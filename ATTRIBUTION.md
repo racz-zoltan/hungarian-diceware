@@ -1,6 +1,4 @@
-================================================================
-ATTRIBUTION — Magyar Diceware Szószedetek
-================================================================
+## ATTRIBUTION — Magyar Diceware Szószedetek
 
 Project:   Magyar Diceware Szószedetek (Hungarian Diceware Wordlists)
 Author:    CarryPass / Rácz Zoltán
@@ -14,9 +12,7 @@ Online generator:  https://kockajelszo.hu
 Source repository: https://github.com/racz-zoltan/hungarian-diceware
 
 
-================================================================
-SOURCE MATERIAL
-================================================================
+## SOURCE MATERIAL
 
 The wordlists in this project were curated from the
 Magyar Wikiszótár (Hungarian Wiktionary):
@@ -32,18 +28,16 @@ license (or a later compatible version listed at
 https://creativecommons.org/compatiblelicenses).
 
 
-================================================================
-HOW TO ATTRIBUTE THIS WORK
-================================================================
+## HOW TO ATTRIBUTE THIS WORK
 
 When you reuse, redistribute, or build upon these wordlists,
 please include the attribution below in any reasonable manner
 appropriate to your medium (e.g. in a README, a credits page,
 an "About" dialog, or a printed colophon).
 
-----------------------------------------------------------------
-Recommended attribution text (English)
-----------------------------------------------------------------
+
+## Recommended attribution text (English)
+
 
   "Magyar Diceware Szószedetek" by CarryPass / Rácz Zoltán,
   licensed under CC BY-SA 4.0
@@ -54,9 +48,8 @@ Recommended attribution text (English)
   https://hu.wiktionary.org/wiki/Kateg%C3%B3ria:Magyar_szavak_list%C3%A1ja
   also licensed under CC BY-SA 4.0.
 
-----------------------------------------------------------------
-Ajánlott attribúciós szöveg (magyar)
-----------------------------------------------------------------
+
+## Ajánlott attribúciós szöveg (magyar)
 
   „Magyar Diceware Szószedetek", készítette CarryPass / Rácz Zoltán,
   CC BY-SA 4.0 licenc alatt
@@ -68,9 +61,7 @@ Ajánlott attribúciós szöveg (magyar)
   szintén CC BY-SA 4.0 alatt.
 
 
-================================================================
-WHAT THE LICENSE REQUIRES
-================================================================
+## WHAT THE LICENSE REQUIRES
 
 CC BY-SA 4.0 grants you the right to:
 
@@ -96,9 +87,7 @@ distribution, for example:
    CarryPass / Rácz Zoltán. Changes: <brief description>."
 
 
-================================================================
-ATTRIBUTION TO REPORT INAPPROPRIATE WORDS
-================================================================
+## ATTRIBUTION TO REPORT INAPPROPRIATE WORDS
 
 If you find a word in these lists that is offensive, slurring,
 or otherwise inappropriate for a passphrase generator, please
