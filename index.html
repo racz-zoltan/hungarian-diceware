@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <title>Diceware jelmondat-generátor — CarryPass</title>
+  <meta name="description" content="Magyar nyelvű Diceware jelmondat-generátor. A böngésződ kriptográfiai véletlenszám-generátorát használja, semmilyen adat nem hagyja el a gépedet.">
+  <meta name="keywords" content="CarryPass, diceware passphrase generator, jelmondat és jelszó generátor, jelszó készítő, password generator, passphrase generator, magyar szószedet, magyar diceware, erős jelszó, megjegyezhető jelszó, véletlenszerű jelszó">
+  <meta name="author" content="Zoltán Rácz">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; manifest-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; worker-src 'self'; connect-src 'self'; style-src 'self'; object-src 'none'; frame-src 'none'; script-src 'self'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), bluetooth=(), clipboard-read=()">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1E003B">
+  <meta name="referrer" content="no-referrer">
+
+  <link rel="stylesheet" href="diceware-theme.css">
+  <script src="lucide.min.js"></script>
+
+</head>
+
+<body>
+
+  <header class="navbar">
+    <div class="navbar-left">
+      <strong style="color:#1E003B; font-size:1.05rem;">CarryPass · Diceware</strong>
+    </div>
+    <div class="navbar-right">
+      <button id="themeToggle" class="dw-theme-toggle" type="button">
+        <i id="themeToggleIcon" data-lucide="moon" aria-hidden="true"></i>
+        <span id="themeToggleText">Sötét téma</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <header class="dw-hero" style="padding-top:5rem;">
+    <h1>Magyar Diceware jelmondat-generátor</h1>
+    <p>
+      Erős, megjegyezhető jelmondatok véletlenszerűen választott magyar szavakból.
+      A böngésződ kriptográfiai véletlenszám-generátorát használja —
+      <strong>semmilyen adat nem hagyja el a gépedet.</strong>
+    </p>
+  </header>
+
+  <!-- GENERATOR CARD -->
+  <section class="dw-card">
+    <h2>Jelmondat generálása</h2>
+
+    <!-- List selector -->
+    <div class="dw-list-switch" role="tablist" aria-label="szószedet választása">
+      <button class="dw-list-btn is-active" data-list="short" type="button">
+        Rövid szószedet
+        <small>1296 megjegyezhető szó · 10,34 bit / szó · 4 kockadobás</small>
+      </button>
+      <button class="dw-list-btn" data-list="long" type="button">
+        Hosszú szószedet (EFF-stílusú)
+        <small>7776 szó · 12,92 bit / szó · 5 kockadobás</small>
+      </button>
+    </div>
+
+    <div id="listMeta" class="dw-list-meta"></div>
+
+    <!-- Word-count buttons -->
+    <div class="dw-count-row" role="group" aria-label="Szavak száma">
+      <button class="dw-count-btn" data-count="6"  type="button">6</button>
+      <button class="dw-count-btn" data-count="7"  type="button">7</button>
+      <button class="dw-count-btn" data-count="8"  type="button">8</button>
+      <button class="dw-count-btn" data-count="9"  type="button">9</button>
+      <button class="dw-count-btn" data-count="10" type="button">10</button>
+      <button class="dw-count-btn action" id="addWordBtn"  type="button" title="Egy szó hozzáadása">+1 szó</button>
+      <button class="dw-count-btn action" id="shuffleBtn"  type="button" title="A szavak véletlenszerű átrendezése">↻ Keverés</button>
+    </div>
+
+    <!-- Output -->
+    <div class="dw-output-wrap">
+      <textarea id="passphraseOutput" readonly rows="2"
+                placeholder="A jelmondat itt fog megjelenni…"></textarea>
+      <div class="dw-output-meta">
+        <span>Szavak: <strong id="wordCount">0</strong></span>
+        <span>Hossz: <strong id="entropyLengthInfo">—</strong></span>
+      </div>
+      <button id="copyBtn" class="btn primary" type="button">Másolás vágólapra</button>
+    </div>
+
+    <!-- Options -->
+    <div class="dw-options">
+      <div class="dw-option-group">
+        <h3>Elválasztó karakter</h3>
+        <div class="dw-radio-row">
+          <label><input type="radio" name="separator" value="-" checked><span>kötőjel</span></label>
+          <label><input type="radio" name="separator" value="."><span>pont</span></label>
+          <label><input type="radio" name="separator" value=" "><span>szóköz</span></label>
+          <label><input type="radio" name="separator" value=""><span>nincs (camelCase)</span></label>
+        </div>
+      </div>
+
+      <div class="dw-option-group">
+        <h3>Plusz erősítés</h3>
+        <div class="dw-toggle-row">
+          <input type="checkbox" id="randomCapsToggle" class="toggle">
+          <label for="randomCapsToggle" class="toggle-text">
+            Egy szó véletlenszerű nagy kezdőbetűvel
+            <small>+log₂(szavak száma) bit entrópia</small>
+          </label>
+        </div>
+        <div class="dw-toggle-row">
+          <input type="checkbox" id="appendSymbolToggle" class="toggle">
+          <label for="appendSymbolToggle" class="toggle-text">
+            Véletlen szimbólum hozzáadása a végéhez
+            <small>+3,58 bit entrópia (#@$=!%|[]:&lt;&gt;)</small>
+          </label>
+        </div>
+        <h3>Nemzetköziesítés</h3>
+        <div class="dw-toggle-row">
+          <input type="checkbox" id="deaccentToggle" class="toggle">
+          <label for="deaccentToggle" class="toggle-text">
+            Ékezetek eltávolítása a hosszú szószedetből
+            <small>Kompatibilitás idegen billentyűzettel — az entrópia változatlan</small>
+          </label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENTROPY & CRACK TIME -->
+  <section class="dw-card">
+    <h2>Erősség és feltörési idő</h2>
+
+    <div class="dw-entropy-summary">
+      <span>Entrópia: <strong id="entropyBits">0 bit</strong></span>
+      <span>Minősítés: <span id="entropyLabel" class="entropy-label">—</span></span>
+    </div>
+    <div class="dw-meter" aria-hidden="true">
+      <div id="entropyMeterFill" class="meter-fill"></div>
+    </div>
+
+    <h3 style="font-size:1rem; margin-top:1.5rem; color:#666;">
+      Becsült feltörési idő — <span style="font-weight:400; font-size:0.85rem;">brute-force átlag a kulcstér 50%-án</span>
+    </h3>
+    <table class="crack-table">
+      <thead>
+        <tr><th>Támadó / sebesség</th><th style="text-align:right;">Idő</th></tr>
+      </thead>
+      <tbody id="crackTableBody"></tbody>
+    </table>
+    <p style="font-size:0.82rem; color:#888; margin-top:0.5rem;">
+      A támadói sebességek illusztratív nagyságrendek. A valós feltörési idő a hash-algoritmustól,
+      a hardvertől és a támadó erőforrásaitól függ. A becslés feltételezi, hogy a támadó tudja,
+      melyik szólistát használtad.
+    </p>
+  </section>
+
+  <!-- WARNING -->
+  <section class="dw-info-block">
+    <div class="dw-warning">
+      <strong>⚠ Figyelem — valódi véletlenszerűség</strong><br>
+      Ez a generátor a böngésződ kriptográfiai véletlenszám-generátorát
+      (<code>window.crypto.getRandomValues</code>) használja, ami a legtöbb felhasználáshoz
+      bőven elegendő. <strong>Ha azonban a legmagasabb biztonsági szintre van szükséged</strong>
+      — például jogi vagy katonai célból, vagy ha komoly fenyegetettségnek vagy kitéve —,
+      <strong>használj valódi, fizikai kockákat</strong>, és a dobások eredményét nézd vissza
+      a szólistában. A szoftveres véletlenszám-generátorok rejtett hibái vagy hátsó kapui
+      nem zárhatók ki teljes bizonyossággal; a fizikai kockákban viszont megbízhatsz.
+    </div>
+  </section>
+
+  <!-- HOW TO USE -->
+  <section class="dw-info-block">
+    <h2>Hogyan használd</h2>
+    <ol>
+      <li>
+        <strong>Válassz szólistát.</strong> A <em>rövid</em> lista (1296 szó) rövidebb,
+        könnyebben megjegyezhető szavakat tartalmaz — több szóra van szükség ugyanolyan
+        biztonsághoz. A <em>hosszú</em>, EFF-stílusú lista (7776 szó) több szóból válogat,
+        így kevesebb szó is elegendő.
+      </li>
+      <li>
+        <strong>Válassz szómennyiséget.</strong> Általános ajánlás: <strong>6+ szó</strong>
+        a hosszú listából, vagy <strong>7+ szó</strong> a rövid listából. Magasabb
+        biztonsági igény esetén lépj feljebb.
+      </li>
+      <li>
+        <strong>Igazítsd ízlésre.</strong> Válassz elválasztót (kötőjel, pont, szóköz,
+        vagy semmi). Igény szerint kapcsolj be véletlen nagy kezdőbetűt vagy szimbólumot.
+      </li>
+      <li>
+        <strong>Jegyezd meg, ne írd le.</strong> A Diceware módszer lényege, hogy
+        a véletlen szavakból összeálló mondat <em>vizuálisan asszociálható</em>, ezért
+        sokkal könnyebb megjegyezni, mint egy ugyanolyan erős, vegyes karakterű jelszót.
+      </li>
+      <li>
+        <strong>Másold ki és használd.</strong> A „Másolás vágólapra" gomb a teljes
+        jelmondatot a vágólapra teszi. A böngésződ vágólapját ne hagyd telerakva —
+        ha lehet, illeszd be azonnal, ahova kell.
+      </li>
+    </ol>
+  </section>
+
+  <!-- HISTORY -->
+  <section class="dw-info-block">
+    <h2>A Diceware története</h2>
+    <p>
+      A <strong>Diceware</strong> módszert <strong>Arnold G. Reinhold</strong>
+      amerikai biztonsági szakértő dolgozta ki és tette közzé <strong>1995-ben</strong>.
+      Az ötlet rendkívül egyszerű, és éppen ebben rejlik az ereje: ha valódi, fizikai
+      hatoldalú kockákkal dobsz, és minden öt dobás eredménye (egy ötjegyű szám 11111 és
+      66666 között) egy-egy szót választ ki egy nyilvános, 7776 elemű szólistából,
+      akkor az így összeállított jelmondat <strong>matematikailag bizonyíthatóan</strong>
+      egyenletes eloszlással kerül a teljes lehetőségtérből.
+    </p>
+    <p>
+      Reinhold célja az volt, hogy átlagos felhasználók is létrehozhassanak igazán
+      erős, mégis megjegyezhető jelmondatokat — kriptográfiai kulcsokhoz, PGP titkos
+      kulcsok védelméhez, lemeztitkosításhoz — anélkül, hogy bízniuk kellene egy szoftver
+      véletlenszám-generátorában vagy egy szolgáltatóban. A kockák a kéztartásodban
+      vannak, és a fizika dolgozik neked.
+    </p>
+    <p>
+      Az eredeti, angol Diceware-szólistát a 2010-es években több irányba is kibővítették:
+      a <strong>Electronic Frontier Foundation (EFF)</strong> 2016-ban kiadott egy
+      gondosan átválogatott, „barátságosabb" 7776 szavas listát, amely csak könnyen
+      leírható, félreérthetetlen szavakat tartalmaz — és egy rövidebb,
+      „<em>memorable</em>" 1296 szavas változatot is, amelyben a szavak rövidebbek és
+      könnyebben megjegyezhetők. Ez az oldal ennek a két formátumnak a
+      <strong>magyar</strong> változatát kínálja.
+    </p>
+    <p style="font-size:0.9rem; color:#666;">
+      Eredeti forrás:
+      <a href="https://theworld.com/~reinhold/diceware.html" target="_blank" rel="noopener noreferrer">
+        theworld.com/~reinhold/diceware.html
+      </a>
+      ·
+      <a href="https://www.eff.org/dice" target="_blank" rel="noopener noreferrer">
+        eff.org/dice
+      </a>
+    </p>
+  </section>
+
+  <!-- ENTROPY EXPLAINER -->
+  <section class="dw-info-block">
+    <h2>Hogyan számoljuk az entrópiát</h2>
+    <p>
+      Az entrópia (bitekben) azt méri, hogy hány különböző jelmondatot tudna a támadó
+      egyenlő valószínűséggel kitalálni. Ha az <em>N</em> elemű szólistából véletlenszerűen
+      választunk egy szót, az <strong>log₂(N)</strong> bit entrópiát ad:
+    </p>
+    <ul>
+      <li>Rövid lista: log₂(1296) ≈ <strong>10,34 bit / szó</strong></li>
+      <li>Hosszú lista: log₂(7776) ≈ <strong>12,92 bit / szó</strong></li>
+      <li>Véletlen szimbólum (12 közül): log₂(12) ≈ <strong>3,58 bit</strong></li>
+      <li>Véletlen nagy kezdőbetű (melyik szón): log₂(szavak száma) bit</li>
+    </ul>
+    <p>
+      A teljes jelmondat entrópiája az egyes részek entrópiájának összege. A feltörési
+      idő becslése: <code>2<sup>bits − 1</sup> ÷ találgatás_per_másodperc</code>, ami
+      a teljes kulcstér 50%-ának brute-force átfésüléséhez szükséges átlagos idő.
+    </p>
+  </section>
+
+  <footer class="dw-footer">
+    Diceware-generátor a <strong>CarryPass</strong> projekttől ·
+    A kódot a böngésződ futtatja, a véletlent a böngésződ adja ·
+    Magyar szószedet © Rácz Zoltán, CC BY 4.0
+  </footer>
+
+  <!-- Wordlist files (loaded BEFORE the controller) -->
+  <script src="diceware_hungarian_short.js"></script>
+  <script src="diceware_hungarian_long.js"></script>
+  <!-- Controller -->
+  <script src="diceware.js"></script>
+
+</body>
+</html>
