@@ -20,7 +20,7 @@
     long: {
       key: "long",
       label: "Hosszú (EFF-stílusú) — 7776 szó",
-      expected: 7776, // currently 5805 in the provided list, but we expect 7776 for full coverage
+      expected: 7776,
       diceRoll: 5,
       words: (typeof HUNGARIAN_WORDS_LONG !== "undefined") ? HUNGARIAN_WORDS_LONG : null
     }
@@ -28,19 +28,16 @@
 
   const SYMBOLS = "#@$=!%|[]:<>";
 
-  // ---------- Application state ----------
   const state = {
-    listKey: "short",     // "short" or "long"
-    words: [],            // current passphrase as array of words
-    separator: "-",       // "-", ".", " ", or ""
-    randomCaps: false,    // capitalize one random word
-    appendSymbol: false,  // append a random symbol token
-    deaccent: false       // strip Hungarian accents from the displayed passphrase
+    listKey: "long",      
+    words: [],      
+    separator: "-",     
+    randomCaps: false,  
+    appendSymbol: false, 
+    deaccent: false    
   };
 
-  // Hungarian accent stripping map. Lower- and uppercase covered.
-  // The mapping is character-by-character and reversible only in the sense
-  // that we always rebuild from `state.words` (the original, accented forms).
+
   const DEACCENT_MAP = {
     'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ö': 'o', 'ő': 'o',
     'ú': 'u', 'ü': 'u', 'ű': 'u',
@@ -55,9 +52,9 @@
     return out;
   }
 
-  // ---------- Secure random helpers ----------
+
   function secureRandomInt(maxExclusive) {
-    // Unbiased integer in [0, maxExclusive). Rejection sampling on Uint32.
+    
     if (maxExclusive <= 0 || maxExclusive > 0x100000000) {
       throw new RangeError("maxExclusive out of range");
     }
@@ -83,7 +80,7 @@
     return SYMBOLS[secureRandomInt(SYMBOLS.length)];
   }
 
-  // Fisher–Yates with CSPRNG (used for shuffle)
+
   function secureShuffle(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -93,16 +90,12 @@
     return a;
   }
 
-  // ---------- Passphrase math ----------
+
   function bitsPerWord(listKey) {
     return Math.log2(LISTS[listKey].expected);
   }
 
-  // Entropy of the *generation process*: how many random bits went into the
-  // current passphrase. We count each word at bitsPerWord and the symbol token
-  // (one character chosen uniformly from SYMBOLS) at log2(SYMBOLS.length).
-  // randomCaps adds log2(N) where N is the word count (which word got capped),
-  // since which word is capitalized is itself a random choice.
+
   function entropyBits(s) {
     const bpw = bitsPerWord(s.listKey);
     let bits = s.words.length * bpw;
@@ -111,10 +104,7 @@
     return bits;
   }
 
-  // Render the passphrase string from state (deterministic given state).
-  // We use a stable per-render decision for which word gets capitalized so the
-  // displayed string is consistent within one render cycle. The actual random
-  // choice is re-rolled when the user re-enables the toggle or shuffles.
+
   function renderPassphrase(s) {
     if (s.words.length === 0) return "";
     let words = s.words.slice();
@@ -126,7 +116,7 @@
 
     let out;
     if (s.separator === "") {
-      // No separator → camelCase-ish join for legibility
+    
       out = words.map((w, i) => i === 0 ? w : w.charAt(0).toUpperCase() + w.slice(1)).join("");
     } else {
       out = words.join(s.separator);
@@ -135,20 +125,13 @@
     if (s.appendSymbol && s._symbolChar) {
       out += s._symbolChar;
     }
-    // Display-time accent stripping. Applied LAST so it only affects
-    // the rendered string; state.words keeps the original accented form,
-    // and the symbol token has no accents to strip.
+  
     if (s.deaccent) {
       out = deaccentString(out);
     }
     return out;
   }
 
-  // ---------- Brute-force crack-time estimates ----------
-  // We model crack time as: avg time to find the key by brute force over the
-  // full keyspace = (2^bits / 2) / guessesPerSecond = 2^(bits-1) / gps.
-  // These attacker speeds are illustrative orders of magnitude; we label them
-  // as such in the UI.
   const ATTACKERS = [
     { id: "online-throttled", label: "Online, korlátozott (10/s)",            gps: 10 },
     { id: "online-fast",      label: "Online, gyors (10³/s)",                gps: 1e3 },
@@ -157,8 +140,6 @@
     { id: "massive",          label: "Nagy szervezet (10¹⁴/s)",              gps: 1e14 }
   ];
 
-  // Format a number of seconds as a human-readable Hungarian duration.
-  // Caps at "az univerzum kora" scale.
   function formatDuration(seconds) {
     if (!isFinite(seconds)) return "∞";
     if (seconds < 1e-6) return "azonnal";
@@ -172,14 +153,12 @@
       { n: "év",        s: 86400 * 365.25 }
     ];
 
-    // Pick the largest unit that gives a value >= 1
     let chosen = units[0];
     for (const u of units) {
       if (seconds / u.s >= 1) chosen = u;
     }
     let value = seconds / chosen.s;
 
-    // For "év" (years), switch to scaled labels when very large
     if (chosen.n === "év") {
       if (value >= 1e15) return "az univerzum kora többszöröse";
       if (value >= 1e12) return formatBigNumber(value) + " év (≈ univerzum kora)";
@@ -192,7 +171,7 @@
   }
 
   function formatBigNumber(v) {
-    // Compact scientific-ish formatting for very large numbers
+   
     if (v >= 1e15) return v.toExponential(2).replace("e+", " × 10^").replace("+", "");
     const exp = Math.floor(Math.log10(v));
     const mantissa = v / Math.pow(10, exp);
@@ -200,16 +179,13 @@
   }
 
   function crackSeconds(bits, gps) {
-    // 2^(bits-1) / gps — guard against Infinity for very large bits
-    // Use logs to keep precision, then convert at the end.
+
     const log2_seconds = (bits - 1) - Math.log2(gps);
-    if (log2_seconds > 1023) return Infinity; // beyond Number.MAX_VALUE
+    if (log2_seconds > 1023) return Infinity; 
     return Math.pow(2, log2_seconds);
   }
 
-  // ---------- Entropy meter classification ----------
-  // Thresholds are rules of thumb for offline-fast attackers.
-  // <50 bits: very weak; 50–75: weak; 75–100: ok; 100–128: strong; 128+: excellent
+
   function entropyClass(bits) {
     if (bits < 50)  return { cls: "weak",      label: "Gyenge",     pct: clampPct(bits, 0, 50)  * 0.20 };
     if (bits < 75)  return { cls: "fair",      label: "Közepes",    pct: 20 + clampPct(bits - 50, 0, 25) * 0.20 };
@@ -223,11 +199,11 @@
     return ((x - lo) / (hi - lo)) * 100;
   }
 
-  // ---------- Generation actions ----------
+
   function generate(n) {
     state.words = [];
     for (let i = 0; i < n; i++) state.words.push(secureRandomWord(state.listKey));
-    refreshExtras(); // re-roll caps index + symbol char
+    refreshExtras();
     render();
   }
 
@@ -253,18 +229,17 @@
     state._symbolChar = secureRandomSymbol();
   }
 
-  // ---------- DOM wiring ----------
+
   function $(id) { return document.getElementById(id); }
 
   function setListKey(key) {
     if (!LISTS[key]) return;
     state.listKey = key;
-    // Update active class on list toggle buttons
     document.querySelectorAll("[data-list]").forEach(btn => {
       btn.classList.toggle("is-active", btn.dataset.list === key);
     });
     updateListMeta();
-    // Regenerate with sensible default count per list
+
     const defaultCount = (key === "short") ? 8 : 6;
     try {
       generate(defaultCount);
@@ -307,17 +282,14 @@
     })[c]);
   }
 
-  // ---------- Render ----------
   function render() {
     const passphrase = renderPassphrase(state);
     const out = $("passphraseOutput");
     out.value = passphrase;
     out.placeholder = "A jelmondat itt fog megjelenni…";
 
-    // Word count display
     $("wordCount").textContent = state.words.length;
 
-    // Entropy
     const bits = entropyBits(state);
     $("entropyBits").textContent = bits.toFixed(1) + " bit";
     $("entropyLengthInfo").textContent =
@@ -332,17 +304,15 @@
     $("entropyLabel").textContent = state.words.length === 0 ? "—" : cls.label;
     $("entropyLabel").className = "entropy-label entropy-" + cls.cls;
 
-    // Brute-force table
     renderCrackTable(bits, state.words.length === 0);
 
-    // Disable "Másolás" button if empty
     $("copyBtn").disabled = state.words.length === 0;
     $("shuffleBtn").disabled = state.words.length < 2;
     $("addWordBtn").disabled = state.words.length === 0;
   }
 
-  function renderCrackTable(bits, empty) {
-    const tbody = $("crackTableBody");
+  function renderCrackTable(bits, empty, tbodyId) {
+    const tbody = $(tbodyId || "crackTableBody");
     tbody.innerHTML = "";
     for (const a of ATTACKERS) {
       const tr = document.createElement("tr");
@@ -362,14 +332,12 @@
     }
   }
 
-  // ---------- Event wiring ----------
   function wireUp() {
-    // List selector
+
     document.querySelectorAll("[data-list]").forEach(btn => {
       btn.addEventListener("click", () => setListKey(btn.dataset.list));
     });
 
-    // Word-count buttons
     document.querySelectorAll("[data-count]").forEach(btn => {
       btn.addEventListener("click", () => {
         try { generate(parseInt(btn.dataset.count, 10)); }
@@ -377,13 +345,11 @@
       });
     });
 
-    // +1 and shuffle
     $("addWordBtn").addEventListener("click", () => {
       try { addWord(); } catch (e) { showListError(e.message); }
     });
     $("shuffleBtn").addEventListener("click", shuffle);
 
-    // Separator radios
     document.querySelectorAll("input[name='separator']").forEach(r => {
       r.addEventListener("change", () => {
         state.separator = r.value;
@@ -391,7 +357,6 @@
       });
     });
 
-    // Random caps toggle
     $("randomCapsToggle").addEventListener("change", e => {
       state.randomCaps = e.target.checked;
       if (state.randomCaps && state.words.length > 0) {
@@ -400,22 +365,17 @@
       render();
     });
 
-    // Symbol toggle
     $("appendSymbolToggle").addEventListener("change", e => {
       state.appendSymbol = e.target.checked;
       if (state.appendSymbol) state._symbolChar = secureRandomSymbol();
       render();
     });
 
-    // Deaccent toggle — display-time accent stripping.
-    // No regeneration needed: render() rebuilds the passphrase from
-    // state.words and applies deaccenting at the end if enabled.
     $("deaccentToggle").addEventListener("change", e => {
       state.deaccent = e.target.checked;
       render();
     });
 
-    // Copy button
     $("copyBtn").addEventListener("click", async () => {
       const text = $("passphraseOutput").value;
       if (!text) return;
@@ -423,7 +383,6 @@
         await navigator.clipboard.writeText(text);
         flashCopyButton(true);
       } catch (e) {
-        // Fallback: select & execCommand
         const out = $("passphraseOutput");
         out.select();
         try {
@@ -436,7 +395,202 @@
       }
     });
 
-    // Theme toggle
+    const diceState = {
+      listKey: "long",
+      words: [],
+      separator: "-",
+      deaccent: false
+    };
+
+    function diceEntropyBits() {
+      const bpw = Math.log2(LISTS[diceState.listKey].expected);
+      return diceState.words.length * bpw;
+    }
+
+    function diceRenderPassphrase() {
+      if (diceState.words.length === 0) return "";
+      let words = diceState.words.slice();
+      if (diceState.deaccent) words = words.map(deaccentString);
+      if (diceState.separator === "") {
+        return words.map((w, i) => i === 0 ? w : w.charAt(0).toUpperCase() + w.slice(1)).join("");
+      }
+      return words.join(diceState.separator);
+    }
+
+    function diceRenderUI() {
+      const wrap = $("diceCollectedWrap");
+      const n    = diceState.words.length;
+      if (n === 0) { wrap.hidden = true; return; }
+      wrap.hidden = false;
+
+      $("diceWordCount").textContent = n;
+
+      const chipList = $("diceWordList");
+      chipList.innerHTML = "";
+      diceState.words.forEach((w, i) => {
+        const chip = document.createElement("span");
+        chip.className = "dw-dice-chip";
+        const label = document.createElement("span");
+        label.textContent = diceState.deaccent ? deaccentString(w) : w;
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "dw-dice-chip-del";
+        del.setAttribute("aria-label", `${w} törlése`);
+        del.textContent = "×";
+        del.addEventListener("click", () => {
+          diceState.words.splice(i, 1);
+          diceRenderUI();
+        });
+        chip.appendChild(label);
+        chip.appendChild(del);
+        chipList.appendChild(chip);
+      });
+
+      const phrase = diceRenderPassphrase();
+      $("dicePassphraseOutput").value = phrase;
+
+      const bits = diceEntropyBits();
+      $("diceEntropyBits").textContent = bits.toFixed(1) + " bit";
+      $("diceEntropyLengthInfo").textContent = phrase.length + " karakter";
+      const cls = entropyClass(bits);
+      $("diceEntropyMeterFill").style.width = cls.pct + "%";
+      $("diceEntropyMeterFill").className = "meter-fill meter-" + cls.cls;
+      $("diceEntropyLabel").textContent = cls.label;
+      $("diceEntropyLabel").className = "entropy-label entropy-" + cls.cls;
+
+      renderCrackTable(bits, false, "diceCrackTableBody");
+
+      $("diceCopyBtn").disabled = false;
+    }
+
+    const diceListSelect = $("diceListSelect");
+    const diceRollInput  = $("diceRollInput");
+    const diceResult     = $("diceResult");
+    const diceAddBtn     = $("diceAddBtn");
+
+    function lookupDiceWord() {
+      const listKey  = diceListSelect ? diceListSelect.value : "long";
+      const list     = LISTS[listKey];
+      const raw      = diceRollInput ? diceRollInput.value.trim() : "";
+
+      if (!raw) {
+        diceResult.textContent = "";
+        if (diceAddBtn) diceAddBtn.disabled = true;
+        return;
+      }
+
+      const digits   = raw.replace(/[^1-6]/g, "");
+      const expected = list.diceRoll;
+
+      if (digits.length !== expected) {
+        diceResult.textContent =
+          `⚠ ${expected} db 1–6 közötti számjegy szükséges (pl. ${expected === 4 ? "2341" : "13456"}).`;
+        diceResult.className = "dw-dice-result dw-dice-error";
+        if (diceAddBtn) diceAddBtn.disabled = true;
+        return;
+      }
+
+      let index = 0;
+      for (const ch of digits) {
+        index = index * 6 + (parseInt(ch, 10) - 1);
+      }
+
+      if (!list.words || index >= list.words.length) {
+        diceResult.textContent = "⚠ Szó nem található a listában.";
+        diceResult.className = "dw-dice-result dw-dice-error";
+        if (diceAddBtn) diceAddBtn.disabled = true;
+        return;
+      }
+
+      const word = list.words[index];
+      diceResult.textContent = `🎲 ${digits}  →  ${word}`;
+      diceResult.className = "dw-dice-result dw-dice-ok";
+      if (diceAddBtn) { diceAddBtn.disabled = false; diceAddBtn._currentWord = word; }
+    }
+
+    function diceAddWord() {
+      const word = diceAddBtn && diceAddBtn._currentWord;
+      if (!word) return;
+      diceState.listKey = diceListSelect ? diceListSelect.value : "long";
+      diceState.words.push(word);
+      diceRollInput.value = "";
+      diceResult.textContent = "";
+      diceAddBtn.disabled = true;
+      diceAddBtn._currentWord = null;
+      diceRollInput.focus();
+      diceRenderUI();
+    }
+
+    if (diceRollInput) {
+      diceRollInput.addEventListener("input", lookupDiceWord);
+      diceRollInput.addEventListener("keydown", e => {
+        if (e.key === "Enter" && diceAddBtn && !diceAddBtn.disabled) diceAddWord();
+      });
+    }
+    if (diceAddBtn) {
+      diceAddBtn.addEventListener("click", diceAddWord);
+    }
+    if (diceListSelect) {
+      diceListSelect.addEventListener("change", () => {
+        diceState.listKey = diceListSelect.value;
+        diceState.words   = [];
+        if (diceRollInput) diceRollInput.value = "";
+        if (diceResult)    diceResult.textContent = "";
+        if (diceAddBtn)    { diceAddBtn.disabled = true; diceAddBtn._currentWord = null; }
+        diceRenderUI();
+        lookupDiceWord();
+      });
+    }
+
+    document.querySelectorAll("input[name='diceSeparator']").forEach(r => {
+      r.addEventListener("change", () => {
+        diceState.separator = r.value;
+        diceRenderUI();
+      });
+    });
+
+    const diceDeaccentToggle = $("diceDeaccentToggle");
+    if (diceDeaccentToggle) {
+      diceDeaccentToggle.addEventListener("change", e => {
+        diceState.deaccent = e.target.checked;
+        diceRenderUI();
+      });
+    }
+
+
+    $("diceClearBtn").addEventListener("click", () => {
+      diceState.words = [];
+      if (diceRollInput) { diceRollInput.value = ""; diceRollInput.focus(); }
+      if (diceResult)    diceResult.textContent = "";
+      if (diceAddBtn)    { diceAddBtn.disabled = true; diceAddBtn._currentWord = null; }
+      diceRenderUI();
+    });
+
+
+    $("diceCopyBtn").addEventListener("click", async () => {
+      const text = $("dicePassphraseOutput").value;
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        flashDiceCopyButton(true);
+      } catch (e) {
+        const out = $("dicePassphraseOutput");
+        out.select();
+        try { document.execCommand("copy"); flashDiceCopyButton(true); }
+        catch (_) { flashDiceCopyButton(false); }
+        out.setSelectionRange(0, 0);
+      }
+    });
+
+    function flashDiceCopyButton(ok) {
+      const btn = $("diceCopyBtn");
+      const orig = btn.textContent;
+      btn.textContent = ok ? "✓ Vágólapra másolva" : "✗ Másolás sikertelen";
+      btn.classList.add(ok ? "copy-ok" : "copy-fail");
+      setTimeout(() => { btn.textContent = orig; btn.classList.remove("copy-ok", "copy-fail"); }, 1800);
+    }
+
+
     $("themeToggle").addEventListener("click", () => {
       const html = document.documentElement;
       const next = html.getAttribute("data-theme") === "dark" ? "light" : "dark";
@@ -445,7 +599,7 @@
       updateThemeButton();
     });
 
-    // Restore saved theme
+
     try {
       const saved = localStorage.getItem("dw-theme");
       if (saved === "dark") document.documentElement.setAttribute("data-theme", "dark");
@@ -455,13 +609,6 @@
 
   function updateThemeButton() {
     const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-    const textEl = document.getElementById("themeToggleText");
-    if (textEl) {
-      textEl.textContent = isDark ? "Világos téma" : "Sötét téma";
-    }
-    // A lucide.createIcons() a data-lucide attribútumú <i> elemeket SVG-re
-    // cseréli. Ha már egyszer lefutott, az <i> már nincs ott, csak az SVG —
-    // ilyenkor újra létre kell hozni az <i>-t a kívánt ikonnal.
     const wrap = $("themeToggle");
     let icon = document.getElementById("themeToggleIcon");
     if (!icon) {
@@ -470,7 +617,7 @@
       icon.setAttribute("aria-hidden", "true");
       wrap.insertBefore(icon, wrap.firstChild);
     } else if (icon.tagName.toLowerCase() === "svg") {
-      // a lucide már SVG-re cserélte — pótoljuk az <i> jelölőt
+    
       const newIcon = document.createElement("i");
       newIcon.id = "themeToggleIcon";
       newIcon.setAttribute("aria-hidden", "true");
@@ -494,10 +641,9 @@
     }, 1800);
   }
 
-  // ---------- Boot ----------
   function init() {
     wireUp();
-    setListKey("short"); // default: short list, generates 8 words
+    setListKey("long"); 
     if (typeof lucide !== "undefined" && lucide.createIcons) {
       lucide.createIcons();
     }
