@@ -1,3 +1,10 @@
+// Hungarian Diceware Wordlist — 1296 words
+// Version: 1.0.0
+// Copyright (c) 2026 Zoltán Rácz
+// Licensed under CC BY SA 4.0
+// https://creativecommons.org/licenses/by-sa/4.0/
+
+
 const HUNGARIAN_WORDS_SHORT = [
   "abakusz",
   "ablak",
