@@ -25,7 +25,7 @@ Könnyen felidézhető, **kizárólag ékezet nélküli** magyar szavak — fől
 
 ### Hosszú szószedet — 7776 szó (6⁵)
 
-EFF-stílusú, gazdagabb választékot adó szószedet, **túlnyomórészt ékezetes szavakkal**. Fontos válogatási kritérium volt, hogy ha egy szóból az ékezeteket eltávolítjuk, **ne "zuhanjon össze" egy létező ékezet nélküli magyar szóvá**: az ilyen párokat (pl. `köröm` ↔ `korom`, `tévé` ↔ `teve`) eltávolítottam. Így az ékezetmentes megjelenítés sem rontja a felismerhetőséget.
+EFF-stílusú, gazdagabb választékot adó szószedet, **túlnyomórészt ékezetes szavakkal**. Fontos válogatási kritérium volt, hogy ha egy szóból az ékezeteket eltávolítjuk, **ne "zuhanjon össze" egy létező ékezet nélküli magyar szóvá**: az ilyen párok esetében (pl. `köröm` ↔ `korom`, `tévé` ↔ `teve`) az ékezetes szót eltávolítottam. Így az ékezetmentes megjelenítés sem rontja a felismerhetőséget.
 
 - **Méret:** 7776 szó (5 kockadobás, `11111`–`66666`)
 - **Entrópia/szó:** ~12,92 bit
