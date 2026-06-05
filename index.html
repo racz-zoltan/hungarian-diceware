@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Diceware jelmondat-generátor</title>
   <meta name="description" content="Magyar nyelvű Diceware jelmondat generátor. A böngésződ kriptográfiai véletlenszám-generátorát használja, semmilyen adat nem hagyja el a gépedet.">
-  <meta name="keywords" content="CarryPass, diceware passphrase generator, jelmondat és jelszó generátor, jelszó készítő, password generator, passphrase generator, magyar szószedet, magyar diceware, erős jelszó, megjegyezhető jelszó, véletlenszerű jelszó">
+  <meta name="keywords" content="CarryPass, diceware passphrase generator, jelmondat és jelszó generátor, több szóból álló jelszó mondat, jelszó készítő, password generator, passphrase generator, magyar szószedet, magyar diceware, erős jelszó, megjegyezhető jelszó, véletlenszerű jelszó">
   <meta name="author" content="Zoltán Rácz">
 
   <meta name="robots" content="index, follow">
@@ -56,8 +56,8 @@
   <link rel="shortcut icon" href="favicon.ico" />
   <link rel="apple-touch-icon" sizes="184x184" href="vilagos_kocka_184.png" />
 
-  <link rel="stylesheet" href="diceware-theme.css">
-  <script src="lucide.min.js"></script>
+  <link rel="stylesheet" href="diceware-theme.css" integrity="sha384-i+BhUJe4YKb2g8mQ/94nd8Q9sfEkRP0+9KWdST4dWIpdFpiYFvLFRBcQU0KkItlI" crossorigin="anonymous">
+  <script src="lucide.min.js" integrity="sha384-1WBlizZxaHNZADu+vujEL0zCN6BYOAzpLXB3HHLkdb5oOd3rxlWlCNuws/tVj4Cu" crossorigin="anonymous"></script>
 
 </head>
 
@@ -158,7 +158,14 @@
           <input type="checkbox" id="appendSymbolToggle" class="toggle">
           <label for="appendSymbolToggle" class="toggle-text">
             Véletlen szimbólum hozzáadása a végéhez
-            <small>+3,58 bit entrópia (#@$=!%|[]:&lt;&gt;)</small>
+            <small>+2,32 bit entrópia (!@#*_)</small>
+          </label>
+        </div>
+        <div class="dw-toggle-row">
+          <input type="checkbox" id="appendNumberToggle" class="toggle">
+          <label for="appendNumberToggle" class="toggle-text">
+            Véletlen szám hozzáadása a végéhez (1–9)
+            <small>+3,17 bit entrópia</small>
           </label>
         </div>
       </div>
@@ -255,6 +262,31 @@
               <small>Kompatibilitás idegen billentyűzettel, informatikai rendszerekkel</small>
             </label>
           </div>
+          <h3>Plusz erősítés</h3>
+          <div class="dw-toggle-row">
+            <input type="checkbox" id="diceRandomCapsToggle" class="toggle">
+            <label for="diceRandomCapsToggle" class="toggle-text">
+              Egy szó véletlenszerű nagy kezdőbetűvel
+              <small>+log₂(szavak száma) bit entrópia</small>
+            </label>
+          </div>
+          <div class="dw-toggle-row">
+            <input type="checkbox" id="diceAppendSymbolToggle" class="toggle">
+            <label for="diceAppendSymbolToggle" class="toggle-text">
+              Véletlen szimbólum hozzáadása a végéhez
+              <small>+2,32 bit entrópia (!@#*_)</small>
+            </label>
+          </div>
+          <div class="dw-toggle-row">
+            <input type="checkbox" id="diceAppendNumberToggle" class="toggle">
+            <label for="diceAppendNumberToggle" class="toggle-text">
+              Véletlen szám hozzáadása a végéhez (1–9)
+              <small>+3,17 bit entrópia</small>
+            </label>
+          </div>
+        </div>
+        <div class="dw-option-group">
+
         </div>
       </div>
 
@@ -300,7 +332,7 @@
         biztonsági igény esetén lépj feljebb.
       </li>
       <li>
-        <strong>Igazítsd ízlésre.</strong> Válassz elválasztót (kötőjel, pont, szóköz,
+        <strong>Igazítsd ízlésedre.</strong> Válassz elválasztót (kötőjel, pont, szóköz,
         vagy semmi). Igény szerint kapcsolj be véletlen nagy kezdőbetűt vagy szimbólumot.
       </li>
       <li>
@@ -370,7 +402,8 @@
     <ul>
       <li>Rövid szószedet: log₂(1296) ≈ <strong>10,34 bit / szó</strong></li>
       <li>Hosszú szószedet: log₂(7776) ≈ <strong>12,92 bit / szó</strong></li>
-      <li>Véletlen szimbólum (12 közül): log₂(12) ≈ <strong>3,58 bit</strong></li>
+      <li>Véletlen szimbólum (5 közül): log₂(5) ≈ <strong>2,32 bit</strong></li>
+      <li>Véletlen szám (1–9): log₂(9) ≈ <strong>3,17 bit</strong></li>
       <li>Véletlen nagy kezdőbetű (melyik szón): log₂(szavak száma) bit</li>
     </ul>
     <p>
@@ -393,10 +426,10 @@
   </footer>
 
 
-  <script src="diceware_hungarian_short.js"></script>
-  <script src="diceware_hungarian_long.js"></script>
+  <script src="diceware_hungarian_short.js" integrity="sha384-jw5mwhc4UfK69VSYdMCIPUWfE3s9DH/AyDn92nugHiDTpC4K2GkSiuyQKa5ikSTc" crossorigin="anonymous"></script>
+  <script src="diceware_hungarian_long.js" integrity="sha384-ycxArtQXcVcryObLfBpily3pAySaPxImHIt/WGC/ssyHQ5W1P+bPaLnJNoIhf5Wl" crossorigin="anonymous"></script>
 
-  <script src="diceware.js" defer></script>
+  <script src="diceware.js" integrity="sha384-N6Bn7aDWE51oFH08MG1FwsvHJs9d7mj7BTwMrZSdBPovMl8pJEnU0HVmUhMsnMvk" crossorigin="anonymous" defer></script>
 
 </body>
 </html>

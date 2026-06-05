@@ -1,14 +1,7 @@
-/* CarryPass Diceware Generator — controller
- * All randomness comes from window.crypto.getRandomValues (browser CSPRNG).
- * No data leaves the browser.
- */
+
 (function () {
   "use strict";
 
-  // ---------- Wordlist registry ----------
-  // Each list declares its expected size. Entropy/word is log2(size).
-  // - Short list: 1296 words (6^4) → 10.34 bits/word
-  // - Long list:  7776 words (6^5) → 12.92 bits/word
   const LISTS = {
     short: {
       key: "short",
@@ -26,7 +19,7 @@
     }
   };
 
-  const SYMBOLS = "#@$=!%|[]:<>";
+  const SYMBOLS = "!@#*_";
 
   const state = {
     listKey: "long",      
@@ -34,6 +27,7 @@
     separator: "-",     
     randomCaps: false,  
     appendSymbol: false, 
+    appendNumber: false,
     deaccent: false    
   };
 
@@ -76,6 +70,10 @@
     return list.words[secureRandomInt(list.words.length)];
   }
 
+  function secureRandomNumber() {
+    return secureRandomInt(9) + 1;
+  }
+
   function secureRandomSymbol() {
     return SYMBOLS[secureRandomInt(SYMBOLS.length)];
   }
@@ -100,6 +98,7 @@
     const bpw = bitsPerWord(s.listKey);
     let bits = s.words.length * bpw;
     if (s.appendSymbol) bits += Math.log2(SYMBOLS.length);
+    if (s.appendNumber) bits += Math.log2(9);
     if (s.randomCaps && s.words.length > 0) bits += Math.log2(s.words.length);
     return bits;
   }
@@ -124,6 +123,10 @@
 
     if (s.appendSymbol && s._symbolChar) {
       out += s._symbolChar;
+    }
+
+    if (s.appendNumber && s._numberChar) {
+      out += s._numberChar;
     }
   
     if (s.deaccent) {
@@ -227,6 +230,7 @@
       state._capsIndex = null;
     }
     state._symbolChar = secureRandomSymbol();
+    state._numberChar = String(secureRandomNumber());
   }
 
 
@@ -371,6 +375,12 @@
       render();
     });
 
+    $("appendNumberToggle").addEventListener("change", e => {
+      state.appendNumber = e.target.checked;
+      if (state.appendNumber) state._numberChar = String(secureRandomNumber());
+      render();
+    });
+
     $("deaccentToggle").addEventListener("change", e => {
       state.deaccent = e.target.checked;
       render();
@@ -399,22 +409,49 @@
       listKey: "long",
       words: [],
       separator: "-",
-      deaccent: false
+      randomCaps: false,
+      appendSymbol: false,
+      appendNumber: false,
+      deaccent: false,
+      _capsIndex: null,
+      _symbolChar: null,
+      _numberChar: null
     };
 
     function diceEntropyBits() {
       const bpw = Math.log2(LISTS[diceState.listKey].expected);
-      return diceState.words.length * bpw;
+      let bits = diceState.words.length * bpw;
+      if (diceState.appendSymbol) bits += Math.log2(SYMBOLS.length);
+      if (diceState.appendNumber) bits += Math.log2(9);
+      if (diceState.randomCaps && diceState.words.length > 0) bits += Math.log2(diceState.words.length);
+      return bits;
     }
 
     function diceRenderPassphrase() {
       if (diceState.words.length === 0) return "";
       let words = diceState.words.slice();
+
+      if (diceState.randomCaps && diceState._capsIndex != null && diceState._capsIndex < words.length) {
+        const i = diceState._capsIndex;
+        words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
+      }
+
+      let out;
       if (diceState.deaccent) words = words.map(deaccentString);
       if (diceState.separator === "") {
-        return words.map((w, i) => i === 0 ? w : w.charAt(0).toUpperCase() + w.slice(1)).join("");
+        out = words.map((w, i) => i === 0 ? w : w.charAt(0).toUpperCase() + w.slice(1)).join("");
+      } else {
+        out = words.join(diceState.separator);
       }
-      return words.join(diceState.separator);
+
+      if (diceState.appendSymbol && diceState._symbolChar) {
+        out += diceState._symbolChar;
+      }
+      if (diceState.appendNumber && diceState._numberChar) {
+        out += diceState._numberChar;
+      }
+
+      return out;
     }
 
     function diceRenderUI() {
@@ -508,11 +545,22 @@
       if (diceAddBtn) { diceAddBtn.disabled = false; diceAddBtn._currentWord = word; }
     }
 
+    function diceRefreshExtras() {
+      if (diceState.words.length > 0) {
+        diceState._capsIndex = secureRandomInt(diceState.words.length);
+      } else {
+        diceState._capsIndex = null;
+      }
+      diceState._symbolChar = secureRandomSymbol();
+      diceState._numberChar = String(secureRandomNumber());
+    }
+
     function diceAddWord() {
       const word = diceAddBtn && diceAddBtn._currentWord;
       if (!word) return;
       diceState.listKey = diceListSelect ? diceListSelect.value : "long";
       diceState.words.push(word);
+      diceRefreshExtras();
       diceRollInput.value = "";
       diceResult.textContent = "";
       diceAddBtn.disabled = true;
@@ -553,6 +601,35 @@
     if (diceDeaccentToggle) {
       diceDeaccentToggle.addEventListener("change", e => {
         diceState.deaccent = e.target.checked;
+        diceRenderUI();
+      });
+    }
+
+    const diceRandomCapsToggle = $("diceRandomCapsToggle");
+    if (diceRandomCapsToggle) {
+      diceRandomCapsToggle.addEventListener("change", e => {
+        diceState.randomCaps = e.target.checked;
+        if (diceState.randomCaps && diceState.words.length > 0) {
+          diceState._capsIndex = secureRandomInt(diceState.words.length);
+        }
+        diceRenderUI();
+      });
+    }
+
+    const diceAppendSymbolToggle = $("diceAppendSymbolToggle");
+    if (diceAppendSymbolToggle) {
+      diceAppendSymbolToggle.addEventListener("change", e => {
+        diceState.appendSymbol = e.target.checked;
+        if (diceState.appendSymbol) diceState._symbolChar = secureRandomSymbol();
+        diceRenderUI();
+      });
+    }
+
+    const diceAppendNumberToggle = $("diceAppendNumberToggle");
+    if (diceAppendNumberToggle) {
+      diceAppendNumberToggle.addEventListener("change", e => {
+        diceState.appendNumber = e.target.checked;
+        if (diceState.appendNumber) diceState._numberChar = String(secureRandomNumber());
         diceRenderUI();
       });
     }
