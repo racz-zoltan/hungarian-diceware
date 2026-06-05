@@ -77,7 +77,7 @@ jobs:
 
       - name: Fetch hashes and update index.html
         run: |
-          BASE_URL="https://hungarian-diceware.vercel.app"
+          BASE_URL="https://kockajelszo.hu"
           FILES=(
             "diceware-theme.css"
             "lucide.min.js"
