@@ -186,6 +186,9 @@ button:focus-visible{outline:2px solid var(--amoba-gold); outline-offset:2px}
 .plan{border:1px solid rgba(251,191,36,.35); border-radius:14px; background:rgba(251,191,36,.04); padding:12px 14px}
 .plan-head{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px}
 .plan-head .label{margin:0; color:var(--amoba-gold)}
+.plan.trap{border-color:rgba(167,139,250,.45); background:rgba(167,139,250,.05)}
+.plan.trap .plan-head .label{color:var(--amoba-violet)}
+.plan li .forced{font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--amoba-o); margin-left:4px}
 .plan ol{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px}
 .plan li{display:grid; grid-template-columns:22px 40px minmax(0,1fr); gap:8px; align-items:baseline; font-size:14px; padding:4px 6px; border-radius:8px; cursor:default}
 .plan li:hover{background:rgba(148,163,184,.08)}
@@ -204,9 +207,9 @@ button:focus-visible{outline:2px solid var(--amoba-gold); outline-offset:2px}
 .scrim.open{opacity:1; pointer-events:auto}
 .drawer{position:fixed; top:0; right:0; bottom:0; width:min(420px, 92vw); z-index:50; display:flex; flex-direction:column;
   color:var(--amoba-text); background:linear-gradient(170deg, #16213f 0%, #0b1122 100%); border-left:1px solid var(--amoba-border);
-  box-shadow:-24px 0 48px -12px rgba(0,0,0,.65); transform:translateX(104%); transition:transform .3s cubic-bezier(.2,.8,.2,1);
+  box-shadow:-24px 0 48px -12px rgba(0,0,0,.65); transform:translateX(104%); visibility:hidden; transition:transform .3s cubic-bezier(.2,.8,.2,1), visibility 0s linear .3s;
   padding-top:env(safe-area-inset-top, 0px); padding-bottom:env(safe-area-inset-bottom, 0px); padding-right:env(safe-area-inset-right, 0px)}
-.drawer.open{transform:none}
+.drawer.open{transform:none; visibility:visible; transition:transform .3s cubic-bezier(.2,.8,.2,1)}
 .drawer-head{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 20px 10px}
 .drawer-head h2{margin:0; font-family:var(--f-display); font-weight:800; font-size:1.5rem}
 .iconbtn{width:38px; height:38px; display:grid; place-items:center; border-radius:10px; border:1px solid var(--amoba-border); background:var(--amoba-surface); color:var(--amoba-text); cursor:pointer}
@@ -232,6 +235,57 @@ button:focus-visible{outline:2px solid var(--amoba-gold); outline-offset:2px}
   .drawer-head{padding:10px 16px 6px} .drawer-body{padding:6px 16px 14px; gap:16px} .drawer-foot{padding:10px 16px 14px}
   .settings-btn{font-size:12.5px}
 }
+
+/* ===== Mód választó ===== */
+.head-right{display:flex; flex-wrap:wrap; align-items:center; gap:10px; justify-content:flex-end}
+.modes button{padding:7px 14px}
+/* ===== Elemzés mód ===== */
+.tools{border:1px solid var(--amoba-border); border-radius:14px; background:var(--amoba-surface); padding:12px 14px; display:flex; flex-direction:column; gap:10px}
+.tool-row{display:grid; grid-template-columns:auto auto; gap:12px 18px; justify-content:start}
+.tool-row .seg button{min-width:44px; font-size:15px}
+#aTool button[data-v="1"]{color:var(--amoba-x)} #aTool button[data-v="2"]{color:var(--amoba-o)}
+.tools .note{margin:0}
+.switch.small .t{font-weight:500; font-size:13.5px; color:var(--amoba-muted)}
+.switch.small .track{transform:scale(.85); transform-origin:left center}
+.tools .note.warnc{color:var(--amoba-o)}
+.btn .ic{width:17px; height:17px; vertical-align:-3px; margin-right:6px}
+label.btn{display:inline-flex; align-items:center}
+.btn.gold{border-color:rgba(251,191,36,.6); color:#fde7a6}
+.runbar{display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px}
+.runbar .run{min-width:170px; justify-content:center; display:inline-flex; align-items:center}
+.runbar .run.stop{background:transparent; color:var(--amoba-o); border-color:rgba(251,113,133,.6)}
+.run-state{font-size:13px; color:var(--amoba-muted)}
+.res.stale{opacity:.55}
+.res{border:1px solid var(--amoba-border); border-radius:14px; background:var(--amoba-surface); padding:12px 14px; cursor:pointer; outline:none}
+.res.focus{border-color:rgba(251,191,36,.55); box-shadow:inset 3px 0 0 var(--amoba-gold)}
+.res:focus-visible{outline:2px solid var(--amoba-gold); outline-offset:2px}
+.res-head{display:flex; align-items:center; gap:10px; margin-bottom:8px}
+.res-head .who{width:24px; height:24px; flex:none}
+.res-head .who svg{width:100%; height:100%}
+.res-head h3{margin:0; font-family:var(--f-display); font-size:1.08rem; font-weight:600}
+.res-head .hint{margin-left:auto; font-size:12px; color:var(--amoba-muted)}
+.res ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
+.res li{display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px; align-items:start; font-size:14px; line-height:1.45}
+.res .plan-mini{margin:8px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:3px}
+.res .plan-mini li{grid-template-columns:20px 22px minmax(0,1fr); gap:6px; font-size:13.5px}
+.res .plan-mini .n{font:700 12.5px var(--f-mono); text-align:center}
+.res .plan-mini .n.s{color:var(--amoba-gold)} .res .plan-mini .n.o{color:var(--amoba-violet)}
+.res .plan-mini .g{width:16px; height:16px} .res .plan-mini .g svg{width:100%; height:100%}
+.res .forced{font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--amoba-o); margin-left:4px}
+.res .busy-line{font-size:13.5px; color:var(--amoba-muted)}
+.res.compact .plan-mini{display:none}
+/* ===== Beolvasás ===== */
+.scan{position:fixed; inset:0; z-index:60; display:flex; flex-direction:column; gap:10px; background:#070b17; color:var(--amoba-text);
+  padding:max(12px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(14px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px))}
+.scan-head{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.scan-head h2{margin:0; font-family:var(--f-display); font-weight:800; font-size:1.35rem}
+.scan-note{margin:0; max-width:70ch}
+.scan-stage{flex:1; min-height:0; display:flex; align-items:center; justify-content:center}
+.scan-stage canvas{touch-action:none; max-width:100%; max-height:100%; border-radius:10px; cursor:grab}
+.scan-ctrl{display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; justify-content:center}
+.stepper{display:flex; align-items:center; gap:8px; font-size:14px; color:var(--amoba-muted)}
+.stepper b{min-width:2ch; text-align:center; color:var(--amoba-text); font-variant-numeric:tabular-nums; font-size:16px}
+.stepper .iconbtn{width:34px; height:34px; font-size:18px}
 
 /* ===== Reszponzív elrendezés =====
    Széles: tábla balra (görgetéskor a helyén marad), panel jobbra.
@@ -285,6 +339,7 @@ button:focus-visible{outline:2px solid var(--amoba-gold); outline-offset:2px}
   .overlay h2{font-size:1.6rem}
 }
 @media (max-width: 599px){ .panel{max-width:calc(var(--cell) * 12 + 14px)} }
+@media (max-width: 599px){ .head-right{width:100%; justify-content:space-between} .tool-row{grid-template-columns:1fr} .res{padding:10px 12px} }
 @media (prefers-reduced-motion: reduce){ *{animation:none!important; transition:none!important} }
 </style>
 </head>
@@ -296,15 +351,20 @@ button:focus-visible{outline:2px solid var(--amoba-gold); outline-offset:2px}
   <div class="head">
     <div>
       <h1><span class="x">×</span> Amőba <span class="o">○</span></h1>
-      <p>Verd meg a gépet. Tanuló módban az edző szól, ha veszély van, de a megoldást neked kell megtalálnod.</p>
+      <p id="headSub">Verd meg a gépet. Tanuló módban az edző szól, ha veszély van, de a megoldást neked kell megtalálnod.</p>
+    </div>
+    <div class="head-right">
+    <div class="modes seg" id="modes" role="tablist" aria-label="Mód">
+      <button role="tab" data-mode="play">Játék</button><button role="tab" data-mode="ana">Elemzés</button>
     </div>
     <button class="settings-btn" id="openSettings" aria-haspopup="dialog" aria-controls="drawer" aria-expanded="false">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
       <span id="summary"></span>
     </button>
+    </div>
   </div>
 
-  <div class="arena">
+  <div class="arena" id="playArena">
     <div class="boardwrap">
       <div class="board" id="board" role="grid" aria-label="Játéktábla 12×12"></div>
       <div class="overlay" id="over" hidden>
@@ -323,7 +383,7 @@ button:focus-visible{outline:2px solid var(--amoba-gold); outline-offset:2px}
       </div>
 
       <div class="plan" id="plan" hidden>
-        <div class="plan-head"><p class="label">A tipp mögötti terv</p><button class="linkbtn" id="planHide">Elrejt</button></div>
+        <div class="plan-head"><p class="label" id="planTitle">A tipp mögötti terv</p><button class="linkbtn" id="planHide">Elrejt</button></div>
         <ol id="planList"></ol>
         <p class="sum" id="planSum"></p>
       </div>
@@ -356,6 +416,67 @@ button:focus-visible{outline:2px solid var(--amoba-gold); outline-offset:2px}
       <p class="foot">Mezők jelölése: oszlop (A–L) és sor (1–12). A Tipp gomb a legjobb lépést mutatja meg, ha elakadtál.</p>
     </div>
   </div>
+  <div class="arena" id="anaArena" hidden>
+    <div class="boardwrap">
+      <div class="board" id="aboard" role="grid" aria-label="Elemzendő állás, 12×12"></div>
+    </div>
+    <div class="panel">
+      <div class="tools">
+        <div class="tool-row">
+          <div>
+            <p class="label">Következő jel</p>
+            <div class="seg" id="aTool"><button data-v="1" aria-label="× lerakása">×</button><button data-v="2" aria-label="○ lerakása">○</button><button data-v="0">Radír</button></div>
+          </div>
+          <div>
+            <p class="label">Ki lép?</p>
+            <div class="seg" id="aTurn"><button data-v="1">× lép</button><button data-v="2">○ lép</button></div>
+          </div>
+        </div>
+        <label class="switch small"><input type="checkbox" id="aAlt"><span class="track"></span><span class="t">Felváltva: × után automatikusan ○ jön, és fordítva</span></label>
+        <p class="note" id="aCount"></p>
+        <div class="row">
+          <label class="btn gold" for="aImg"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>Fotó vagy kép</label>
+          <input type="file" id="aImg" accept="image/*" hidden>
+          <button class="btn" id="aFromGame">Játszma átvétele</button>
+        </div>
+        <p class="note">A telefon felkínálja a fotózást és a fotókönyvtárat is. Ha a kamera fekete képet ad, fotózd le a táblát a Kamera alkalmazással, és utána a fotókönyvtárból válaszd ki.</p>
+        <div class="row">
+          <button class="btn" id="aUndo">Visszavonás</button>
+          <button class="btn" id="aClear">Tábla törlése</button>
+        </div>
+      </div>
+      <div class="runbar">
+        <button class="btn primary run" id="aRun"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg><span>Elemzés indítása</span></button>
+        <span class="run-state" id="aRunState" aria-live="polite"></span>
+      </div>
+      <div class="res" id="aRes1" tabindex="0"></div>
+      <div class="res" id="aRes2" tabindex="0"></div>
+      <div class="row">
+        <button class="btn" id="aStep" disabled>Lépés</button>
+        <button class="btn" id="aVs" disabled>Folytatás a gép ellen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="scan" id="scan" role="dialog" aria-modal="true" aria-labelledby="scanTitle" hidden>
+    <div class="scan-head">
+      <h2 id="scanTitle">Tábla beolvasása</h2>
+      <button class="iconbtn" id="scanClose" aria-label="Bezárás"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+    </div>
+    <p class="note scan-note" id="scanIntro"></p>
+    <div class="scan-stage" id="scanStage"><canvas id="scanCv"></canvas></div>
+    <p class="note scan-note" id="scanHint" aria-live="polite"></p>
+    <div class="scan-ctrl" id="scanAuto">
+      <button class="btn" id="scanManual">Kézi rács</button>
+      <button class="btn primary" id="scanTake">Átvétel</button>
+    </div>
+    <div class="scan-ctrl" id="scanMan" hidden>
+      <div class="stepper"><span>Oszlopok</span><button class="iconbtn" data-k="cols" data-d="-1" aria-label="Kevesebb oszlop">−</button><b id="scanCols">12</b><button class="iconbtn" data-k="cols" data-d="1" aria-label="Több oszlop">+</button></div>
+      <div class="stepper"><span>Sorok</span><button class="iconbtn" data-k="rows" data-d="-1" aria-label="Kevesebb sor">−</button><b id="scanRows">12</b><button class="iconbtn" data-k="rows" data-d="1" aria-label="Több sor">+</button></div>
+      <button class="btn primary" id="scanGo">Felismerés</button>
+    </div>
+  </div>
+
   <div class="scrim" id="scrim"></div>
   <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true" inert>
     <div class="drawer-head">
@@ -576,6 +697,24 @@ function threatMoves(b, p, threes){
 // ---- Fenyegetés-keresés (VCF: csak négyesek, VCT: négyesek + nyitott hármasok) ----
 function mkCtx(ms, maxNodes){ return { deadline: Date.now() + ms, n: 0, max: maxNodes || 1e9, out: false }; }
 function tick(ctx){ ctx.n++; if (ctx.n > ctx.max || ((ctx.n & 63) === 0 && Date.now() > ctx.deadline)) ctx.out = true; return ctx.out; }
+// ---- Állás-memória (transzpozíciós tábla): egy állás eredménye bármilyen lépéssorrendből érvényes ----
+var ZA = new Int32Array(NN * 3), ZB = new Int32Array(NN * 3);
+(function(){ var s = 0x2545F491; function r(){ s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return s | 0; }
+  for (var i = 0; i < NN * 3; i++){ ZA[i] = r(); ZB[i] = r(); } })();
+function hkey(b, p, kind){
+  var a = p * 0x9E3779B1 + kind * 0x85EBCA77, c = p * 0x27D4EB2F + kind * 0x165667B1;
+  for (var i = 0; i < NN; i++){ var v = b[i]; if (v){ a ^= ZA[i*3 + v]; c ^= ZB[i*3 + v]; } }
+  return (a >>> 0) * 2097152 + ((c >>> 0) & 0x1FFFFF);
+}
+var TT = new Map();
+function ttGet(k){ return TT.get(k); }
+function ttPut(k, win, depth, move){
+  if (TT.size > 400000) TT.clear();
+  var e = TT.get(k);
+  if (!e){ e = { w: 99, f: -1, m: -1 }; TT.set(k, e); }
+  if (win){ if (depth < e.w){ e.w = depth; e.m = move; } }
+  else if (depth > e.f) e.f = depth;
+}
 // p lép; visszaadja a nyerő első lépést, vagy -1-et
 function vct(b, p, depth, ctx, threes){
   if (tick(ctx)) return -1;
@@ -583,22 +722,27 @@ function vct(b, p, depth, ctx, threes){
   var mine = fiveSquares(b, p); if (mine.length) return mine[0];
   var theirs = fiveSquares(b, q);
   if (theirs.length >= 2) return -1;
+  var key = hkey(b, p, threes ? 1 : 2), e = ttGet(key);
+  if (e){ if (e.w <= depth) return e.m; if (e.f >= depth) return -1; }
+  var res = -1;
   if (theirs.length === 1){
     var c = theirs[0]; b[c] = p;
     var ok = defend(b, p, depth, ctx, threes);
-    b[c] = 0; return ok ? c : -1;
+    b[c] = 0; res = ok ? c : -1;
+  } else if (depth > 0){
+    var moves = threatMoves(b, p, threes && depth >= 2);
+    if (e && e.m >= 0){ var ix = moves.indexOf(e.m); if (ix > 0){ moves.splice(ix, 1); moves.unshift(e.m); } }
+    for (var n = 0; n < moves.length; n++){
+      var m = moves[n];
+      b[m] = p;
+      var w = defend(b, p, depth - 1, ctx, threes);
+      b[m] = 0;
+      if (w){ res = m; break; }
+      if (ctx.out) return -1;
+    }
   }
-  if (depth <= 0) return -1;
-  var moves = threatMoves(b, p, threes && depth >= 2);
-  for (var n = 0; n < moves.length; n++){
-    var m = moves[n];
-    b[m] = p;
-    var w = defend(b, p, depth - 1, ctx, threes);
-    b[m] = 0;
-    if (w) return m;
-    if (ctx.out) return -1;
-  }
-  return -1;
+  if (!ctx.out) ttPut(key, res >= 0, depth, res);
+  return res;
 }
 // q lép; igaz, ha p minden védekezés után is nyer
 function defend(b, p, depth, ctx, threes){
@@ -607,24 +751,32 @@ function defend(b, p, depth, ctx, threes){
   if (fiveSquares(b, q).length) return false;
   var pf = fiveSquares(b, p);
   if (pf.length >= 2) return true;
+  var key = hkey(b, p, threes ? 3 : 4), e = ttGet(key);
+  if (e){ if (e.w <= depth) return true; if (e.f >= depth) return false; }
   var replies;
   if (pf.length === 1) replies = pf;
   else {
     var S = openFourSquares(b, p);
-    if (!S.length) return false;
+    if (!S.length){ ttPut(key, false, 99, -1); return false; }
     replies = fullDefenses(b, p, S);
     var cf = fourMoves(b, q);
     for (var k = 0; k < cf.length; k++) if (replies.indexOf(cf[k]) < 0) replies.push(cf[k]);
-    if (!replies.length) return true;
+    if (!replies.length){ ttPut(key, true, 0, -1); return true; }
   }
+  // a korábban cáfoló védekezést próbáljuk először
+  if (e && e.m >= 0){ var ix = replies.indexOf(e.m); if (ix > 0){ replies.splice(ix, 1); replies.unshift(e.m); } }
+  var res = true, refute = -1;
   for (var n = 0; n < replies.length; n++){
     var r = replies[n];
     b[r] = q;
     var w = vct(b, p, depth, ctx, threes);
     b[r] = 0;
-    if (w < 0) return false;
+    if (ctx.out) return false;
+    if (w < 0){ res = false; refute = r; break; }
   }
-  return true;
+  if (res) ttPut(key, true, depth, -1);
+  else { ttPut(key, false, depth, -1); var ee = TT.get(key); if (ee) ee.m = refute; }
+  return res;
 }
 // p kényszerítő nyerése: először VCF, aztán VCT
 // mint forcedWin, de jelzi, ha az idő lejárt (ilyenkor a "nincs nyerés" nem biztos)
@@ -948,7 +1100,8 @@ function analyze(b, m, ms, vctD){
   res.cause.open = causeOf(b, res.open, m, C_OTHREE);
   res.cause.fork = causeOf(b, res.forks, m, C_OTHREE);
   if (res.trap) res.cause.trap = causeOf(b, [res.trap.i], m, C_OTHREE);
-  var mw = forcedWin(b, u, 12, 0, ms * 0.05);
+  if (res.trap) res.trapLine = trapLine(b, m, Math.min(2500, ms * 0.25));
+  var mw = forcedWin(b, u, 14, 4, ms * 0.12);
   if (mw) res.myWin = mw;
   if (res.open.length || res.forks.length || res.trap){
     var cand = uniq(res.openDef.concat(res.forks, res.trap ? [res.trap.i] : [], res.open, fourMoves(b, u)));
@@ -971,6 +1124,7 @@ function analyze(b, m, ms, vctD){
       .sort(function(x, y){ return y[1] - x[1]; }).slice(0, 8).map(function(x){ return x[0]; });
     cand = uniq(cand.concat(extra));
     cand = cand.map(function(i){ return [i, scoreCell(b, i, m) * 1.1 + scoreCell(b, i, u)]; }).sort(function(x, y){ return y[1] - x[1]; }).map(function(x){ return x[0]; }).slice(0, 22);
+    res.cand = cand.slice(0, 8);
     var deadline = t0 + ms * 0.8;
     var pending = cand.slice(), round = 0;
     // több kör: ami lejárt időben, az a maradék időből újra kap
@@ -1009,31 +1163,41 @@ function analyze(b, m, ms, vctD){
   return res;
 }
 // Vesztes-e az állás u számára (u jön)?
-function isLost(b, m, ms, vctD){
-  vctD = vctD || 4;
-  var u = 3 - m;
-  if (fiveSquares(b, u).length) return false;
+// u jön: 'lost' (minden lépésére bizonyított a gép nyerése), 'saved' (van bizonyítottan mentő lépés), 'unknown'
+function lostStatus(b, m, ms, vctD){
+  vctD = vctD || 5;
+  var u = 3 - m, end = Date.now() + ms;
+  if (fiveSquares(b, u).length) return { s: 'saved', move: fiveSquares(b, u)[0] };
   var f = fiveSquares(b, m);
-  if (f.length >= 2) return true;
-  if (!forcedWin(b, m, 16, vctD, ms * 0.2)) return false;
-  var cells = nearCells(b, 2), per = Math.max(30, ms * 0.8 / Math.max(1, cells.length));
+  if (f.length >= 2) return { s: 'lost' };
+  var pre = forcedWinX(b, m, 16, vctD, ms * 0.2);
+  if (!pre.win && !pre.unsure) return { s: 'saved', move: -1 };
+  var cells = f.length ? f : nearCells(b, 2);
+  // a fenyegetéshez közeli, erős mezők előre
+  cells = cells.map(function(i){ return [i, scoreCell(b, i, m) + scoreCell(b, i, u)]; }).sort(function(x, y){ return y[1] - x[1]; }).map(function(x){ return x[0]; });
+  var unknown = false;
   for (var n = 0; n < cells.length; n++){
-    if (verdictOf(b, cells[n], u, vctD, per).v !== 'lose') return false;
+    var rem = end - Date.now();
+    var vd = verdictOf(b, cells[n], u, vctD, Math.max(40, rem / (cells.length - n)));
+    if (vd.v === 'safe') return { s: 'saved', move: cells[n] };
+    if (vd.v === 'unknown') unknown = true;
   }
-  return true;
+  return { s: unknown ? 'unknown' : 'lost' };
 }
-// A legutóbbi lépésed, amely után az állás elveszett: hány lépést kell visszavonni
+function isLost(b, m, ms, vctD){ return lostStatus(b, m, ms, vctD).s === 'lost'; }
+// Visszafelé keresi azt a lépésedet, amely előtt még volt bizonyítottan mentő lépés
 function findMistake(b, moves, user, ms){
   var m = 3 - user, bb = Int8Array.from(b), list = moves.slice();
-  var back = 0, steps = 0, t0 = Date.now();
-  while (list.length && steps < 6 && Date.now() - t0 < ms){
-    // vissza a felhasználó előző lépése előttig
+  var back = 0, steps = 0, t0 = Date.now(), lastBack = 0, lastMove = -1;
+  while (list.length && steps < 10 && Date.now() - t0 < ms){
     do { var mv = list.pop(); bb[mv.i] = 0; back++; } while (list.length && list[list.length - 1].p === user);
     if (mv.p !== user) break;
     steps++;
-    if (!isLost(bb, m, Math.min(2500, ms / 3), 5)) return { back: back, move: mv.i };
+    lastBack = back; lastMove = mv.i;
+    var st = lostStatus(bb, m, Math.min(4000, Math.max(800, (ms - (Date.now() - t0)) / 2)), 6);
+    if (st.s === 'saved' && st.move !== mv.i) return { back: back, move: mv.i, alt: st.move, sure: true };
   }
-  return { back: back, move: -1 };
+  return { back: lastBack, move: lastMove, sure: false };
 }
 // Lépés előtti ellenőrzés: ha u ide lép, nyer-e a gép kényszerítéssel?
 function checkMove(b, i, u, ms, vctD){
@@ -1097,7 +1261,78 @@ function planLine(b0, u, first, ms){
   return line;
 }
 
-if (typeof module !== 'undefined') module.exports = { N: N, toName: toName, fiveSquares: fiveSquares, chooseMove: chooseMove, analyze: analyze, checkMove: checkMove, isFiveAt: isFiveAt, winCells: winCells, forcedWin: forcedWin, openFourSquares: openFourSquares, scoreCell: scoreCell, isLost: isLost, findMistake: findMistake, evalBoard: evalBoard, planLine: planLine, genMoves: genMoves, forcedWinX: forcedWinX };
+// ---- A gép kényszerítő sorozata (a csapda bemutatásához): ha a játékos nem lép közbe ----
+function trapLine(b0, m, ms){
+  var b = Int8Array.from(b0), u = 3 - m, line = [], end = Date.now() + ms;
+  for (var k = 0; k < 7; k++){
+    var f = fiveSquares(b, m);
+    if (f.length){ line.push({ i: f[0], side: 'm', kind: 'five' }); return { line: line, end: 'five' }; }
+    var uf = fiveSquares(b, u), mv;
+    if (uf.length) mv = uf[0];
+    else {
+      var r = forcedWinX(b, m, 16, 6, Math.max(60, (end - Date.now()) / 2));
+      if (!r.win) break;
+      mv = r.win.i;
+    }
+    var d = describeMove(b, mv, m);
+    line.push({ i: mv, side: 'm', kind: d.kind });
+    b[mv] = m;
+    var of = fiveSquares(b, m);
+    if (of.length >= 2) return { line: line, end: 'double', squares: of };
+    var rep;
+    if (of.length === 1) rep = of[0];
+    else {
+      var S = openFourSquares(b, m);
+      if (!S.length) continue;
+      var defs = fullDefenses(b, m, S);
+      if (!defs.length) return { line: line, end: 'fork', squares: S };
+      rep = defs[0];
+    }
+    var du = describeMove(b, rep, u);
+    line.push({ i: rep, side: 'u', kind: du.kind, forced: of.length === 1 });
+    b[rep] = u;
+  }
+  return line.length ? { line: line, end: 'open' } : null;
+}
+
+// ---- Tetszőleges állás értékelése: s jön ----
+function analyzePosition(b, s, ms){
+  var o = 3 - s, t0 = Date.now(), res = { side: s };
+  var left = function(){ return Math.max(200, ms - (Date.now() - t0)); };
+  res.myFive = fiveSquares(b, s);
+  res.oppFive = fiveSquares(b, o);
+  if (res.myFive.length){ res.state = 'win1'; res.best = res.myFive[0]; return res; }
+  // a másik fél fenyegetései (s szemszögéből, s jön)
+  res.threat = analyze(b, o, ms * 0.35, 6);
+  // ha maradt bizonytalanság, újra (a memória miatt a második kör már a korábbi munkára épít)
+  for (var k = 0; k < 2 && res.threat.unsure && !res.threat.lost && Date.now() - t0 < ms * 0.6; k++) res.threat = analyze(b, o, ms * 0.3, 6);
+  // saját kényszerítő nyerés
+  var fw = res.oppFive.length >= 2 ? { win: null } : forcedWinX(b, s, 16, 6, Math.min(left() * 0.4, ms * 0.25));
+  if (fw.win){
+    res.state = 'win'; res.best = fw.win.i; res.winKind = fw.win.kind;
+    var tl = trapLine(b, s, Math.min(2500, left() * 0.5));
+    res.plan = tl ? tl.line : [{ i: fw.win.i, side: 'm', kind: 'four' }];
+    res.planEnd = tl ? tl.end : null; res.planSquares = tl ? tl.squares : null;
+    return res;
+  }
+  var mv = chooseMove(b, s, 4);
+  res.best = mv.i; res.why = mv.why;
+  var t = res.threat;
+  if (t.lost) res.state = 'lost';
+  else if (res.oppFive.length) res.state = 'block';
+  else if (t.open.length || t.forks.length || t.trap) res.state = 'defend';
+  else res.state = 'quiet';
+  // védekezésnél a bizonyítottan jó lépések közül válasszunk
+  if (res.state === 'defend' && t.defend.length && t.defend.indexOf(res.best) < 0){
+    var safe = t.defend.filter(function(c){ return t.verdicts[c] && t.verdicts[c].v === 'safe'; });
+    if (safe.length) res.best = safe[0];
+  }
+  if (res.state === 'block') res.best = res.oppFive[0];
+  res.plan = planLine(b, s, res.best, Math.min(2000, left()));
+  return res;
+}
+
+if (typeof module !== 'undefined') module.exports = { N: N, toName: toName, fiveSquares: fiveSquares, chooseMove: chooseMove, analyze: analyze, checkMove: checkMove, isFiveAt: isFiveAt, winCells: winCells, forcedWin: forcedWin, openFourSquares: openFourSquares, scoreCell: scoreCell, isLost: isLost, findMistake: findMistake, evalBoard: evalBoard, planLine: planLine, trapLine: trapLine, analyzePosition: analyzePosition, genMoves: genMoves, forcedWinX: forcedWinX };
 
 </script>
 <script>
@@ -1119,32 +1354,43 @@ function runOp(m, b){
   if (m.op === 'analyze') return analyze(b, m.p, m.ms, m.vct);
   if (m.op === 'check') return checkMove(b, m.i, m.p, m.ms, m.vct);
   if (m.op === 'mistake') return findMistake(b, m.moves, m.p, m.ms);
+  if (m.op === 'position') return analyzePosition(b, m.side, m.ms);
   if (m.op === 'hint'){ const r = chooseMove(b, m.p, 4); r.plan = planLine(b, m.p, r.i, 2200); return r; }
 }
 const workers = {};
+let workerUrl = null;
+function makeWorker(k){
+  const w = new Worker(workerUrl);
+  w.onmessage = e => { const f = pending.get(e.data.id); if (f){ pending.delete(e.data.id); f.res(e.data.r); } };
+  w.onerror = () => { delete workers[k]; };
+  workers[k] = w;
+}
 try{
   const src = document.getElementById('engine-src').textContent + '\n' + runOp.toString() + `
     self.onmessage = function(e){ var m = e.data; self.postMessage({ id: m.id, r: runOp(m, Int8Array.from(m.b)) }); };`;
-  const url = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
-  for (const k of ['main', 'deep']){
-    const w = new Worker(url);
-    w.onmessage = e => { const f = pending.get(e.data.id); if (f){ pending.delete(e.data.id); f(e.data.r); } };
-    w.onerror = () => { delete workers[k]; };
-    workers[k] = w;
-  }
+  workerUrl = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
+  makeWorker('main'); makeWorker('deep');
 }catch(e){}
+// a mély elemzést félbe lehet hagyni (a szálat újraindítjuk), hogy egy új lépés elemzésére ne kelljen várni
+function restartDeep(){
+  if (!workers.deep || !workerUrl) return;
+  workers.deep.terminate();
+  for (const [id, f] of pending) if (f.lane === 'deep'){ pending.delete(id); f.res(null); }
+  makeWorker('deep');
+}
 function compute(msg, lane){
   msg.b = Array.from(msg.b);
-  const w = workers[lane || 'main'];
+  lane = lane || 'main';
+  const w = workers[lane];
   if (!w){
     const b = Int8Array.from(msg.b);
     return new Promise(res => setTimeout(() => res(runOp(msg, b)), 20));
   }
-  return new Promise(res => { msg.id = ++reqId; pending.set(msg.id, res); w.postMessage(msg); });
+  return new Promise(res => { msg.id = ++reqId; pending.set(msg.id, { res, lane }); w.postMessage(msg); });
 }
 // az edző legalább olyan mélyen számol, mint az aktuális gépi szint
 const COACH = [
-  { vct: 4, ms: 2500 }, { vct: 4, ms: 2500 }, { vct: 4, ms: 3500 }, { vct: 5, ms: 5000 }, { vct: 6, ms: 8000 }
+  { vct: 5, ms: 5000 }, { vct: 5, ms: 5000 }, { vct: 5, ms: 5500 }, { vct: 6, ms: 6000 }, { vct: 6, ms: 8000 }
 ];
 
 // ---- Szintek ----
@@ -1244,7 +1490,7 @@ function renderLevels(){
   renderSummary();
 }
 function renderSummary(){
-  $('#summary').textContent = `${LEVEL_INFO[g.level].name} · ${g.sym === 'x' ? '×' : '○'} · ${g.first === 1 ? 'te kezdesz' : 'a gép kezd'}${g.learn ? ' · tanuló mód' : ''}`;
+  $('#summary').textContent = `${LEVEL_INFO[g.level].name} · ${g.sym === 'x' ? '×' : '○'} · ${g.baseLen ? 'betöltött állás' : (g.first === 1 ? 'te kezdesz' : 'a gép kezd')}${g.learn ? ' · tanuló mód' : ''}`;
   const pendingFirst = (g.first === 1 ? 1 : 2) !== g.user && g.moves.some(m => m.p === g.user) && !g.over;
   $('#firstNote').hidden = !pendingFirst;
 }
@@ -1314,8 +1560,10 @@ function status(p, txt, sub, thinking){
   $('#statusSub').textContent = sub || '';
 }
 function refreshStatus(){ status.apply(null, lastStatus); }
+// a betöltött állás lépései nem vonhatók vissza
+const ownMoves = () => g.moves.slice(g.baseLen || 0).some(m => m.p === g.user);
 function setButtons(){
-  $('#undo').disabled = g.busy || !g.moves.some(m => m.p === g.user);
+  $('#undo').disabled = g.busy || !ownMoves();
   $('#hint').disabled = g.busy || g.over || !isUserTurn();
 }
 function coachList(items){
@@ -1330,9 +1578,10 @@ function renderStats(){
 
 // ---- Játékmenet ----
 function newGame(){
-  g.token++; g.b = new Int8Array(N*N); g.moves = []; g.over = false; g.busy = false;
+  g.token++; g.b = new Int8Array(N*N); g.moves = []; g.over = false; g.busy = false; g.baseLen = 0;
+  g.sym = store.get('sym', 'x') === 'o' ? 'o' : 'x';
   g.user = g.first === 1 ? 1 : 2; g.marks = {}; g.winLine = null; g.an = null; g.reveal = 0;
-  g.threatsSeen = 0; g.solvedAlone = 0; g.helped = 0; g.mistakeCell = -1; clearWarn(); clearPlan();
+  g.threatsSeen = 0; g.solvedAlone = 0; g.helped = 0; g.mistakeCell = -1; g.lostProven = false; extraNote = ''; clearWarn(); clearPlan();
   $('#over').hidden = true;
   renderBoard(); renderLevels(); renderCoach();
   if (g.user === 1){
@@ -1349,7 +1598,7 @@ function place(i, p){
 async function onCell(i){
   if (g.over || g.busy || !isUserTurn() || g.b[i]) return;
   const forcedBlock = g.an && g.an.five && g.an.five.length === 1 && g.an.five[0] === i;
-  if (g.learn && !(g.an && g.an.lost) && !forcedBlock){
+  if (g.learn && !(g.an && g.an.lost) && !g.lostProven && !forcedBlock){
     if (g.warn && g.warn.i === i) return commitUser(i, true);
     clearWarn();
     g.busy = true; setButtons();
@@ -1374,11 +1623,13 @@ function commitUser(i, ignoredWarn){
   if (g.learn && hasThreat(g.an) && !g.an.lost){
     if (!ignoredWarn && g.reveal === 0 && !g.warnedTurn) g.solvedAlone++;
   }
+  if (g.extending){ g.extending = false; restartDeep(); }
   clearWarn(); clearPlan(); g.marks = {}; g.an = null; g.warnedTurn = false; g.mistakeCell = -1;
   const won = place(i, g.user);
   renderBoard(i); renderLevels();
   if (won) return finish(g.user);
   if (g.moves.length >= N*N) return finish(0);
+  extraNote = '';
   if (ignoredWarn && wasWarn) extraNote = `Ezzel a lépéssel (${toName(i)}) a gép kényszerítő nyerést kapott. Figyeld, hogyan csinálja, aztán lépj vissza!`;
   machineTurn();
 }
@@ -1417,30 +1668,33 @@ function finish(winner){
   setButtons();
 }
 function undo(){
-  if (g.busy || !g.moves.some(m => m.p === g.user)) return;
+  if (g.busy || !ownMoves()) return;
   g.token++; g.over = false; g.winLine = null; $('#over').hidden = true;
-  do { const m = g.moves.pop(); g.b[m.i] = 0; } while (g.moves.length && g.moves[g.moves.length - 1].p === g.user);
-  g.marks = {}; g.an = null; clearWarn(); clearPlan(); renderBoard(); renderLevels();
+  do { const m = g.moves.pop(); g.b[m.i] = 0; } while (g.moves.length > g.baseLen && g.moves[g.moves.length - 1].p === g.user);
+  g.marks = {}; g.an = null; g.lostProven = false; extraNote = ''; clearWarn(); clearPlan(); renderBoard(); renderLevels();
   if (!isUserTurn()) return machineTurn();
   status(g.user, 'Te jössz', 'Visszaléptél egyet.'); setButtons();
   if (g.learn) runAnalysis(); else renderCoach();
 }
 $('#undo').onclick = undo;
 async function backToMistake(){
-  if (g.busy || !g.moves.some(m => m.p === g.user)) return;
+  if (g.busy || !ownMoves()) return;
   g.busy = true; setButtons(); const tok = g.token;
-  status(g.user, 'Keresem a döntő hibát', '', true);
-  const r = await compute({ op: 'mistake', b: g.b, moves: g.moves, p: g.user, ms: 6000 });
+  status(g.user, 'Keresem a döntő hibát', 'Visszafelé ellenőrzöm a lépéseidet', true);
+  const r = await compute({ op: 'mistake', b: g.b, moves: g.moves.slice(g.baseLen || 0), p: g.user, ms: 15000 });
   if (tok !== g.token) return;
   g.busy = false;
   g.token++; g.over = false; g.winLine = null; $('#over').hidden = true;
   for (let k = 0; k < r.back && g.moves.length; k++){ const m = g.moves.pop(); g.b[m.i] = 0; }
   while (g.moves.length && !isUserTurn()){ const m = g.moves.pop(); g.b[m.i] = 0; }
-  g.marks = {}; g.an = null; clearWarn(); clearPlan(); g.mistakeCell = r.move;
+  g.marks = {}; g.an = null; g.lostProven = false; clearWarn(); clearPlan(); g.mistakeCell = r.move;
   renderBoard(); renderLevels(); setButtons();
-  if (r.move >= 0){
-    extraNote = `Itt hibáztál: miután ide léptél (${toName(r.move)}, szaggatott keret), már nem volt védekezés. Most keresd meg a jobb lépést!`;
+  if (r.move >= 0 && r.sure){
+    extraNote = `Itt hibáztál: miután ide léptél (${toName(r.move)}, szaggatott keret), már nem volt védekezés. Ebből az állásból még van mentés, keresd meg!`;
     status(g.user, 'Vissza a hibád elé', 'A döntő lépésed: ' + toName(r.move));
+  } else if (r.move >= 0){
+    extraNote = `A döntő hibát nem tudtam biztosan beazonosítani. Valószínűleg ez volt az (${toName(r.move)}, szaggatott keret), vagy egy még korábbi lépés.`;
+    status(g.user, 'Visszaléptem', 'Gyanús lépés: ' + toName(r.move));
   } else status(g.user, 'Te jössz', 'Nem találtam egyértelmű hibát, ennyit léptem vissza.');
   if (!isUserTurn()) return machineTurn();
   if (g.learn) runAnalysis(); else renderCoach();
@@ -1492,15 +1746,41 @@ async function runAnalysis(){
   const still = () => tok === g.token && moveCount === g.moves.length && g.learn && !g.over;
   coachIdleBusy(true, 'elemzés');
   const quick = await compute({ op: 'analyze', b: g.b, p: machine(), ms: 700, vct: 3 }, 'deep');
-  if (!still()) return;
-  g.an = quick; g.reveal = 0; g.counted = false;
-  if (hasThreat(quick) && !quick.lost){ g.threatsSeen++; g.counted = true; }
-  applyReveal(true);
+  if (!quick || !still()) return;
+  g.counted = false; g.quickDefend = quick.defend || [];
+  // ha az állás már bizonyítottan elveszett, a gyors (sekélyebb) eredményt nem mutatjuk, csak a mélyet
+  if (!g.lostProven || quick.lost){
+    g.an = quick; g.reveal = 0;
+    if (hasThreat(quick) && !quick.lost){ g.threatsSeen++; g.counted = true; }
+    applyReveal(true);
+  }
   coachIdleBusy(true, 'mélyebb ellenőrzés');
-  const deep = await compute({ op: 'analyze', b: g.b, p: machine(), ms: C.ms, vct: C.vct }, 'deep');
-  if (!still()) return;
+  let deep = await compute({ op: 'analyze', b: g.b, p: machine(), ms: C.ms, vct: C.vct }, 'deep');
+  if (!deep || !still()) return;
+  // ha maradt el nem döntött lépés, tovább számolunk, amíg a játékos gondolkodik
+  g.extending = true;
+  for (let k = 0; k < 4 && deep.unsure && !deep.lost; k++){
+    showDeep(deep, quick);
+    coachIdleBusy(true, 'még számolok');
+    const more = await compute({ op: 'analyze', b: g.b, p: machine(), ms: C.ms * 1.5, vct: C.vct }, 'deep');
+    if (!more || !still()){ g.extending = false; return; }
+    deep = more;
+  }
+  g.extending = false;
   coachIdleBusy(false);
+  showDeep(deep, quick);
+}
+function showDeep(deep, quick){
   deep.deep = true;
+  if (deep.lost) g.lostProven = true;
+  else if (g.lostProven){
+    const provenSafe = deep.defend.length && !deep.unsure && deep.defend.some(c => deep.verdicts[c] && deep.verdicts[c].v === 'safe');
+    if (provenSafe || !hasThreat(deep)){
+      g.lostProven = false;
+      extraNote = 'A gép nem a nyerő folytatást választotta, így újra van mentés. Most figyelj!';
+    } else { deep.lost = true; deep.sticky = true; }
+  }
+  if (g.an !== quick && !(g.an && g.an.deep)) g.reveal = 0;
   g.an = deep;
   if (!g.counted && hasThreat(deep) && !deep.lost){ g.threatsSeen++; g.counted = true; }
   applyReveal(!hasThreat(quick) && hasThreat(deep));
@@ -1523,10 +1803,13 @@ function applyReveal(fresh){
   g.marks = {};
   if (!g.learn || !r || g.over){ renderCoach(); renderBoard(); return; }
   const items = [];
-  if (extraNote){ items.push({ c: 'plain', tag: 'Megjegyzés', t: extraNote }); extraNote = ''; }
+  if (extraNote) items.push({ c: 'plain', tag: 'Megjegyzés', t: extraNote });
   const threat = hasThreat(r);
   if (r.myFive.length){
     items.push({ c: 'gold', tag: 'Nyerhetsz', t: 'Van egy lépésed, amellyel ötöt raksz ki. Keresd meg!' });
+  } else if (r.lost && r.sticky){
+    causeAll(r).forEach(i => addMark(i, 't-cause'));
+    items.push({ c: 'violet', tag: 'Elveszett', t: 'A gép a nyerő támadását folytatja, ebből az állásból már nincs mentés. Lépj vissza a hibádig, vagy játszd végig, és figyeld, hogyan fejezi be.' });
   } else if (r.lost && r.afterBlock){
     const blk = r.five[0], ab = r.afterBlock;
     causeAll(r).concat(ab.cause || []).forEach(i => addMark(i, 't-cause'));
@@ -1538,10 +1821,21 @@ function applyReveal(fresh){
     causeAll(r).forEach(i => addMark(i, 't-cause'));
     const dz = r.five.length ? r.five : [...new Set([...r.open, ...r.forks, ...(r.trap ? [r.trap.i] : [])])];
     dz.forEach(i => addMark(i, 't-danger'));
-    items.push({ c: 'violet', tag: 'Elveszett', t: (r.five.length >= 2
-      ? `A gépnek két nyerő mezője van (${sqList(r.five)}), egyszerre csak egyet tudsz lezárni.`
-      : `A gépnek egyszerre több fenyegetése van (${sqList(dz.slice(0, 4))}), és egy lépéssel nem tudod mindet megállítani.`) +
-      ' Bármit lépsz, kikényszeríti a győzelmet. A hiba korábban történt: lépj vissza oda, és keresd meg a jobb lépést.' });
+    let why;
+    if (r.five.length >= 2) why = `A gépnek két nyerő mezője van (${sqList(r.five)}), egyszerre csak egyet tudsz lezárni.`;
+    else {
+      // a kézenfekvő védekezések és a gép válasza rájuk
+      const pool = [...new Set([...(g.quickDefend || []), ...(r.cand || []).slice(0, 2), ...(r.openDef || []), ...r.forks, ...(r.trap ? [r.trap.i] : []), ...(r.cand || [])])];
+      const defs = pool.filter(c => r.verdicts && r.verdicts[c] && r.verdicts[c].at >= 0).slice(0, 4);
+      const kind = r.open.length ? 'A gép nyitott hármasát' : (r.forks.length ? 'A gép villapontját' : 'A gép támadását');
+      const where = r.open.length ? 'csak itt lehetne lezárni' : 'itt lehetne megelőzni';
+      if (defs.length){
+        defs.forEach(c => addMark(r.verdicts[c].at, 't-danger'));
+        why = `A kézenfekvő védekezések: ${sqList(defs)}. De mindegyik után marad a gépnek kényszerítő támadása: ` +
+          defs.map(c => `${sq(c)} után ${sq(r.verdicts[c].at)}`).join(', ') + '.';
+      } else why = `A gépnek egyszerre több fenyegetése van (${sqList(dz.slice(0, 4))}), és egy lépéssel nem tudod mindet megállítani.`;
+    }
+    items.push({ c: 'violet', tag: 'Elveszett', t: why + ' Bármit lépsz, kikényszeríti a győzelmet. A hiba korábban történt: lépj vissza oda, és keresd meg a jobb lépést.' });
   } else if (threat){
     causeAll(r).forEach(i => addMark(i, 't-cause'));
     const kinds = threatKinds(r);
@@ -1571,11 +1865,15 @@ function applyReveal(fresh){
           items.push({ c: 'violet', tag: 'Csapda', t: r.trap.kind === 'vcf'
             ? `A gépnek négyes-sorozata van a(z) ${sq(r.trap.i)} mezőtől. Minden négyesére kötelező lesz válaszolnod, a végén villát kap.`
             : `A gép a(z) ${sq(r.trap.i)} mezőtől hármasokkal és négyesekkel kényszerítő támadást tud indítani.` });
+          if (r.trapLine && r.trapLine.line.length > 1) items.push({ c: 'plain', tag: 'Menete', t: 'A sorozat lépéseit a táblán számok jelölik, és fent, a lila dobozban lépésenként olvashatod.' });
         }
       }
     }
-    if (g.reveal >= 2 && !r.deep && !r.five.length){
+    if (g.reveal >= 2 && (!r.deep || (r.unsure && g.extending)) && !r.five.length){
       items.push({ c: 'gold', tag: 'Megoldás', t: 'A legjobb védekezést most számolom ki pontosan, mélyebben előre nézve. Pár másodperc…' });
+    } else if (g.reveal >= 2 && r.myWin && !r.five.length){
+      addMark(r.myWin.i, 't-best');
+      items.push({ c: 'gold', tag: 'Megoldás', t: `Ne védekezz, támadj! A(z) ${sq(r.myWin.i)} mezőtől ${r.myWin.kind === 'vcf' ? 'négyesek sorozatával' : 'hármasokkal és négyesekkel'} kikényszerítheted a győzelmet, mielőtt a gép fenyegetése beérne.` });
     } else if (g.reveal >= 2){
       const best = r.defend[0];
       const defs = r.defend.length ? r.defend : (r.openDef || []);
@@ -1583,19 +1881,26 @@ function applyReveal(fresh){
       if (best >= 0 && best !== undefined) addMark(best, 't-best');
       if (r.five.length > 1) items.push({ c: 'gold', tag: 'Megoldás', t: `Ezt már nem lehet megvédeni: zárd le az egyiket (${sq(best)}). A hármasnál kellett volna közbelépni. Lépj vissza, és keresd meg!` });
       else items.push({ c: 'gold', tag: 'Megoldás', t: r.defend.length
-        ? `A legjobb lépés: ${sq(best)}.` + (r.defend.length > 1 ? ` Ezek is megállítják: ${sqList(r.defend.slice(1))}.` : '') + (r.unsure ? ' Mély számítással ezek ellen sem talált a gép kényszerítő nyerést.' : ' Ezek után a gépnek nincs kényszerítő nyerése.')
+        ? `A legjobb lépés: ${sq(best)}.` + trapNote(r, best) + (r.defend.length > 1 ? ` Ezek is megállítják: ${sqList(r.defend.slice(1))}.` : '') + (r.unsure ? ' Mély számítással ezek ellen sem talált a gép kényszerítő nyerést.' : ' Ezek után a gépnek nincs kényszerítő nyerése.')
         : (r.openDef && r.openDef.length ? `A hármas itt zárható le: ${sqList(r.openDef)}.` : 'Nem találtam lépést, ami mindent megállít. Próbálj saját négyessel időt nyerni.') });
     }
+  } else if (g.mistakeCell >= 0 && !g.b[g.mistakeCell]){
+    items.push({ c: 'violet', tag: 'Rejtett csapda', t: 'Itt még nem látszik közvetlen fenyegetés, de a gép csapdát épít. A szaggatott keretes lépésed után már nem volt mentés. Keress olyan lépést, amely a gép jelei között megtöri a vonalait. Ha elakadsz, a Tipp segít.' });
   } else {
     items.push({ c: 'plain', tag: 'Nyugi', t: 'Most nincs fenyegetés. Építkezz: olyan mezőre lépj, ahol két saját vonalad keresztezi egymást.' });
   }
   if (!r.myFive.length && r.myWin) items.push({ c: 'gold', tag: 'Lehetőség', t: r.myWin.kind === 'vcf' ? 'Neked is van kényszerítő négyes-sorozatod. Ha megtalálod, előbb nyersz.' : 'Neked is van kényszerítő támadásod. Keresd meg!' });
+  // a csapda menete: csak felfedés után, és csak ha nincs épp tipp-terv
+  if (!(g.plan && g.plan.kind === 'hint')){
+    if (threat && !r.lost && g.reveal >= 1 && r.trapLine && r.trapLine.line.length > 1 && !r.five.length && !r.open.length) showTrap(r.trapLine);
+    else if (g.plan && g.plan.kind === 'trap') clearPlan();
+  }
   coachList(items);
   if (g.mistakeCell >= 0 && !g.b[g.mistakeCell]) addMark(g.mistakeCell, 't-warn');
   $('#coachBtns').hidden = (!threat && !r.lost) || !!r.myFive.length;
   $('#rev1').hidden = g.reveal >= 1 || !!r.lost;
   $('#rev2').hidden = g.reveal >= 2 || !!r.lost;
-  $('#revBack').hidden = !r.lost || !g.moves.some(m => m.p === g.user);
+  $('#revBack').hidden = !r.lost || !ownMoves();
   if (r.lost) status(g.user, 'Ez az állás elveszett', 'Lépj vissza a hibád elé, vagy játszd végig.');
   renderStats();
   if (g.warn){ addMark(g.warn.i, 't-warn'); (g.warn.r.cause || []).forEach(c => addMark(c, 't-cause')); if (g.warn.why && g.warn.r.at >= 0) addMark(g.warn.r.at, 't-danger'); }
@@ -1632,9 +1937,48 @@ const PLAN_M = {
   block4: 'kénytelen lezárni a négyesedet', block3: 'lezárja a hármasodat', block3four: 'lezárja a hármasodat, és közben négyest csinál',
   prevent: 'elveszi a legjobb meződet', buildstrong: 'a saját vonalait erősíti', build: 'építkezik'
 };
+const Az = n => (n === 1 || n === 5 || (n >= 50 && n < 60)) ? 'Az' : 'A';
+const az = n => Az(n).toLowerCase();
+function trapNote(r, best){
+  if (!r.trapLine) return '';
+  const k = r.trapLine.line.findIndex(s => s.i === best);
+  if (k < 0){
+    const sqs = r.trapLine.squares || [];
+    return sqs.includes(best) ? ` Ez annak a villának az egyik pontja, amellyel a gép ${az(r.trapLine.line.length)} ${r.trapLine.line.length}. lépés után nyerne: előre elfoglalod, így a sorozat végén nem lesz két fenyegetése.` : '';
+  }
+  const s = r.trapLine.line[k];
+  if (k === 0) return ' Ezzel elfoglalod azt a mezőt, ahonnan a gép a sorozatot indítaná.';
+  return ` Ez a sorozat ${k + 1}. lépésének mezője (${s.side === 'm' ? 'ahova a gép lépne' : 'ahova kényszerítene'}), így a támadása elakad.`;
+}
+function showTrap(tl){
+  const line = tl.line;
+  g.plan = { line, map: {}, kind: 'trap' };
+  line.forEach((s, k) => { g.plan.map[s.i] = { n: k + 1, side: s.side }; });
+  $('#plan').classList.add('trap');
+  $('#planTitle').textContent = 'Így nyerne a gép, ha nem lépsz közbe';
+  $('#planList').innerHTML = line.map((s, k) =>
+    `<li class="${s.side}" data-i="${s.i}"><span class="n">${k + 1}.</span><span class="who">${s.side === 'u' ? 'Te' : 'Gép'}</span><span>${sq(s.i)} ${(s.side === 'u' ? PLAN_U : PLAN_M)[s.kind] || ''}${s.forced ? '<span class="forced">kötelező</span>' : ''}</span></li>`).join('');
+  const forcedSteps = line.map((s, k) => s.forced ? k + 1 : 0).filter(Boolean);
+  let sum = '';
+  if (forcedSteps.length) sum += `${Az(forcedSteps[0])} ${forcedSteps.join('. és ')}. lépésben nincs választásod: a gép négyesét kötelező lezárni, így ő dönti el, hova lépsz. `;
+  if (tl.end === 'fork' || tl.end === 'double') sum += `${Az(line.length)} ${line.length}. lépés után a gépnek két fenyegetése marad (${sqList(tl.squares || [])}), és egyszerre csak egyet tudsz megállítani. `;
+  else if (tl.end === 'five') sum += `${Az(line.length)} ${line.length}. lépésben kirakja az ötöt. `;
+  sum += '<b>Ezért most kell közbelépned, mielőtt a sorozat elindul.</b>';
+  $('#planSum').innerHTML = sum;
+  $('#plan').hidden = false;
+  bindPlanHover();
+}
+function bindPlanHover(){
+  $('#planList').querySelectorAll('li').forEach(li => {
+    li.addEventListener('mouseenter', () => { g.planFocus = +li.dataset.i; renderBoard(); });
+    li.addEventListener('mouseleave', () => { g.planFocus = -1; renderBoard(); });
+  });
+}
 function showPlan(line){
   if (!line || !line.length){ clearPlan(); return; }
-  g.plan = { line, map: {} };
+  $('#plan').classList.remove('trap');
+  $('#planTitle').textContent = 'A tipp mögötti terv';
+  g.plan = { line, map: {}, kind: 'hint' };
   line.forEach((s, k) => { g.plan.map[s.i] = { n: k + 1, side: s.side }; });
   $('#planList').innerHTML = line.map((s, k) =>
     `<li class="${s.side}" data-i="${s.i}"><span class="n">${k + 1}.</span><span class="who">${s.side === 'u' ? 'Te' : 'Gép'}</span><span>${sq(s.i)} ${(s.side === 'u' ? PLAN_U : PLAN_M)[s.kind] || ''}</span></li>`).join('');
@@ -1647,10 +1991,7 @@ function showPlan(line){
   if (!(last.side === 'u' && last.kind === 'five')) sum += ' A számok a várható lépések sorrendjét mutatják: arany a tiéd, lila a gépé.';
   $('#planSum').innerHTML = sum;
   $('#plan').hidden = false;
-  $('#planList').querySelectorAll('li').forEach(li => {
-    li.addEventListener('mouseenter', () => { g.planFocus = +li.dataset.i; renderBoard(); });
-    li.addEventListener('mouseleave', () => { g.planFocus = -1; renderBoard(); });
-  });
+  bindPlanHover();
 }
 function clearPlan(){ g.plan = null; g.planFocus = -1; $('#plan').hidden = true; }
 $('#planHide').onclick = () => { clearPlan(); renderBoard(); };
@@ -1669,9 +2010,1112 @@ $('#hint').onclick = async () => {
   status(g.user, 'Tipp: ' + toName(r.i), WHY[r.why] || WHY.build);
 };
 
+// ---- homográfia (rácskoordináta -> kép) legkisebb négyzetekkel, normalizálva ----
+function applyH(Hm, u, v){ const w = Hm[6] * u + Hm[7] * v + Hm[8]; return [(Hm[0] * u + Hm[1] * v + Hm[2]) / w, (Hm[3] * u + Hm[4] * v + Hm[5]) / w]; }
+function invHomog(Hm){
+  const [a, b, c, d, e, f, g, h, i] = Hm;
+  const A = e * i - f * h, B = -(d * i - f * g), C = d * h - e * g, det = a * A + b * B + c * C;
+  if (Math.abs(det) < 1e-12) return null;
+  return [A / det, -(b * i - c * h) / det, (b * f - c * e) / det, B / det, (a * i - c * g) / det, -(a * f - c * d) / det, C / det, -(a * h - b * g) / det, (a * e - b * d) / det];
+}
+function fitHomog(IJ, P){
+  // normalizálás a jobb kondíció érdekében
+  const mean = a => a.reduce((s, x) => s + x, 0) / a.length;
+  const mu = mean(IJ.map(t => t[0])), mv = mean(IJ.map(t => t[1])), mx = mean(P.map(t => t[0])), my = mean(P.map(t => t[1]));
+  const su = Math.sqrt(mean(IJ.map(t => (t[0] - mu) ** 2 + (t[1] - mv) ** 2))) || 1, sx = Math.sqrt(mean(P.map(t => (t[0] - mx) ** 2 + (t[1] - my) ** 2))) || 1;
+  const M = Array.from({ length: 8 }, () => new Array(9).fill(0));
+  for (let k = 0; k < IJ.length; k++){
+    const u = (IJ[k][0] - mu) / su, v = (IJ[k][1] - mv) / su, x = (P[k][0] - mx) / sx, y = (P[k][1] - my) / sx;
+    const rows = [[u, v, 1, 0, 0, 0, -x * u, -x * v, x], [0, 0, 0, u, v, 1, -y * u, -y * v, y]];
+    for (const r of rows) for (let i = 0; i < 8; i++){ for (let j = 0; j < 8; j++) M[i][j] += r[i] * r[j]; M[i][8] += r[i] * r[8]; }
+  }
+  for (let i = 0; i < 8; i++) M[i][i] += 1e-6;
+  for (let i = 0; i < 8; i++){
+    let pv = i; for (let r = i + 1; r < 8; r++) if (Math.abs(M[r][i]) > Math.abs(M[pv][i])) pv = r;
+    [M[i], M[pv]] = [M[pv], M[i]]; if (Math.abs(M[i][i]) < 1e-12) return null;
+    for (let r = 0; r < 8; r++) if (r !== i){ const f = M[r][i] / M[i][i]; for (let c = i; c < 9; c++) M[r][c] -= f * M[i][c]; }
+  }
+  const h = M.map((r, i) => r[8] / r[i]);
+  // Hn: normalizált u,v -> normalizált x,y ; teljes: T_x^-1 * Hn * T_u
+  const Hn = [h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7], 1];
+  const Tu = [1 / su, 0, -mu / su, 0, 1 / su, -mv / su, 0, 0, 1], Txi = [sx, 0, mx, 0, sx, my, 0, 0, 1];
+  const mul = (A, B) => { const C = new Array(9).fill(0); for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) for (let k = 0; k < 3; k++) C[r * 3 + c] += A[r * 3 + k] * B[k * 3 + c]; return C; };
+  return mul(Txi, mul(Hn, Tu));
+}
+// ===== Automatikus felismerés: jelek keresése, a rács kikövetkeztetése a jelekből =====
+// data: RGBA bájtok, W×H. Visszaad: { marks: [{x,y,w,h,p,i,j}], fit: {affin}, board: Int8Array(144), ... } vagy { error }
+function autoDetect(data, W, H){
+  const n = W * H;
+  const L = new Float32Array(n), Ch = new Float32Array(n), Hu = new Float32Array(n), Sv = new Float32Array(n);
+  for (let k = 0, o = 0; k < n; k++, o += 4){
+    const r = data[o] / 255, g = data[o + 1] / 255, b = data[o + 2] / 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), c = mx - mn;
+    L[k] = 0.299 * r + 0.587 * g + 0.114 * b; Ch[k] = c; Sv[k] = mx > 0.02 ? c / mx : 0;
+    let h = 0;
+    if (c > 1e-6){ if (mx === r) h = ((g - b) / c) % 6; else if (mx === g) h = (b - r) / c + 2; else h = (r - g) / c + 4; h *= 60; if (h < 0) h += 360; }
+    Hu[k] = h;
+  }
+  // helyi háttér: blokkonkénti medián (árnyék, egyenetlen fény ellen)
+  const B = Math.max(16, Math.round(Math.max(W, H) / 30));
+  const bw = Math.ceil(W / B), bh = Math.ceil(H / B), bgB = new Float32Array(bw * bh);
+  for (let by = 0; by < bh; by++) for (let bx = 0; bx < bw; bx++){
+    const a = [];
+    for (let y = by * B; y < Math.min(H, (by + 1) * B); y += 2) for (let x = bx * B; x < Math.min(W, (bx + 1) * B); x += 2) a.push(L[y * W + x]);
+    a.sort((p, q) => p - q); bgB[by * bw + bx] = a[a.length >> 1];
+  }
+  const bgAt = (x, y) => {   // bilineáris a blokkközepek között
+    const fx = Math.max(0, Math.min(bw - 1.001, x / B - 0.5)), fy = Math.max(0, Math.min(bh - 1.001, y / B - 0.5));
+    const x0 = Math.floor(fx), y0 = Math.floor(fy), tx = fx - x0, ty = fy - y0, x1 = Math.min(bw - 1, x0 + 1), y1 = Math.min(bh - 1, y0 + 1);
+    return (bgB[y0 * bw + x0] * (1 - tx) + bgB[y0 * bw + x1] * tx) * (1 - ty) + (bgB[y1 * bw + x0] * (1 - tx) + bgB[y1 * bw + x1] * tx) * ty;
+  };
+  const sorted = Array.from(bgB).sort((p, q) => p - q);
+  const dark = sorted[sorted.length >> 1] < 0.3;
+  const overlay = k => dark && ((Hu[k] >= 20 && Hu[k] <= 65) || (Hu[k] >= 240 && Hu[k] <= 290));
+  // tinta: színes és a háttérnél jóval sötétebb (papír) / világosabb (képernyő). A szürke-fekete rácsvonalak így kimaradnak.
+  // kétszintű küszöb: az erős tintapontok (strong) és a hozzájuk kapcsolódó halványabb részek (mask)
+  const mask = new Uint8Array(n), strong = new Uint8Array(n);
+  let cnt = 0;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++){
+    const k = y * W + x, bg = bgAt(x, y);
+    if (dark){
+      if (overlay(k)) continue;
+      if (Ch[k] > 0.25 && L[k] - bg > 0.15){ strong[k] = 1; mask[k] = 1; cnt++; }
+      else if (Ch[k] > 0.15 && L[k] - bg > 0.08) mask[k] = 1;
+    } else {
+      if (Sv[k] > 0.33 && Ch[k] > 0.07 && bg - L[k] > 0.2){ strong[k] = 1; mask[k] = 1; cnt++; }
+      else if (Sv[k] > 0.2 && Ch[k] > 0.035 && bg - L[k] > 0.1) mask[k] = 1;
+    }
+  }
+  let colored = true;
+  if (cnt < n * 0.0008){
+    // nincs színes tinta (ceruza, fekete toll): sötét képpontok, a hosszú egyenes vonalakat később kiszűrjük
+    colored = false; cnt = 0; mask.fill(0); strong.fill(0);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++){
+      const k = y * W + x, bg = bgAt(x, y), d = dark ? L[k] - bg : bg - L[k];
+      if (d > 0.25){ strong[k] = 1; mask[k] = 1; cnt++; } else if (d > 0.2) mask[k] = 1;
+    }
+  }
+  // kis tágítás, hogy a megszakadt vonalak egy foltot adjanak
+  let m2 = new Uint8Array(n);
+  const dil = src => { const o = new Uint8Array(n); for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++){ const k = y * W + x; if (src[k] || src[k - 1] || src[k + 1] || src[k - W] || src[k + W]) o[k] = 1; } return o; };
+  m2 = dil(mask); if (!colored) m2 = dil(m2);
+  // összefüggő foltok (8-szomszédság), sorfolytonos címkézés union-find-dal
+  const lab = new Int32Array(n), par = [0];
+  const find = a => { while (par[a] !== a){ par[a] = par[par[a]]; a = par[a]; } return a; };
+  let next = 1;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++){
+    const k = y * W + x; if (!m2[k]) continue;
+    const nb = [];
+    if (x > 0 && lab[k - 1]) nb.push(lab[k - 1]);
+    if (y > 0){ if (lab[k - W]) nb.push(lab[k - W]); if (x > 0 && lab[k - W - 1]) nb.push(lab[k - W - 1]); if (x < W - 1 && lab[k - W + 1]) nb.push(lab[k - W + 1]); }
+    if (!nb.length){ lab[k] = next; par.push(next); next++; }
+    else { let r = find(nb[0]); for (const q of nb){ const s = find(q); if (s !== r){ if (s < r){ par[r] = s; r = s; } else par[s] = r; } } lab[k] = r; }
+  }
+  const comp = new Map();
+  for (let k = 0; k < n; k++){
+    if (!lab[k]) continue;
+    const r = find(lab[k]); lab[k] = r;
+    let c = comp.get(r);
+    if (!c){ c = { x0: 1e9, y0: 1e9, x1: -1, y1: -1, a: 0, ink: 0, hx: 0, hy: 0, st: 0 }; comp.set(r, c); }
+    if (strong[k]) c.st++;
+    const x = k % W, y = (k / W) | 0;
+    if (x < c.x0) c.x0 = x; if (x > c.x1) c.x1 = x; if (y < c.y0) c.y0 = y; if (y > c.y1) c.y1 = y; c.a++;
+    if (mask[k]){ c.ink++; if (Ch[k] > 0.15){ const t = Hu[k] * Math.PI / 180; c.hx += Math.cos(t) * Ch[k]; c.hy += Math.sin(t) * Ch[k]; } }
+  }
+  let blobs = [];
+  for (const [id, c] of comp){
+    const w = c.x1 - c.x0 + 1, h = c.y1 - c.y0 + 1;
+    if (c.a < 25 || Math.max(w, h) < 7 || c.st < Math.max(6, 0.08 * c.ink)) continue;   // csak erős tintapontot is tartalmazó folt
+    if (Math.max(w, h) / Math.min(w, h) > 3.2) continue;          // vonaldarab, nem jel
+    blobs.push({ id, ink: c.ink, x: (c.x0 + c.x1) / 2, y: (c.y0 + c.y1) / 2, w, h, s: Math.max(w, h), x0: c.x0, y0: c.y0, x1: c.x1, y1: c.y1, a: c.a, hue: (Math.atan2(c.hy, c.hx) * 180 / Math.PI + 360) % 360, chroma: Math.hypot(c.hx, c.hy) / Math.max(1, c.ink) });
+  }
+  const DBG = { maskPx: cnt, comps: comp.size, blobs0: blobs.length, sizes: blobs.map(b => b.s).sort((p, q) => p - q).filter((_, i, a) => i % Math.max(1, (a.length / 20) | 0) === 0) };
+  if (!blobs.length) return { error: 'nojel' };
+  // jelméret: a foltok méretének mediánja; a túl kicsi (piszok) és túl nagy (vonal, árnyék) foltok kiesnek
+  const sizes = blobs.map(b => b.s).sort((p, q) => p - q);
+  let S = sizes[sizes.length >> 1];
+  blobs = blobs.filter(b => b.s >= 0.5 * S && b.s <= 2 * S);
+  if (!colored){
+    // ceruzánál a rácsvonal-darabok: kitöltöttségük nagyon kicsi vagy nagyon hosszúak
+    blobs = blobs.filter(b => b.a / (b.w * b.h) > 0.06);
+  }
+  if (!blobs.length) return { error: 'nojel' };
+  // széttöredezett jelek (pl. két ívre szakadt kör) összevonása: közeli darabok, amelyek együtt is jelméretűek
+  {
+    const whole = blobs.filter(b => Math.max(b.w, b.h) / Math.min(b.w, b.h) < 1.5).map(b => b.s).sort((p, q) => p - q);
+    const Sw = whole.length ? whole[whole.length >> 1] : S;
+    blobs.forEach(b => b.ids = [b.id]);
+    let merged = true;
+    while (merged){
+      merged = false;
+      for (let a = 0; a < blobs.length && !merged; a++) for (let c = a + 1; c < blobs.length && !merged; c++){
+        const A = blobs[a], Cb = blobs[c];
+        const gx = Math.max(0, Math.max(A.x0, Cb.x0) - Math.min(A.x1, Cb.x1)), gy = Math.max(0, Math.max(A.y0, Cb.y0) - Math.min(A.y1, Cb.y1));
+        const x0 = Math.min(A.x0, Cb.x0), x1 = Math.max(A.x1, Cb.x1), y0 = Math.min(A.y0, Cb.y0), y1 = Math.max(A.y1, Cb.y1);
+        const fragA = A.s < 0.85 * Sw || Math.max(A.w, A.h) / Math.min(A.w, A.h) > 1.6, fragC = Cb.s < 0.85 * Sw || Math.max(Cb.w, Cb.h) / Math.min(Cb.w, Cb.h) > 1.6;
+        if ((fragA || fragC) && Math.hypot(gx, gy) <= 0.3 * Sw && Math.max(x1 - x0 + 1, y1 - y0 + 1) <= 1.3 * Sw){
+          const tot = A.ink + Cb.ink || 1;
+          const m = { ids: A.ids.concat(Cb.ids), x0, x1, y0, y1, w: x1 - x0 + 1, h: y1 - y0 + 1, a: A.a + Cb.a, ink: A.ink + Cb.ink,
+            hue: (A.chroma * A.ink >= Cb.chroma * Cb.ink) ? A.hue : Cb.hue, chroma: (A.chroma * A.ink + Cb.chroma * Cb.ink) / tot };
+          m.s = Math.max(m.w, m.h); m.x = (x0 + x1) / 2; m.y = (y0 + y1) / 2; m.id = A.id;
+          blobs.splice(c, 1); blobs[a] = m; merged = true;
+        }
+      }
+    }
+  }
+  S = blobs.map(b => b.s).sort((p, q) => p - q)[blobs.length >> 1];
+  // × vagy ○: zárt belső üreg (○) és a közép tintássága (×)
+  for (const b of blobs){
+    const bw2 = b.x1 - b.x0 + 3, bh2 = b.y1 - b.y0 + 3, seen = new Uint8Array(bw2 * bh2);
+    const inside = (xx, yy) => { const X = b.x0 - 1 + xx, Y = b.y0 - 1 + yy; if (X < 0 || Y < 0 || X >= W || Y >= H) return false; const k = Y * W + X; return m2[k] && b.ids.includes(lab[k]); };
+    const st = [];
+    for (let xx = 0; xx < bw2; xx++){ st.push([xx, 0], [xx, bh2 - 1]); }
+    for (let yy = 0; yy < bh2; yy++){ st.push([0, yy], [bw2 - 1, yy]); }
+    while (st.length){
+      const [xx, yy] = st.pop();
+      if (xx < 0 || yy < 0 || xx >= bw2 || yy >= bh2) continue;
+      const q = yy * bw2 + xx; if (seen[q] || inside(xx, yy)) continue;
+      seen[q] = 1; st.push([xx + 1, yy], [xx - 1, yy], [xx, yy + 1], [xx, yy - 1]);
+    }
+    let hole = 0, cen = 0, cenN = 0;
+    for (let yy = 1; yy < bh2 - 1; yy++) for (let xx = 1; xx < bw2 - 1; xx++){
+      const q = yy * bw2 + xx, ins = inside(xx, yy);
+      if (!ins && !seen[q]) hole++;
+      const u = (xx - 1) / (bw2 - 2) - 0.5, v = (yy - 1) / (bh2 - 2) - 0.5;
+      if (Math.abs(u) < 0.14 && Math.abs(v) < 0.14){ cenN++; if (ins) cen++; }
+    }
+    b.hole = hole / ((bw2 - 2) * (bh2 - 2));
+    b.cen = cenN ? cen / cenN : 0;
+    b.shape = (b.hole > 0.05 ? -1 : 0) + (b.cen > 0.3 ? 1 : 0) + (b.cen < 0.12 ? -0.6 : 0);
+    b.p = b.shape > 0 ? 1 : 2;
+  }
+  // két jól elkülönülő tintaszín esetén a szín dönt (pl. képernyőkép, két tollszín)
+  const col = blobs.filter(b => b.chroma > 0.12);
+  if (col.length >= 4){
+    const dist = (a, c) => { const d = Math.abs(a - c) % 360; return d > 180 ? 360 - d : d; };
+    let c1 = col[0].hue, c2 = (c1 + 180) % 360;
+    for (let it = 0; it < 10; it++){
+      const g1 = col.filter(b => dist(b.hue, c1) <= dist(b.hue, c2)), g2 = col.filter(b => dist(b.hue, c1) > dist(b.hue, c2));
+      const mean = gr => { let x = 0, y = 0; gr.forEach(b => { x += Math.cos(b.hue * Math.PI / 180); y += Math.sin(b.hue * Math.PI / 180); }); return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; };
+      if (g1.length) c1 = mean(g1); if (g2.length) c2 = mean(g2);
+    }
+    const g1 = col.filter(b => dist(b.hue, c1) <= dist(b.hue, c2)), g2 = col.filter(b => dist(b.hue, c1) > dist(b.hue, c2));
+    if (g1.length && g2.length && dist(c1, c2) > 45){
+      const s1 = g1.reduce((a, b) => a + b.shape, 0) / g1.length, s2 = g2.reduce((a, b) => a + b.shape, 0) / g2.length;
+      const p1 = s1 >= s2 ? 1 : 2;
+      g1.forEach(b => b.p = p1); g2.forEach(b => b.p = 3 - p1);
+    }
+  }
+  // ---- a rács kikövetkeztetése a jelek helyzetéből ----
+  // a játékállás összefüggő: a többiektől messze lévő foltok (fejléc, ikonok) nem tartoznak hozzá
+  {
+    const g = blobs.map(() => -1); let gid = 0;
+    for (let a = 0; a < blobs.length; a++){
+      if (g[a] >= 0) continue;
+      const st = [a]; g[a] = gid;
+      while (st.length){ const u = st.pop(); for (let c = 0; c < blobs.length; c++) if (g[c] < 0 && Math.hypot(blobs[c].x - blobs[u].x, blobs[c].y - blobs[u].y) < 4.2 * S){ g[c] = gid; st.push(c); } }
+      gid++;
+    }
+    const cntG = new Array(gid).fill(0); g.forEach(x => cntG[x]++);
+    const big = cntG.indexOf(Math.max(...cntG));
+    blobs = blobs.filter((_, i) => g[i] === big);
+  }
+  const P = blobs.map(b => [b.x, b.y]);
+  // irány: a szomszédos jelpárok szöge (vízszintes, függőleges és átlós is ugyanazt adja 8-szorozva)
+  let sx = 0, sy = 0;
+  for (let a = 0; a < P.length; a++) for (let c = a + 1; c < P.length; c++){
+    const dx = P[c][0] - P[a][0], dy = P[c][1] - P[a][1], d = Math.hypot(dx, dy);
+    if (d > 3.2 * S || d < 0.6 * S) continue;
+    const t = Math.atan2(dy, dx) * 8, w = 1 / d; sx += Math.cos(t) * w; sy += Math.sin(t) * w;
+  }
+  const theta = (sx || sy) ? Math.atan2(sy, sx) / 8 : 0;
+  const ct = Math.cos(-theta), st2 = Math.sin(-theta);
+  // a kezdő cellaméretet csak a középső jelekből becsüljük (perspektívánál a kép széle már eltér)
+  const gx = P.reduce((a, p) => a + p[0], 0) / P.length, gy = P.reduce((a, p) => a + p[1], 0) / P.length;
+  const near = P.map((p, t) => [Math.hypot(p[0] - gx, p[1] - gy), t]).sort((a, b) => a[0] - b[0]).slice(0, Math.min(P.length, 14)).map(t => t[1]);
+  const R = near.map(t => P[t]).map(([x, y]) => [x * ct - y * st2, x * st2 + y * ct]);
+  // cellaméret: a legnagyobb olyan méret, amelyre minden jel jól illik egy rácsra (a jelméret 1,2–2,6-szorosa között)
+  const fitP = p => {
+    const circ = arr => { let c = 0, s = 0; arr.forEach(v => { c += Math.cos(2 * Math.PI * v / p); s += Math.sin(2 * Math.PI * v / p); }); return Math.atan2(s, c) / (2 * Math.PI) * p; };
+    const ox = circ(R.map(r => r[0])), oy = circ(R.map(r => r[1]));
+    let e = 0, mx = 0;
+    for (const [x, y] of R){
+      const fx = (x - ox) / p, fy = (y - oy) / p, rx = fx - Math.round(fx), ry = fy - Math.round(fy);
+      const d = rx * rx + ry * ry; e += d; mx = Math.max(mx, Math.sqrt(d));
+    }
+    return { p, ox, oy, rms: Math.sqrt(e / R.length), mx };
+  };
+  let best = null;
+  if (R.length >= 3){
+    for (let p = 2.6 * S; p >= 1.15 * S; p *= 0.995){
+      const f = fitP(p);
+      if (f.rms < 0.16 && f.mx < 0.33){ best = f; break; }
+    }
+    if (!best){ let bb = null; for (let p = 2.6 * S; p >= 1.15 * S; p *= 0.995){ const f = fitP(p); if (!bb || f.rms < bb.rms) bb = f; } best = bb; }
+  } else best = fitP(S / 0.62);
+  // rácskoordináták: a középső jelekből indulva fokozatosan növesztjük a lefedett területet,
+  // közben affin, majd perspektív (homográfia) illesztéssel követjük a kép torzulását
+  const solveAff = (IJs, idx) => {
+    const A = [[0,0,0],[0,0,0],[0,0,0]], bx = [0,0,0], by = [0,0,0];
+    for (const t of idx){ const [i, j] = IJs[t], f = [i, j, 1]; for (let r = 0; r < 3; r++){ bx[r] += f[r] * P[t][0]; by[r] += f[r] * P[t][1]; for (let c = 0; c < 3; c++) A[r][c] += f[r] * f[c]; } }
+    const s3 = (M, v) => { const a = M.map((r, i) => r.concat([v[i]])); for (let i = 0; i < 3; i++){ let pv = i; for (let r = i + 1; r < 3; r++) if (Math.abs(a[r][i]) > Math.abs(a[pv][i])) pv = r; [a[i], a[pv]] = [a[pv], a[i]]; if (Math.abs(a[i][i]) < 1e-9) return null; for (let r = 0; r < 3; r++) if (r !== i){ const f = a[r][i] / a[i][i]; for (let c = i; c < 4; c++) a[r][c] -= f * a[i][c]; } } return a.map((r, i) => r[3] / r[i]); };
+    const X = s3(A, bx), Y = s3(A, by); return X && Y ? [X, Y] : null;
+  };
+  const inv = A2 => { const [a, b, c] = A2[0], [d, e, f] = A2[1], det = a * e - b * d; return (x, y) => { const X = x - c, Y = y - f; return [(e * X - b * Y) / det, (-d * X + a * Y) / det]; }; };
+  let aff = [[best.p * Math.cos(theta), -best.p * Math.sin(theta), 0], [best.p * Math.sin(theta), best.p * Math.cos(theta), 0]];
+  aff[0][2] = best.ox * Math.cos(theta) - best.oy * Math.sin(theta); aff[1][2] = best.ox * Math.sin(theta) + best.oy * Math.cos(theta);
+  let toLat = inv(aff), toImg = (u, v) => [aff[0][0] * u + aff[0][1] * v + aff[0][2], aff[1][0] * u + aff[1][1] * v + aff[1][2]];
+  const span = a => a.length ? Math.max(...a) - Math.min(...a) : 0;
+  const cx = P.reduce((a, p) => a + p[0], 0) / P.length, cy = P.reduce((a, p) => a + p[1], 0) / P.length;
+  for (let rad = 2.5; ; rad += 1.5){
+    const ctr = toLat(cx, cy);
+    const idx = P.map((p, t) => t).filter(t => { const [u, v] = toLat(P[t][0], P[t][1]); return Math.hypot(u - ctr[0], v - ctr[1]) <= rad; });
+    for (let it = 0; it < 3; it++){
+      const IJc = P.map(([x, y]) => { const [u, v] = toLat(x, y); return [Math.round(u), Math.round(v)]; });
+      const si = span(idx.map(t => IJc[t][0])), sj = span(idx.map(t => IJc[t][1]));
+      if (idx.length >= 8 && si >= 3 && sj >= 3){
+        const Hm = fitHomog(idx.map(t => IJc[t]), idx.map(t => P[t])), Hi = Hm && invHomog(Hm);
+        if (Hi){
+          const c0 = applyH(Hm, ctr[0], ctr[1]), c1 = applyH(Hm, ctr[0] + 1, ctr[1]), pp = Math.hypot(c1[0] - c0[0], c1[1] - c0[1]);
+          if (pp > 0.5 * best.p && pp < 2 * best.p){ toImg = (u, v) => applyH(Hm, u, v); toLat = (x, y) => applyH(Hi, x, y); continue; }
+        }
+      }
+      if (idx.length >= 4 && si >= 1 && sj >= 1){
+        const na = solveAff(IJc, idx);
+        if (na){
+          const ps = Math.hypot(na[0][0], na[1][0]), qs = Math.hypot(na[0][1], na[1][1]);
+          if (ps > 0.6 * best.p && ps < 1.6 * best.p && qs > 0.6 * best.p && qs < 1.6 * best.p){
+            aff = na; toLat = inv(aff); toImg = (u, v) => [aff[0][0] * u + aff[0][1] * v + aff[0][2], aff[1][0] * u + aff[1][1] * v + aff[1][2]];
+          }
+        }
+      }
+    }
+    if (idx.length === P.length || rad > 40) break;
+  }
+  const marks = blobs.map((b, t) => { const [u, v] = toLat(b.x, b.y); return { ...b, i: Math.round(u), j: Math.round(v), ru: u - Math.round(u), rv: v - Math.round(v) }; });
+  // ütközés: egy cellába két folt → a cellaközéphez közelebbi marad
+  const cell = new Map();
+  for (const m of marks){
+    const key = m.i + ',' + m.j, d = Math.hypot(m.ru, m.rv), o = cell.get(key);
+    if (!o || d < Math.hypot(o.ru, o.rv)) cell.set(key, m);
+  }
+  const kept = [...cell.values()];
+  const i0 = Math.min(...kept.map(m => m.i)), i1 = Math.max(...kept.map(m => m.i));
+  const j0 = Math.min(...kept.map(m => m.j)), j1 = Math.max(...kept.map(m => m.j));
+  const spanI = i1 - i0 + 1, spanJ = j1 - j0 + 1;
+  const offI = Math.floor((12 - Math.min(12, spanI)) / 2), offJ = Math.floor((12 - Math.min(12, spanJ)) / 2);
+  const board = new Int8Array(144);
+  let lost = 0;
+  for (const m of kept){
+    const c = m.i - i0 + offI, r = m.j - j0 + offJ;
+    if (c < 0 || r < 0 || c > 11 || r > 11){ lost++; continue; }
+    board[r * 12 + c] = m.p; m.c = c; m.r = r;
+  }
+  const rms = Math.sqrt(kept.reduce((a, m) => a + m.ru * m.ru + m.rv * m.rv, 0) / kept.length);
+  // a 12×12-es keret sarkai a képen (a kézi módhoz kiindulásnak)
+  const L2I = toImg;
+  const fu = i0 - offI - 0.5, fv = j0 - offJ - 0.5;
+  const corners = [L2I(fu, fv), L2I(fu + 12, fv), L2I(fu + 12, fv + 12), L2I(fu, fv + 12)];
+  return { dbg: DBG, marks: kept, board, aff, S, theta, pitch: best.p, rms, lost, tooBig: spanI > 12 || spanJ > 12, corners, colored, dark, dropped: marks.length - kept.length, origin: [i0 - offI, j0 - offJ] };
+}
+
+
+// =====================================================================
+// ===== ELEMZÉS MÓD: tetszőleges állás, kézi bevitel vagy fotó =====
+// =====================================================================
+const A = { b: new Int8Array(N*N), hist: [], tool: 1, turn: 1, last: 0, alt: store.get('alt', true), res: {}, focus: 1, token: 0, note: '', busy: false };
+const symG = p => p === 1 ? XSVG : OSVG;
+const symC = p => p === 1 ? '×' : '○';
+const PLAN_N = {
+  five: 'kirakja az ötöt', win: 'két nyerő mezőt kap, ez már nem védhető', fork43: 'villát csinál: négyes és hármas egyszerre',
+  fork33: 'két nyitott hármast csinál egyszerre', four: 'négyest csinál, erre kötelező válaszolni', three: 'nyitott hármast csinál',
+  block4: 'lezárja a négyest', block3: 'lezárja a hármast', block3four: 'lezárja a hármast, és közben négyest csinál',
+  prevent: 'elfoglalja az ellenfél legjobb mezőjét', buildstrong: 'két vonalát erősíti', build: 'építkezik'
+};
+const aCells = [];
+(function buildA(){
+  const el = $('#aboard'), frag = document.createDocumentFragment();
+  for (let y = 0; y < N; y++){
+    const lab = document.createElement('div'); lab.className = 'coord'; lab.textContent = N - y; frag.appendChild(lab);
+    for (let x = 0; x < N; x++){
+      const i = y*N + x, c = document.createElement('button');
+      c.className = 'cell' + (x === 0 ? ' c0' : '') + (y === 0 ? ' r0' : '');
+      c.type = 'button'; c.setAttribute('role', 'gridcell'); c.innerHTML = '<span class="mk"></span>';
+      c.addEventListener('click', () => aEdit(i));
+      c.addEventListener('keydown', e => {
+        const x0 = i % N, y0 = (i / N) | 0; let nx = x0, ny = y0;
+        if (e.key === 'ArrowLeft') nx--; else if (e.key === 'ArrowRight') nx++; else if (e.key === 'ArrowUp') ny--; else if (e.key === 'ArrowDown') ny++; else return;
+        e.preventDefault(); if (nx >= 0 && ny >= 0 && nx < N && ny < N) aCells[ny*N + nx].focus();
+      });
+      aCells.push(c); frag.appendChild(c);
+    }
+  }
+  frag.appendChild(document.createElement('div'));
+  for (let x = 0; x < N; x++){ const lab = document.createElement('div'); lab.className = 'coord'; lab.textContent = COLS[x]; frag.appendChild(lab); }
+  el.appendChild(frag);
+})();
+let aMarks = {}, aPlan = {};
+function aMark(i, k){ if (!(aMarks[i] || '').includes(k)) aMarks[i] = (aMarks[i] || '') + ' ' + k; }
+function renderA(){
+  for (let i = 0; i < N*N; i++){
+    const c = aCells[i], p = A.b[i], want = p ? 'p' + p : '';
+    if (c.dataset.p !== want){ c.dataset.p = want; c.innerHTML = '<span class="mk"></span>' + (p ? symG(p) : ''); }
+    c.classList.toggle('filled', !!p);
+    const m = aMarks[i] || '';
+    for (const k of MARKS) c.classList.toggle(k, m.includes(k));
+    const pl = !p ? aPlan[i] : null;
+    let pn = c.querySelector('.pn');
+    if (pl){ if (!pn){ pn = document.createElement('span'); c.appendChild(pn); } pn.className = 'pn ' + pl.cls; pn.textContent = pl.n; }
+    else if (pn) pn.remove();
+    c.classList.toggle('has-plan', !!pl);
+    c.setAttribute('aria-label', toName(i) + (p ? ', ' + symC(p) : ', üres'));
+  }
+}
+function counts(){ let x = 0, o = 0; for (let i = 0; i < N*N; i++){ if (A.b[i] === 1) x++; else if (A.b[i] === 2) o++; } return { x, o }; }
+function fiveOnBoard(){
+  for (let i = 0; i < N*N; i++) if (A.b[i] && isFiveAt(A.b, i, A.b[i])) return { p: A.b[i], cells: winCells(A.b, i, A.b[i]) };
+  return null;
+}
+// Ki lép? Minden módosítás után a táblából számoljuk: akinek kevesebb jele van, az lép.
+// Egyenlő számnál az lép, aki nem az utolsó jelet rakta le (ha ez ismert), egyébként marad az eddigi.
+function autoTurn(){
+  const { x, o } = counts();
+  if (x === o + 1) A.turn = 2;
+  else if (o === x + 1) A.turn = 1;
+  else if (x === o && A.last) A.turn = 3 - A.last;
+  if (A.alt && A.tool !== 0) A.tool = A.turn;
+}
+function renderTools(){
+  $('#aTool').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.v === A.tool));
+  $('#aAlt').checked = A.alt;
+  $('#aTurn').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.v === A.turn));
+  const { x, o } = counts();
+  const el = $('#aCount');
+  let t = `× ${x} jel, ○ ${o} jel.`, warn = false;
+  if (Math.abs(x - o) > 1){ t += ' A jelek száma nem jöhet ki egy szabályos játszmából. Ellenőrizd az állást.'; warn = true; }
+  else if (x === o && (x || o)) t += ` Egyenlő a jelek száma, ezért bármelyik fél jöhet: most ${symC(A.turn)} lép. Ha nem így van, állítsd át fent.`;
+  else if (x || o) t += ` A jelek száma alapján ${symC(A.turn)} lép.`;
+  if (A.note){ t = A.note + ' ' + t; }
+  el.textContent = t; el.classList.toggle('warnc', warn);
+  $('#aUndo').disabled = !A.hist.length;
+  $('#aClear').disabled = !x && !o;
+  $('#aFromGame').hidden = !g.moves.length;
+}
+function aPush(){ A.hist.push({ b: Int8Array.from(A.b), turn: A.turn, tool: A.tool, last: A.last }); if (A.hist.length > 200) A.hist.shift(); }
+function aEdit(i){
+  if (!A.b[i] && A.tool === 0) return;
+  aPush(); A.note = '';
+  if (A.b[i]){
+    // foglalt mezőre koppintás: leveszi a jelet, és felváltva módban ez a jel jön újra
+    const p = A.b[i]; A.b[i] = 0; A.last = 3 - p;
+  } else {
+    A.b[i] = A.tool; A.last = A.tool;
+  }
+  autoTurn(); aChanged();
+}
+$('#aAlt').onchange = () => { A.alt = $('#aAlt').checked; store.set('alt', A.alt); if (A.alt && A.tool !== 0) A.tool = A.turn; renderTools(); };
+$('#aTool').querySelectorAll('button').forEach(b => b.onclick = () => { A.tool = +b.dataset.v; renderTools(); });
+$('#aTurn').querySelectorAll('button').forEach(b => b.onclick = () => {
+  const v = +b.dataset.v, { x, o } = counts();
+  if (v === A.turn) return;
+  if (Math.abs(x - o) === 1){ A.note = `A jelek száma alapján most ${symC(A.turn)} lép: ${symC(x > o ? 1 : 2)}-nak eggyel több jele van.`; renderTools(); return; }
+  A.turn = v; A.last = 3 - v; if (A.alt && A.tool !== 0) A.tool = v; aChanged();
+});
+$('#aUndo').onclick = () => { if (!A.hist.length) return; const h = A.hist.pop(); A.b = h.b; A.turn = h.turn; A.tool = h.tool; A.last = h.last; A.note = ''; aChanged(); };
+$('#aClear').onclick = () => { aPush(); A.b = new Int8Array(N*N); A.turn = 1; A.last = 0; A.note = ''; if (A.tool !== 0) A.tool = 1; aChanged(); };
+$('#aFromGame').onclick = () => {
+  aPush(); A.b = new Int8Array(N*N);
+  // a játék belső jelölését (1 = kezdő) valódi ×/○ jelekre fordítjuk
+  for (let i = 0; i < N*N; i++) if (g.b[i]) A.b[i] = symOf(g.b[i]) === 'x' ? 1 : 2;
+  A.turn = symOf((g.moves.length % 2 === 0) ? 1 : 2) === 'x' ? 1 : 2; A.last = 3 - A.turn; if (A.tool !== 0) A.tool = A.turn;
+  A.note = 'Átvettem a játszma állását.'; aChanged();
+};
+// Az állás változásakor csak töröljük a régi eredményt; az elemzés a gombra indul
+const RUN_ICON = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>';
+const STOP_ICON = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>';
+function setRun(running, label){
+  A.running = running;
+  const b = $('#aRun');
+  b.classList.toggle('stop', running);
+  b.innerHTML = (running ? STOP_ICON : RUN_ICON) + `<span>${running ? 'Leállítás' : (label || 'Elemzés indítása')}</span>`;
+}
+function aStop(msg, byUser){
+  if (A.running){ if (byUser) A.stoppedTok = A.token; A.token++; restartDeep(); }
+  setRun(false);
+  $('#aRunState').textContent = msg || '';
+}
+function aChanged(){
+  aMarks = {}; aPlan = {}; A.res = {}; A.focus = A.turn;
+  renderA(); renderTools();
+  if (A.running) aStop();
+  A.token++;
+  $('#aStep').disabled = true; $('#aVs').disabled = true; $('#aStep').textContent = 'Lépés';
+  const f = fiveOnBoard();
+  const { x, o } = counts();
+  $('#aRun').disabled = !!f || (!x && !o);
+  $('#aRunState').textContent = '';
+  $('#aRes2').hidden = true;
+  if (f){
+    f.cells.forEach(i => aMark(i, 't-best')); renderA();
+    $('#aRes1').innerHTML = resHead(f.p, `${symC(f.p)} nyert`) + `<ul><li><span class="chip gold">Vége</span><span>Már van öt ${symC(f.p)} egy sorban. Vedd le valamelyiket, vagy töröld a táblát.</span></li></ul>`;
+    return;
+  }
+  if (!x && !o){
+    $('#aRes1').innerHTML = resHead(A.turn, 'Üres tábla') + `<ul><li><span class="chip plain">Kezdés</span><span>Rakd fel a jeleket koppintással, vagy olvasd be egy fotóról. Ha már játszottál, a „Játszma átvétele” ide hozza az állást. Ha kész az állás, indítsd az elemzést.</span></li></ul>`;
+    return;
+  }
+  $('#aRes1').innerHTML = resHead(A.turn, `${symC(A.turn)} lép`) + `<p class="busy-line">Ha kész az állás, nyomd meg az „Elemzés indítása” gombot. Addig nyugodtan javíts rajta.</p>`;
+}
+$('#aRun').onclick = () => { if (A.running) aStop('Leállítva. Az eddig kész eredmény látható marad.', true); else aRun(); };
+async function aRun(){
+  const { x, o } = counts();
+  if (fiveOnBoard() || (!x && !o)) return;
+  A.token++;
+  const tok = A.token, b = Int8Array.from(A.b), s = A.turn;
+  A.res = {}; A.focus = s; aMarks = {}; aPlan = {}; renderA();
+  setRun(true);
+  $('#aRunState').textContent = `${symC(s)} lépését elemzem…`;
+  $('#aRes1').innerHTML = resHead(s, `${symC(s)} lép`) + '<p class="busy-line">Elemzem az állást… <span class="dots"><i></i><i></i><i></i></span></p>';
+  $('#aRes2').hidden = false;
+  $('#aRes2').innerHTML = resHead(3 - s, `Ha ${symC(3 - s)} lépne most`) + '<p class="busy-line">Utána ezt is megnézem.</p>';
+  const r1 = await compute({ op: 'position', b, side: s, ms: 9000 }, 'deep');
+  if (!r1 || tok !== A.token){ if (A.stoppedTok === tok) markStopped(); return; }
+  A.res[s] = r1; renderRes(s, true); applyAMarks();
+  $('#aStep').disabled = !(r1.best >= 0);
+  $('#aStep').textContent = r1.best >= 0 ? `${symC(s)} lép: ${toName(r1.best)}` : 'Lépés';
+  $('#aVs').disabled = Math.abs(x - o) > 1;
+  $('#aRunState').textContent = `Most azt nézem, mit tenne ${symC(3 - s)}…`;
+  const r2 = await compute({ op: 'position', b, side: 3 - s, ms: 6000 }, 'deep');
+  if (!r2 || tok !== A.token){ if (A.stoppedTok === tok) markStopped(); return; }
+  A.res[3 - s] = r2; renderRes(3 - s, false);
+  if (A.focus === 3 - s) applyAMarks();
+  setRun(false, 'Elemzés újra');
+  $('#aRunState').textContent = 'Kész.';
+}
+function markStopped(){
+  // a félbehagyott kártyákon ne maradjon "elemzem" felirat
+  for (const id of ['#aRes1', '#aRes2']){
+    const el = $(id), bl = el.querySelector('.busy-line');
+    if (bl) bl.textContent = 'Leállítva, ez a rész nem készült el.';
+  }
+}
+function resHead(p, title, hint){
+  return `<div class="res-head"><span class="who">${symG(p)}</span><h3>${title}</h3>${hint ? `<span class="hint">${hint}</span>` : ''}</div>`;
+}
+const why = (r) => ({ win: 'itt ötöt rak ki', block4: 'le kell zárnia a négyest', fork: 'két fenyegetést csinál egyszerre', vcf: 'innen négyesek sorozatával nyer', vct: 'innen kényszerítő támadással nyer',
+  block3: 'lezárja a hármast, és közben a saját vonalait is erősíti', trap: 'ezzel kényszerítő nyerést készít elő', attack: 'fenyegetést épít, az ellenfélnek reagálnia kell',
+  prevent: 'elveszi az ellenfél legjobb mezőjét', build: 'ez nyitja a legtöbb későbbi támadási lehetőséget', open: 'jó nyitólépés' })[r.why] || 'a Brutál+ motor szerint ez a legerősebb';
+function planHtml(r, s){
+  if (!r.plan || r.plan.length < 2) return '';
+  const winPlan = r.state === 'win';
+  return '<ol class="plan-mini">' + r.plan.map((e, k) => {
+    const p = winPlan ? (e.side === 'm' ? s : 3 - s) : (e.side === 'u' ? s : 3 - s);
+    return `<li><span class="n ${p === s ? 's' : 'o'}">${k + 1}.</span><span class="g">${symG(p)}</span><span>${sq(e.i)} ${PLAN_N[e.kind] || ''}${e.forced ? '<span class="forced">kötelező</span>' : ''}</span></li>`;
+  }).join('') + '</ol>';
+}
+function renderRes(s, primary){
+  const r = A.res[s], o = 3 - s, el = primary ? $('#aRes1') : $('#aRes2');
+  const t = r.threat || {}, items = [];
+  const title = primary ? `${symC(s)} lép` : `Ha ${symC(s)} lépne most`;
+  const safeList = (t.defend || []).filter(c => t.verdicts && t.verdicts[c] && t.verdicts[c].v === 'safe');
+  { const { x, o: oo } = counts(); if (Math.abs(x - oo) > 1) items.push({ c: 'rose', tag: 'Szabálytalan', t: `× ${x}, ○ ${oo} jel: ez nem jöhetett ki egy játszmából, így az elemzés is félrevezető lehet. Ellenőrizd az állást.` }); }
+  if (r.state === 'win1') items.push({ c: 'gold', tag: 'Nyerő lépés', t: `${sq(r.best)}: itt kirakja az ötöt.` });
+  else if (r.state === 'win'){
+    items.push({ c: 'gold', tag: 'Nyerő támadás', t: `${symC(s)} kikényszerítheti a győzelmet: ${sq(r.best)} mezőtől ${r.winKind === 'vcf' ? `négyesek sorozatával. ${symC(o)} minden lépése kényszerlépés lesz.` : `hármasokkal és négyesekkel. ${symC(o)} csak védekezni tud: a négyeseket kötelező lezárnia, a hármasokat is meg kell állítania, és bármelyik védekezés után folytatódik a támadás.`} Egy lehetséges menet:` });
+    if (r.oppFive && r.oppFive.length) items.push({ c: 'plain', tag: 'Figyelem', t: `${symC(o)} négyesét előbb le kell zárni (${sq(r.oppFive[0])}), a támadás ezzel indul.` });
+  } else if (r.state === 'lost'){
+    const pool = [...new Set([...(t.cand || []), ...(t.openDef || [])])].filter(c => t.verdicts && t.verdicts[c] && t.verdicts[c].at >= 0).slice(0, 4);
+    items.push({ c: 'violet', tag: 'Elveszett', t: `Bármit lép ${symC(s)}, ${symC(o)} kikényszeríti a győzelmet.` + (pool.length ? ` A kézenfekvő védekezések és a cáfolatuk: ${pool.map(c => `${sq(c)} után ${sq(t.verdicts[c].at)}`).join(', ')}.` : '') });
+    items.push({ c: 'plain', tag: 'Legszívósabb', t: `${sq(r.best)}: ezzel tarthat ki a legtovább.` });
+  } else if (r.state === 'block'){
+    items.push({ c: 'violet', tag: 'Kötelező', t: `${symC(o)} négyest csinált: ${sq(r.oppFive[0])} mezőn ötöt rakna ki, ezt kell lezárni.` });
+  } else if (r.state === 'defend'){
+    const kinds = [];
+    if (t.open && t.open.length) kinds.push(`nyitott hármas (ide lépve nyitott négyese lenne: ${sqList(t.open)})`);
+    if (t.forks && t.forks.length) kinds.push(`villapont (${sqList(t.forks.slice(0, 3))}: itt két fenyegetést csinálna egyszerre)`);
+    if (t.trap && !(t.forks || []).includes(t.trap.i)) kinds.push(`kényszerítő támadás ${sq(t.trap.i)} mezőtől`);
+    items.push({ c: 'violet', tag: 'Veszély', t: `${symC(o)} fenyeget: ${kinds.join('; ')}.` });
+    if (t.trapLine && t.trapLine.line && t.trapLine.line.length > 1 && !(t.open && t.open.length)){
+      const tl = t.trapLine.line;
+      items.push({ c: 'plain', tag: 'A csapda', t: `Ha ${symC(s)} nem lép közbe: ` + tl.map(e => `${e.side === 'm' ? symC(o) : symC(s)} ${toName(e.i)}${e.forced ? ' (kötelező)' : ''}`).join(' → ') + (t.trapLine.squares ? `, és a végén két fenyegetése marad (${t.trapLine.squares.map(toName).join(', ')}).` : '.') });
+    }
+    items.push({ c: 'gold', tag: 'Legjobb lépés', t: `${sq(r.best)}: ${why(r)}.` + (safeList.length > 1 ? ` Ezek is megállítják: ${sqList(safeList.filter(c => c !== r.best).slice(0, 3))}.` : '') });
+  } else {
+    items.push({ c: 'gold', tag: 'Legjobb lépés', t: `${sq(r.best)}: ${why(r)}. Közvetlen fenyegetés nincs.` });
+  }
+  if (r.state !== 'win' && r.state !== 'win1' && t.myWin && r.state !== 'lost') items.push({ c: 'gold', tag: 'Lehetőség', t: `Nyerő támadás is van ${sq(t.myWin.i)} mezőtől.` });
+  const showPlan = r.state === 'win' || r.state === 'quiet' || r.state === 'defend';
+  el.innerHTML = resHead(s, title, A.focus === s ? 'a táblán ez látszik' : 'koppints a megjelenítéshez') +
+    '<ul>' + items.map(it => `<li><span class="chip ${it.c}">${it.tag}</span><span>${it.t}</span></li>`).join('') + '</ul>' +
+    (showPlan ? planHtml(r, s) : '');
+  el.classList.toggle('focus', A.focus === s);
+  el.onclick = () => { if (A.focus !== s){ A.focus = s; applyAMarks(); ['1','2'].forEach(k => { const rr = A.res[+k]; if (rr) renderRes(+k, +k === A.turn); }); } };
+  el.onkeydown = e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); el.onclick(); } };
+}
+function applyAMarks(){
+  aMarks = {}; aPlan = {};
+  const s = A.focus, r = A.res[s];
+  if (!r){ renderA(); return; }
+  const t = r.threat || {}, c = t.cause || {};
+  if (r.state !== 'win' && r.state !== 'win1'){
+    [...(c.five || []), ...(c.open || []), ...(c.fork || []), ...(c.trap || [])].forEach(i => aMark(i, 't-cause'));
+    [...(t.five || []), ...(t.open || []), ...(t.forks || []), ...(t.trap ? [t.trap.i] : [])].forEach(i => aMark(i, 't-danger'));
+    (t.defend || []).filter(i => t.verdicts && t.verdicts[i] && t.verdicts[i].v === 'safe').forEach(i => aMark(i, 't-def'));
+  }
+  if (r.best >= 0) aMark(r.best, 't-best');
+  if (r.plan && r.plan.length > 1 && r.state !== 'lost' && r.state !== 'block'){
+    const winPlan = r.state === 'win';
+    r.plan.forEach((e, k) => { const p = winPlan ? (e.side === 'm' ? s : 3 - s) : (e.side === 'u' ? s : 3 - s); if (k > 0) aPlan[e.i] = { n: k + 1, cls: p === s ? 'u' : 'm' }; });
+  }
+  renderA();
+}
+$('#aStep').onclick = () => {
+  if (A.running) return;
+  const r = A.res[A.turn]; if (!r || !(r.best >= 0) || A.b[r.best]) return;
+  aPush(); A.b[r.best] = A.turn; A.last = A.turn; A.note = ''; autoTurn(); aChanged();
+};
+// ---- Folytatás a gép ellen ----
+$('#aVs').onclick = () => {
+  const { x, o } = counts(); if (Math.abs(x - o) > 1 || fiveOnBoard()) return;
+  const s = A.turn, other = 3 - s;
+  // ki kezdett? A jelek számából: akinek több van, vagy egyenlőnél az, aki most lép
+  const starter = x > o ? 1 : (o > x ? 2 : s);
+  if ((x > o && s !== 2) || (o > x && s !== 1)){ A.note = 'A jelek száma alapján a másik fél lép. Állítsd át a „Ki lép?” kapcsolót.'; renderTools(); return; }
+  g.token++; restartDeep();
+  const map = p => p === starter ? 1 : 2;   // a játék belül: 1 = kezdő
+  g.b = new Int8Array(N*N); g.moves = [];
+  const a = [], c = [];
+  for (let i = 0; i < N*N; i++){ if (A.b[i] === starter) a.push(i); else if (A.b[i]) c.push(i); }
+  for (let k = 0; k < Math.max(a.length, c.length); k++){ if (a[k] !== undefined) g.moves.push({ i: a[k], p: 1 }); if (c[k] !== undefined) g.moves.push({ i: c[k], p: 2 }); }
+  for (const m of g.moves) g.b[m.i] = m.p;
+  g.baseLen = g.moves.length;
+  g.user = map(s); g.sym = s === 1 ? 'x' : 'o';
+  g.over = false; g.busy = false; g.winLine = null; g.marks = {}; g.an = null; g.lostProven = false; g.mistakeCell = -1; extraNote = '';
+  g.threatsSeen = 0; g.solvedAlone = 0; g.helped = 0;
+  clearWarn(); clearPlan(); $('#over').hidden = true;
+  setMode('play');
+  renderBoard(); renderLevels(); renderSummary(); setButtons();
+  status(g.user, 'Te jössz', `A betöltött állásból folytatod ${symC(s)} jellel.`);
+  if (g.learn) runAnalysis(); else renderCoach();
+};
+
+// ---- Beolvasás fotóról ----
+const SC = { mode: 'auto', auto: null, touched: new Set(), src: null, data: null, W: 0, H: 0, pts: null, cols: 12, rows: 12, drag: -1, scale: 1 };
+// A kép betöltése több módon: ha az egyik nem működik az adott környezetben (pl. egy alkalmazás előnézetében), jön a következő
+function viaBitmap(file){
+  if (typeof createImageBitmap !== 'function') return Promise.reject(new Error('nincs'));
+  return createImageBitmap(file, { imageOrientation: 'from-image' }).catch(() => createImageBitmap(file))
+    .then(bm => ({ src: bm, w: bm.width, h: bm.height }));
+}
+function viaImage(url){
+  return new Promise((res, rej) => {
+    const im = new Image();
+    im.onload = () => (im.naturalWidth ? res({ src: im, w: im.naturalWidth, h: im.naturalHeight }) : rej(new Error('üres')));
+    im.onerror = () => rej(new Error('hiba'));
+    im.src = url;
+  });
+}
+function viaDataUrl(file){
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => viaImage(fr.result).then(res, rej);
+    fr.onerror = () => rej(new Error('olvasás'));
+    fr.readAsDataURL(file);
+  });
+}
+function viaBlobUrl(file){
+  const url = URL.createObjectURL(file);
+  return viaImage(url).finally(() => setTimeout(() => URL.revokeObjectURL(url), 1000));
+}
+async function loadAny(file){
+  const errs = [];
+  for (const f of [viaBitmap, viaDataUrl, viaBlobUrl]){
+    try { return await f(file); } catch (e){ errs.push(e && e.message); }
+  }
+  throw new Error(errs.join(', '));
+}
+async function onImageFile(file){
+  if (!file) return;
+  A.note = 'Kép betöltése…'; renderTools();
+  let got;
+  try { got = await loadAny(file); }
+  catch (e){
+    const heic = /heic|heif/i.test(file.type || '') || /\.(heic|heif)$/i.test(file.name || '');
+    A.note = heic
+      ? 'Ezt a HEIC formátumú fotót ez a böngésző nem tudja megnyitni. Készíts róla képernyőképet, vagy nyisd meg a játékot Safariban.'
+      : 'Ezt a képet itt nem sikerült megnyitni. Ha a játékot egy alkalmazás előnézetében nyitottad meg, próbáld Safariban vagy Chrome-ban.';
+    renderTools(); return;
+  }
+  const max = 1400, k = Math.min(1, max / Math.max(got.w, got.h));
+  const W = Math.max(1, Math.round(got.w * k)), H = Math.max(1, Math.round(got.h * k));
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const cx = cv.getContext('2d'); cx.drawImage(got.src, 0, 0, W, H);
+  if (got.src.close) got.src.close();
+  try { SC.data = cx.getImageData(0, 0, W, H).data; }
+  catch (e){ A.note = 'A képet megnyitottam, de a böngésző nem engedi kiolvasni a képpontjait. Próbáld Safariban vagy Chrome-ban.'; renderTools(); return; }
+  SC.src = cv; SC.W = W; SC.H = H;
+  const m = Math.min(W, H) * 0.08;
+  SC.pts = [[m, m], [W - m, m], [W - m, H - m], [m, H - m]]; SC.touched = new Set();
+  SC.cols = 12; SC.rows = 12;
+  A.note = 'Jelek keresése a képen…'; renderTools();
+  await new Promise(r => setTimeout(r, 30));
+  let det = null;
+  try { det = autoDetect(SC.data, W, H); } catch (e){ det = { error: 'hiba' }; }
+  A.note = ''; renderTools();
+  $('#scan').hidden = false; document.body.style.overflow = 'hidden';
+  $('#scanCols').textContent = SC.cols; $('#scanRows').textContent = SC.rows;
+  if (det && !det.error && det.marks.length){
+    SC.auto = det; SC.pts = det.corners.map(p => p.slice());
+    setScanMode('auto');
+  } else {
+    SC.auto = null; setScanMode('manual', 'Nem találtam jeleket a képen. Állítsd be kézzel a rácsot: húzd a négy sárga sarkot a tábla sarkaira.');
+  }
+  requestAnimationFrame(scanLayout);
+}
+function setScanMode(mode, msg){
+  SC.mode = mode;
+  $('#scanAuto').hidden = mode !== 'auto'; $('#scanMan').hidden = mode !== 'manual';
+  if (mode === 'auto'){
+    const d = SC.auto, nx = d.marks.filter(m => m.p === 1 && m.c !== undefined).length, no = d.marks.filter(m => m.p === 2 && m.c !== undefined).length;
+    $('#scanIntro').textContent = `Felismertem ${nx} × és ${no} ○ jelet. A keretek mutatják, mit minek láttam, a rács pedig, hogy melyik mezőbe kerülnek. Ha jó, vedd át. Ha nem, válts kézi rácsra.`;
+    $('#scanHint').textContent = d.tooBig ? 'Az állás nagyobb 12×12-nél: a széleken lévő jelek egy része nem fért el.' : '';
+  } else {
+    $('#scanIntro').textContent = msg || 'Húzd a négy sárga sarkot a beolvasandó rész sarkaira. A rács mutatja, hogyan osztja fel a mezőket: minden jel a saját négyzetébe essen.';
+    $('#scanHint').textContent = '';
+  }
+  if (SC.src) scanDraw();
+}
+$('#scanManual').onclick = () => { SC.touched = new Set([0, 1, 2, 3]); setScanMode('manual'); };
+$('#scanTake').onclick = () => {
+  const d = SC.auto; if (!d) return;
+  aPush(); A.b = Int8Array.from(d.board); A.last = 0; A.turn = 1; autoTurn();
+  const { x, o } = counts();
+  A.note = `Felismertem: ${x} × és ${o} ○. Ellenőrizd a képpel, és ha valami nem stimmel, javítsd koppintással.`;
+  closeScan(); aChanged();
+};
+$('#aImg').onchange = e => { onImageFile(e.target.files[0]); e.target.value = ''; };
+function closeScan(){ $('#scan').hidden = true; document.body.style.overflow = ''; }
+$('#scanClose').onclick = closeScan;
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#scan').hidden) closeScan(); });
+$('#scan').querySelectorAll('.stepper .iconbtn').forEach(b => b.onclick = () => {
+  const k = b.dataset.k; SC[k] = Math.max(5, Math.min(12, SC[k] + +b.dataset.d));
+  $('#scanCols').textContent = SC.cols; $('#scanRows').textContent = SC.rows; scanDraw();
+});
+function scanLayout(){
+  const st = $('#scanStage'), cv = $('#scanCv');
+  const sw = st.clientWidth, sh = st.clientHeight;
+  const k = Math.min(sw / SC.W, sh / SC.H);
+  SC.scale = k;
+  const dpr = window.devicePixelRatio || 1;
+  cv.style.width = Math.round(SC.W * k) + 'px'; cv.style.height = Math.round(SC.H * k) + 'px';
+  cv.width = Math.round(SC.W * k * dpr); cv.height = Math.round(SC.H * k * dpr);
+  scanDraw();
+}
+window.addEventListener('resize', () => { if (!$('#scan').hidden) scanLayout(); });
+// egységnégyzet -> négyszög (perspektív) leképezés
+function sqToQuad(p){
+  const [x0, y0] = p[0], [x1, y1] = p[1], [x2, y2] = p[2], [x3, y3] = p[3];
+  const dx1 = x1 - x2, dx2 = x3 - x2, dy1 = y1 - y2, dy2 = y3 - y2, sx = x0 - x1 + x2 - x3, sy = y0 - y1 + y2 - y3;
+  let G = 0, Hh = 0;
+  if (Math.abs(sx) > 1e-9 || Math.abs(sy) > 1e-9){ const den = dx1 * dy2 - dx2 * dy1; G = (sx * dy2 - dx2 * sy) / den; Hh = (dx1 * sy - sx * dy1) / den; }
+  const a = x1 - x0 + G * x1, b = x3 - x0 + Hh * x3, c = x0, d = y1 - y0 + G * y1, e = y3 - y0 + Hh * y3, f = y0;
+  return (u, v) => { const w = G * u + Hh * v + 1; return [(a * u + b * v + c) / w, (d * u + e * v + f) / w]; };
+}
+function scanDraw(){
+  const cv = $('#scanCv'), x = cv.getContext('2d'), dpr = window.devicePixelRatio || 1, k = SC.scale * dpr;
+  x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, cv.width, cv.height);
+  x.drawImage(SC.src, 0, 0, cv.width, cv.height);
+  x.setTransform(k, 0, 0, k, 0, 0);
+  const map = sqToQuad(SC.pts);
+  // a kereten kívüli rész elsötétítése
+  x.save(); x.fillStyle = 'rgba(3,6,15,.55)'; x.beginPath(); x.rect(0, 0, SC.W, SC.H);
+  x.moveTo(SC.pts[0][0], SC.pts[0][1]); for (let n = 3; n >= 1; n--) x.lineTo(SC.pts[n][0], SC.pts[n][1]); x.closePath(); x.fill('evenodd'); x.restore();
+  x.lineWidth = 1.2 / SC.scale; x.strokeStyle = SC.mode === 'auto' ? 'rgba(226,232,240,.45)' : 'rgba(34,211,238,.85)';
+  x.beginPath();
+  for (let c = 0; c <= SC.cols; c++){ const a = map(c / SC.cols, 0), b = map(c / SC.cols, 1); x.moveTo(a[0], a[1]); x.lineTo(b[0], b[1]); }
+  for (let r = 0; r <= SC.rows; r++){ const a = map(0, r / SC.rows), b = map(1, r / SC.rows); x.moveTo(a[0], a[1]); x.lineTo(b[0], b[1]); }
+  x.stroke();
+  if (SC.mode === 'auto' && SC.auto){
+    // a felismert jelek: × türkiz keret, ○ rózsaszín kör
+    for (const m of SC.auto.marks){
+      if (m.c === undefined) continue;
+      const pad = 3 / SC.scale;
+      x.lineWidth = 2.5 / SC.scale;
+      x.strokeStyle = m.p === 1 ? '#22d3ee' : '#fb7185';
+      x.beginPath();
+      if (m.p === 1) x.rect(m.x0 - pad, m.y0 - pad, m.w + 2 * pad, m.h + 2 * pad);
+      else x.ellipse(m.x, m.y, m.w / 2 + pad * 2, m.h / 2 + pad * 2, 0, 0, Math.PI * 2);
+      x.stroke();
+      const fs = Math.max(11, Math.min(20, m.s * 0.35 * SC.scale)) / SC.scale;
+      x.font = `700 ${fs}px "JetBrains Mono", monospace`; x.textAlign = 'left'; x.textBaseline = 'bottom';
+      const lbl = (m.p === 1 ? '×' : '○') + ' ' + COLS[m.c] + (12 - m.r);
+      const tw = x.measureText(lbl).width;
+      x.fillStyle = 'rgba(7,11,23,.82)'; x.fillRect(m.x0 - pad, m.y0 - pad - fs * 1.15, tw + 6 / SC.scale, fs * 1.15);
+      x.fillStyle = m.p === 1 ? '#22d3ee' : '#fb7185'; x.fillText(lbl, m.x0 - pad + 3 / SC.scale, m.y0 - pad);
+    }
+    return;
+  }
+  SC.pts.forEach((p, n) => {
+    x.beginPath(); x.arc(p[0], p[1], 13 / SC.scale, 0, Math.PI * 2);
+    x.fillStyle = n === SC.drag ? 'rgba(251,191,36,.45)' : 'rgba(251,191,36,.2)'; x.fill();
+    x.lineWidth = 2.5 / SC.scale; x.strokeStyle = '#fbbf24'; x.stroke();
+  });
+  // nagyító húzás közben
+  if (SC.drag >= 0){
+    const p = SC.pts[SC.drag], R = 60 / SC.scale, Z = 3;
+    const left = p[0] > SC.W / 2 ? R + 8 / SC.scale : SC.W - R - 8 / SC.scale, top = R + 8 / SC.scale;
+    x.save(); x.beginPath(); x.arc(left, top, R, 0, Math.PI * 2); x.clip();
+    x.drawImage(SC.src, p[0] - R / Z, p[1] - R / Z, 2 * R / Z, 2 * R / Z, left - R, top - R, 2 * R, 2 * R);
+    x.strokeStyle = '#fbbf24'; x.lineWidth = 1.5 / SC.scale;
+    x.beginPath(); x.moveTo(left - R, top); x.lineTo(left + R, top); x.moveTo(left, top - R); x.lineTo(left, top + R); x.stroke();
+    x.restore();
+    x.beginPath(); x.arc(left, top, R, 0, Math.PI * 2); x.lineWidth = 2 / SC.scale; x.strokeStyle = '#fbbf24'; x.stroke();
+  }
+}
+(function scanPointer(){
+  const cv = $('#scanCv');
+  const pos = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) / SC.scale, (e.clientY - r.top) / SC.scale]; };
+  cv.addEventListener('pointerdown', e => {
+    if (SC.mode !== 'manual') return;
+    const [px, py] = pos(e); let best = -1, bd = Infinity;
+    SC.pts.forEach((p, n) => { const d = Math.hypot(p[0] - px, p[1] - py); if (d < bd){ bd = d; best = n; } });
+    if (bd * SC.scale > 70) return;
+    SC.drag = best; SC.lastDrag = best; SC.off = [SC.pts[best][0] - px, SC.pts[best][1] - py];
+    cv.setPointerCapture(e.pointerId); scanDraw(); e.preventDefault();
+  });
+  cv.addEventListener('pointermove', e => {
+    if (SC.drag < 0) return;
+    const [px, py] = pos(e);
+    SC.pts[SC.drag] = [Math.max(0, Math.min(SC.W, px + SC.off[0])), Math.max(0, Math.min(SC.H, py + SC.off[1]))];
+    scanDraw();
+  });
+  const up = () => {
+    if (SC.drag < 0) return;
+    SC.drag = -1;
+    // elengedéskor a rács ráigazodik a kép vonalaira (ha vannak), így látszik, mit fog beolvasni
+    // ha már mind a négy sarok a helyén van, a rács ráigazodik a kép vonalaira
+    SC.touched.add(SC.lastDrag);
+    if (SC.touched.size === 4){
+      const before = SC.pts.map(p => p.slice());
+      if (snapGrid(scanIsDark())){
+        const moved = SC.pts.some((p, i) => Math.hypot(p[0] - before[i][0], p[1] - before[i][1]) > 1);
+        $('#scanHint').textContent = moved ? 'A rácsot ráigazítottam a kép vonalaira. Ellenőrizd, hogy minden jel a saját négyzetében van-e.' : '';
+      }
+    } else $('#scanHint').textContent = `Még ${4 - SC.touched.size} sarkot húzz a helyére.`;
+    scanDraw();
+  };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+})();
+// ---- Jelfelismerés ----
+function rgbAt(x, y){
+  const xi = Math.max(0, Math.min(SC.W - 1, Math.round(x))), yi = Math.max(0, Math.min(SC.H - 1, Math.round(y)));
+  const o = (yi * SC.W + xi) * 4, d = SC.data;
+  return [d[o] / 255, d[o + 1] / 255, d[o + 2] / 255];
+}
+function hsl(c){
+  const [r, g2, b] = c, mx = Math.max(r, g2, b), mn = Math.min(r, g2, b), l = (mx + mn) / 2, d = mx - mn;
+  let h = 0; if (d > 1e-6){ if (mx === r) h = ((g2 - b) / d) % 6; else if (mx === g2) h = (b - r) / d + 2; else h = (r - g2) / d + 4; h *= 60; if (h < 0) h += 360; }
+  const sat = d < 1e-6 ? 0 : d / (1 - Math.abs(2 * l - 1) + 1e-6);
+  return [h, Math.min(1, sat), 0.299 * r + 0.587 * g2 + 0.114 * b];
+}
+// A rács finomhangolása: a jelek tömegközéppontja a cellájuk közepe felé húzza a sarkokat
+// Egy cella mintarácsában a (majdnem) végig tintás sorok és oszlopok rácsvonalak, nem jelek
+function dropLines(smp, S){
+  const lim = 0.62 * S;
+  for (let j = 0; j < S; j++){ let n = 0; for (let i = 0; i < S; i++) if (smp[j * S + i].ink) n++; if (n > lim) for (let i = 0; i < S; i++) smp[j * S + i].ink = false; }
+  for (let i = 0; i < S; i++){ let n = 0; for (let j = 0; j < S; j++) if (smp[j * S + i].ink) n++; if (n > lim) for (let j = 0; j < S; j++) smp[j * S + i].ink = false; }
+}
+// Sötét képernyőképen az edző jelölései (arany keret/csillag, lila keret/pötty) nem játékjelek
+function isOverlay(s, dark){ return dark && s.L > 0.2 && ((s.sat > 0.2 && s.h >= 20 && s.h <= 65) || (s.sat > 0.3 && s.h >= 240 && s.h <= 290)); }
+function inkMaskStats(map, r, c, half, S, dark){
+  const smp = [];
+  for (let j = 0; j < S; j++) for (let i = 0; i < S; i++){
+    const du = -half + 2 * half * (i + 0.5) / S, dv = -half + 2 * half * (j + 0.5) / S;
+    const [x, y] = map((c + 0.5 + du) / SC.cols, (r + 0.5 + dv) / SC.rows);
+    const [h, sat, L] = hsl(rgbAt(x, y)); smp.push({ du, dv, h, sat, L });
+  }
+  const Ls = smp.map(s => s.L).sort((a, b) => a - b), med = Ls[Ls.length >> 1];
+  const Ss = smp.map(s => s.sat).sort((a, b) => a - b), smed = Ss[Ss.length >> 1];
+  for (const s of smp) s.ink = !isOverlay(s, dark) && (dark ? (s.L - med > 0.16 || (s.sat - smed > 0.3 && s.L > 0.2)) : (med - s.L > 0.16 || (s.sat - smed > 0.3 && med - s.L > 0.05)));
+  dropLines(smp, S);
+  let n = 0, sx = 0, sy = 0;
+  for (const s of smp) if (s.ink){ n++; sx += s.du; sy += s.dv; }
+  return { frac: n / smp.length, cx: n ? sx / n : 0, cy: n ? sy / n : 0 };
+}
+// Ha a képen látszik rács (füzet kockái, képernyő rácsa), a keretet a valódi vonalakhoz igazítjuk.
+// A keretet kiegyenesítjük, a felső/alsó és bal/jobb félben külön megkeressük a vonalakat (így a dőlésük is látszik),
+// egyenest illesztünk rájuk, és a sarkokat a szélső vonalak metszéspontjaiba tesszük.
+function lumAt(x, y){ const c = rgbAt(x, y); return 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]; }
+// A keret kiegyenesítése: "tintásság" térkép cella egységben, M cella margóval, cellánként R mintával
+function rectify(dark, R, M){
+  const C = SC.cols, Rw = SC.rows, map = sqToQuad(SC.pts);
+  const nu = Math.round((C + 2 * M) * R), nv = Math.round((Rw + 2 * M) * R), off = Math.round(M * R);
+  const D = new Float32Array(nu * nv), all = [];
+  for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++){
+    const u = (-M + (i + 0.5) / R) / C, v = (-M + (j + 0.5) / R) / Rw;
+    const [x, y] = map(u, v); const L = lumAt(x, y); D[j * nu + i] = L; if (((i * 7 + j * 13) & 15) === 0) all.push(L);
+  }
+  all.sort((a, b) => a - b); const bg = all[all.length >> 1];
+  for (let k = 0; k < D.length; k++) D[k] = Math.max(0, dark ? D[k] - bg : bg - D[k]);
+  return { D, nu, nv, off, map, C, Rw };
+}
+// Durva igazítás: a rácsvonalak fázisa a felső/alsó és bal/jobb félben (átlagprofil, ezért a ferdeséget is elviseli)
+function phaseAlign(dark){
+  const R = 12, M = 0.6, { D, nu, nv, off, map, C, Rw } = rectify(dark, R, M);
+  const phase = (prof, n) => {
+    let best = -1, bp = 0, mx = 0;
+    for (let s = -R / 2; s <= R / 2; s++){
+      let t = 0; for (let k = 0; k <= n; k++){ const i = off + k * R + s; if (i >= 0 && i < prof.length) t += prof[i]; }
+      if (t > best){ best = t; bp = s; }
+    }
+    let mean = 0; for (let i = 0; i < prof.length; i++) mean += prof[i]; mean /= prof.length;
+    return { ph: bp / R, strength: best / (n + 1) - mean };
+  };
+  const colP = (j0, j1) => { const p = new Float32Array(nu); for (let j = j0; j < j1; j++) for (let i = 0; i < nu; i++) p[i] += D[j * nu + i]; return p.map(x => x / (j1 - j0)); };
+  const rowP = (i0, i1) => { const p = new Float32Array(nv); for (let j = 0; j < nv; j++) for (let i = i0; i < i1; i++) p[j] += D[j * nu + i]; return p.map(x => x / (i1 - i0)); };
+  const mv = Math.round(nv / 2), mu = Math.round(nu / 2);
+  const top = phase(colP(off, mv), C), bot = phase(colP(mv, nv - off), C), lef = phase(rowP(off, mu), Rw), rig = phase(rowP(mu, nu - off), Rw);
+  const strength = Math.min(top.strength, bot.strength, lef.strength, rig.strength);
+  if (strength < 0.02) return 0;
+  const near = (a, b) => { let d = b - a; while (d > 0.5) d -= 1; while (d < -0.5) d += 1; return a + d; };
+  const uT = top.ph, uB = near(uT, bot.ph), vL = lef.ph, vR = near(vL, rig.ph);
+  // a fázisok a sávok közepén érvényesek (1/4 és 3/4), innen extrapolálunk a keret széleire
+  const du = v => uT + (uB - uT) * (v / Rw - 0.25) * 2, dv = u => vL + (vR - vL) * (u / C - 0.25) * 2;
+  SC.pts = [[0, 0], [C, 0], [C, Rw], [0, Rw]].map(([u, v]) => { const nu2 = u + du(v), nv2 = v + dv(u); return map(nu2 / C, nv2 / Rw); });
+  return strength;
+}
+function fitLatticeOnce(dark){
+  const R = 14, M = 0.6, NB = 6;
+  const { D, nu, nv, off, map, C, Rw } = rectify(dark, R, M);
+  const med = a => { a.sort((x, y) => x - y); return a[a.length >> 1]; };
+  // vonalpozíciók keskeny sávokban: oszlopvonalak (u) NB vízszintes sávban, sorvonalak (v) NB függőleges sávban
+  const findPeaks = (prof, n) => {
+    let gmax = 0; for (let i = 0; i < prof.length; i++) gmax = Math.max(gmax, prof[i]);
+    const out = [];
+    for (let k = 0; k <= n; k++){
+      const c = off + k * R, w = Math.round(0.45 * R);
+      let bi = -1, bv = 0;
+      for (let i = Math.max(1, c - w); i <= Math.min(prof.length - 2, c + w); i++) if (prof[i] > bv){ bv = prof[i]; bi = i; }
+      if (bi < 0 || bv < 0.03 || bv < 0.3 * gmax) continue;
+      const a = prof[bi - 1], b = prof[bi], cc = prof[bi + 1], den = a - 2 * b + cc;
+      const sub = den < 0 ? 0.5 * (a - cc) / den : 0;
+      out.push([k, (bi + 0.5 + sub) / R - M]);
+    }
+    return out;
+  };
+  const colObs = [], rowObs = [];   // [k, sávközép, pozíció] cella egységben
+  for (let bnd = 0; bnd < NB; bnd++){
+    const j0 = off + Math.round(bnd * Rw * R / NB), j1 = off + Math.round((bnd + 1) * Rw * R / NB);
+    const p = new Float32Array(nu);
+    for (let i = 0; i < nu; i++){ const a = []; for (let j = j0; j < j1; j++) a.push(D[j * nu + i]); p[i] = med(a); }
+    const vc = (bnd + 0.5) * Rw / NB;
+    for (const [k, u] of findPeaks(p, C)) colObs.push([k, vc, u]);
+    const i0 = off + Math.round(bnd * C * R / NB), i1 = off + Math.round((bnd + 1) * C * R / NB);
+    const q = new Float32Array(nv);
+    for (let j = 0; j < nv; j++){ const a = []; for (let i = i0; i < i1; i++) a.push(D[j * nu + i]); q[j] = med(a); }
+    const uc = (bnd + 0.5) * C / NB;
+    for (const [k, v] of findPeaks(q, Rw)) rowObs.push([k, uc, v]);
+  }
+  if (colObs.length < 1.6 * (C + 1) || rowObs.length < 1.6 * (Rw + 1)) return null;
+  // modell: pos = (a0 + a1 k) + (b0 + b1 k) * t  (t: a másik koordináta), legkisebb négyzetek, kiugrók elhagyásával
+  const fit = obs => {
+    const solve4 = O => {
+      const A = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]], y = [0,0,0,0];
+      for (const [k, t, p] of O){ const f = [1, k, t, k * t]; for (let i = 0; i < 4; i++){ y[i] += f[i] * p; for (let j = 0; j < 4; j++) A[i][j] += f[i] * f[j]; } }
+      const a = A.map((r, i) => r.concat([y[i]]));
+      for (let i = 0; i < 4; i++){
+        let pv = i; for (let r = i + 1; r < 4; r++) if (Math.abs(a[r][i]) > Math.abs(a[pv][i])) pv = r;
+        [a[i], a[pv]] = [a[pv], a[i]]; if (Math.abs(a[i][i]) < 1e-12) return null;
+        for (let r = 0; r < 4; r++) if (r !== i){ const f = a[r][i] / a[i][i]; for (let c = i; c < 5; c++) a[r][c] -= f * a[i][c]; }
+      }
+      return a.map((r, i) => r[4] / r[i]);
+    };
+    let O = obs, w = solve4(O);
+    for (let it = 0; it < 2 && w; it++){
+      const res = O.map(([k, t, p]) => Math.abs(p - (w[0] + w[1] * k + (w[2] + w[3] * k) * t)));
+      const keep = O.filter((_, i) => res[i] < 0.1);
+      if (keep.length === O.length || keep.length < 8) break;
+      O = keep; w = solve4(O);
+    }
+    return w;
+  };
+  const fc = fit(colObs), fr = fit(rowObs);
+  if (!fc || !fr) return null;
+  // k. oszlopvonal: u = A + B v ; k. sorvonal: v = P + Q u  → metszéspont
+  const corner = (kc, kr) => {
+    const A = fc[0] + fc[1] * kc, B = fc[2] + fc[3] * kc, P = fr[0] + fr[1] * kr, Q = fr[2] + fr[3] * kr;
+    const d = 1 - B * Q; if (Math.abs(d) < 1e-9) return null;
+    const u = (A + B * P) / d, v = P + Q * u; return [u, v];
+  };
+  const cs = [[0, 0], [C, 0], [C, Rw], [0, Rw]].map(([a, b]) => corner(a, b));
+  if (cs.some(c => !c)) return null;
+  const moved = cs.map(([u, v]) => map(u / C, v / Rw));
+  const cw = Math.hypot(SC.pts[1][0] - SC.pts[0][0], SC.pts[1][1] - SC.pts[0][1]) / C;
+  if (moved.some((p, i) => Math.hypot(p[0] - SC.pts[i][0], p[1] - SC.pts[i][1]) > 1.2 * cw)) return null;
+  return moved;
+}
+function snapGrid(dark){
+  const orig = SC.pts.map(p => p.slice());
+  let ok = false;
+  SC.lined = phaseAlign(dark) > 0;
+  for (let it = 0; it < 3; it++){
+    const np = fitLatticeOnce(dark);
+    if (!np) break;
+    const d = Math.max(...np.map((p, i) => Math.hypot(p[0] - SC.pts[i][0], p[1] - SC.pts[i][1])));
+    SC.pts = np; ok = true;
+    if (d < 0.5) break;
+  }
+  if (!ok && !SC.lined) SC.pts = orig;   // erős rácsnál a durva igazítás megmarad akkor is, ha a finom nem sikerült
+  return ok || SC.lined;
+}
+function refineGrid(dark){
+  for (let it = 0; it < 4; it++){
+    const map = sqToQuad(SC.pts), obs = [];
+    for (let r = 0; r < SC.rows; r++) for (let c = 0; c < SC.cols; c++){
+      const st = inkMaskStats(map, r, c, 0.46, 14, dark);
+      if (st.frac > 0.03 && st.frac < 0.45) obs.push({ u: (c + 0.5) / SC.cols, v: (r + 0.5) / SC.rows, dx: st.cx, dy: st.cy });
+    }
+    if (obs.length < 4) return;
+    // bilineáris illesztés: a négy sarok eltolása (cella egységben), legkisebb négyzetek
+    const M = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]], bx = [0,0,0,0], by = [0,0,0,0];
+    for (const o of obs){
+      const w = [(1 - o.u) * (1 - o.v), o.u * (1 - o.v), o.u * o.v, (1 - o.u) * o.v];
+      for (let i = 0; i < 4; i++){ bx[i] += w[i] * o.dx; by[i] += w[i] * o.dy; for (let j = 0; j < 4; j++) M[i][j] += w[i] * w[j]; }
+    }
+    for (let i = 0; i < 4; i++) M[i][i] += 0.05 * obs.length / 4;   // csillapítás, hogy kevés jelnél se ugráljon
+    const solve = (Mm, bb) => {
+      const a = Mm.map((row, i) => row.concat([bb[i]]));
+      for (let i = 0; i < 4; i++){
+        let p = i; for (let k = i + 1; k < 4; k++) if (Math.abs(a[k][i]) > Math.abs(a[p][i])) p = k;
+        [a[i], a[p]] = [a[p], a[i]];
+        for (let k = 0; k < 4; k++) if (k !== i){ const f = a[k][i] / a[i][i]; for (let j = i; j < 5; j++) a[k][j] -= f * a[i][j]; }
+      }
+      return a.map((row, i) => row[4] / row[i]);
+    };
+    const ddx = solve(M, bx), ddy = solve(M, by);
+    const UV = [[0, 0], [1, 0], [1, 1], [0, 1]];
+    let moved = 0;
+    SC.pts = UV.map(([u, v], i) => {
+      const nu = u + 0.85 * ddx[i] / SC.cols, nv = v + 0.85 * ddy[i] / SC.rows;
+      moved = Math.max(moved, Math.abs(ddx[i]), Math.abs(ddy[i]));
+      return map(nu, nv);
+    });
+    if (moved < 0.02) return;
+  }
+}
+function scanIsDark(){
+  const map0 = sqToQuad(SC.pts), Ls = [];
+  for (let k = 0; k < 400; k++){ const [x, y] = map0(((k * 37) % 400) / 400, ((k * 91) % 400) / 400); Ls.push(lumAt(x, y)); }
+  Ls.sort((a, b) => a - b); return Ls[200] < 0.45;
+}
+function recognize(){
+  {
+    // sötét vagy világos alap a teljes keretből
+    const map0 = sqToQuad(SC.pts), Ls = [];
+    for (let k = 0; k < 400; k++){ const [x, y] = map0(Math.random(), Math.random()); Ls.push(hsl(rgbAt(x, y))[2]); }
+    Ls.sort((a, b) => a - b);
+    const dk = Ls[200] < 0.45;
+    if (!snapGrid(dk) && !SC.lined) refineGrid(dk);
+  }
+  const map = sqToQuad(SC.pts), S = 22, cells = [];
+  for (let r = 0; r < SC.rows; r++) for (let c = 0; c < SC.cols; c++){
+    const smp = [];
+    for (let j = 0; j < S; j++) for (let i = 0; i < S; i++){
+      const du = -0.36 + 0.72 * (i + 0.5) / S, dv = -0.36 + 0.72 * (j + 0.5) / S;
+      const [x, y] = map((c + 0.5 + du) / SC.cols, (r + 0.5 + dv) / SC.rows);
+      const [h, sat, L] = hsl(rgbAt(x, y));
+      smp.push({ du, dv, h, sat, L });
+    }
+    cells.push({ r, c, smp });
+  }
+  // háttér: a cella mintáinak mediánja (egyenetlen megvilágítás ellen); sötét vagy világos alap
+  const allL = []; cells.forEach(ce => ce.smp.forEach((s, k) => { if (k % 7 === 0) allL.push(s.L); }));
+  allL.sort((a, b) => a - b);
+  const dark = allL[allL.length >> 1] < 0.45;
+  for (const ce of cells){
+    const Ls = ce.smp.map(s => s.L).sort((a, b) => a - b), med = Ls[Ls.length >> 1];
+    const Ss = ce.smp.map(s => s.sat).sort((a, b) => a - b), smed = Ss[Ss.length >> 1];
+    let ink = 0, cen = 0, cenN = 0, axis = 0, axisN = 0, hx = 0, hy = 0, sw = 0, inkSat = 0;
+    for (const s of ce.smp) s.ink = !isOverlay(s, dark) && (dark ? (s.L - med > 0.16 || (s.sat - smed > 0.3 && s.L > 0.2)) : (med - s.L > 0.16 || (s.sat - smed > 0.3 && med - s.L > 0.05)));
+    dropLines(ce.smp, S);
+    for (const s of ce.smp){
+      const isInk = s.ink;
+      const rr = Math.hypot(s.du, s.dv);
+      if (rr < 0.1){ cenN++; if (isInk) cen++; }
+      if (rr > 0.14 && rr < 0.33 && Math.min(Math.abs(s.du), Math.abs(s.dv)) < 0.05){ axisN++; if (isInk) axis++; }
+      if (isInk){ ink++; if (s.sat > 0.25){ hx += Math.cos(s.h * Math.PI / 180) * s.sat; hy += Math.sin(s.h * Math.PI / 180) * s.sat; sw += s.sat; } inkSat += s.sat; }
+    }
+    ce.inkFrac = ink / ce.smp.length;
+    ce.cen = cenN ? cen / cenN : 0; ce.axis = axisN ? axis / axisN : 0;
+    ce.colorful = ink > 0 && inkSat / ink > 0.3 && sw > 0;
+    ce.hue = sw ? (Math.atan2(hy, hx) * 180 / Math.PI + 360) % 360 : 0;
+    ce.shape = ce.cen - ce.axis;              // > 0: × (a vonalak átmennek a közepén), < 0: ○ (üres közép, a kör metszi a tengelyeket)
+  }
+  const filled = cells.filter(ce => ce.inkFrac > 0.04);
+  filled.forEach(ce => { ce.p = ce.shape > 0 ? 1 : 2; });
+  // színes jelek: ha két jól elkülönülő színcsoport van, azt vesszük alapul (pl. két tollszín vagy képernyőkép)
+  const col = filled.filter(ce => ce.colorful);
+  if (col.length >= 4){
+    let c1 = col[0].hue, c2 = (c1 + 180) % 360;
+    const dist = (a, b) => { const d = Math.abs(a - b) % 360; return d > 180 ? 360 - d : d; };
+    for (let it = 0; it < 8; it++){
+      const g1 = col.filter(ce => dist(ce.hue, c1) <= dist(ce.hue, c2)), g2 = col.filter(ce => dist(ce.hue, c1) > dist(ce.hue, c2));
+      const mean = gr => { let x = 0, y = 0; gr.forEach(ce => { x += Math.cos(ce.hue * Math.PI / 180); y += Math.sin(ce.hue * Math.PI / 180); }); return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; };
+      if (g1.length) c1 = mean(g1); if (g2.length) c2 = mean(g2);
+    }
+    const g1 = col.filter(ce => dist(ce.hue, c1) <= dist(ce.hue, c2)), g2 = col.filter(ce => dist(ce.hue, c1) > dist(ce.hue, c2));
+    if (g1.length && g2.length && dist(c1, c2) > 45){
+      const s1 = g1.reduce((a, ce) => a + ce.shape, 0) / g1.length, s2 = g2.reduce((a, ce) => a + ce.shape, 0) / g2.length;
+      const p1 = s1 >= s2 ? 1 : 2;
+      g1.forEach(ce => ce.p = p1); g2.forEach(ce => ce.p = 3 - p1);
+      // ha a jelek egyértelműen két színből állnak, a színtelen foltok (keretek, jelölések) nem jelek
+      if (g1.length + g2.length >= 6) filled.forEach(ce => { if (!ce.colorful) ce.p = 0; });
+    }
+  }
+  const out = new Int8Array(N*N);
+  const ox = Math.floor((N - SC.cols) / 2), oy = Math.floor((N - SC.rows) / 2);
+  filled.forEach(ce => { if (ce.p) out[(ce.r + oy) * N + ce.c + ox] = ce.p; });
+  return out;
+}
+$('#scanGo').onclick = () => {
+  const res = recognize();
+  aPush(); A.b = res; A.last = 0; A.turn = 1; autoTurn();
+  const { x, o } = counts();
+  A.note = (x + o > SC.cols * SC.rows * 0.5)
+    ? `Gyanúsan sok jelet találtam (${x} × és ${o} ○): valószínűleg elcsúszott a rács. Olvasd be újra, és húzd a sarkokat pontosan a tábla sarkaira.`
+    : `Felismertem: ${x} × és ${o} ○. Ellenőrizd a képpel, és ha valami nem stimmel, javítsd koppintással.`;
+  closeScan(); aChanged();
+};
+window.__scanTest = { open: onImageFile, setPts: p => { SC.pts = p; setScanMode('manual'); }, auto: () => SC.auto && { n: SC.auto.marks.length, board: Array.from(SC.auto.board) }, mode: () => SC.mode, setSize: (c, r) => { SC.cols = c; SC.rows = r; }, recognize, pts: () => SC.pts.map(p => p.map(Math.round)), size: () => [SC.cols, SC.rows] };
+
+// ---- Mód váltás ----
+function setMode(m){
+  g.mode = m; store.set('mode', m);
+  $('#modes').querySelectorAll('button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === m));
+  $('#modes').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
+  $('#playArena').hidden = m !== 'play'; $('#anaArena').hidden = m !== 'ana';
+  $('#openSettings').hidden = m !== 'play';
+  $('#headSub').textContent = m === 'play'
+    ? 'Verd meg a gépet. Tanuló módban az edző szól, ha veszély van, de a megoldást neked kell megtalálnod.'
+    : 'Rakj fel egy állást kézzel vagy fotóról, és megmutatom mindkét játékos legjobb lépését.';
+}
+$('#modes').querySelectorAll('button').forEach(b => b.onclick = () => {
+  const m = b.dataset.mode; if (m === g.mode) return;
+  restartDeep(); A.token++; g.token++;
+  setMode(m);
+  if (m === 'ana'){ renderTools(); aChanged(); }
+  else {
+    g.busy = false; setButtons();
+    if (!g.over && isUserTurn()){ status(g.user, 'Te jössz', ''); if (g.learn) runAnalysis(); }
+    else if (!g.over) machineTurn();
+  }
+});
+
 // ---- Indulás ----
 renderLevels(); setSeg('#first', g.first); setSeg('#sym', g.sym); renderScore();
+setMode(store.get('mode', 'play') === 'ana' ? 'ana' : 'play');
 newGame();
+if (g.mode === 'ana'){ renderTools(); aChanged(); }
 })();
 
 </script>
