@@ -1,0 +1,416 @@
+@font-face{font-family:'Bricolage Grotesque';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/bricolage-grotesque-600.woff2') format('woff2');unicode-range:U+0020,U+0021,U+0022,U+0023,U+0024,U+0025,U+0026,U+0027,U+0028,U+0029,U+002A,U+002B,U+002C,U+002D,U+002E,U+002F,U+0030,U+0031,U+0032,U+0033,U+0034,U+0035,U+0036,U+0037,U+0038,U+0039,U+003A,U+003B,U+003C,U+003D,U+003E,U+003F,U+0040,U+0041,U+0042,U+0043,U+0044,U+0045,U+0046,U+0047,U+0048,U+0049,U+004A,U+004B,U+004C,U+004D,U+004E,U+004F,U+0050,U+0051,U+0052,U+0053,U+0054,U+0055,U+0056,U+0057,U+0058,U+0059,U+005A,U+005B,U+005C,U+005D,U+005E,U+005F,U+0060,U+0061,U+0062,U+0063,U+0064,U+0065,U+0066,U+0067,U+0068,U+0069,U+006A,U+006B,U+006C,U+006D,U+006E,U+006F,U+0070,U+0071,U+0072,U+0073,U+0074,U+0075,U+0076,U+0077,U+0078,U+0079,U+007A,U+007B,U+007C,U+007D,U+007E,U+00B7,U+00C1,U+00C9,U+00CD,U+00D3,U+00D6,U+00D7,U+00DA,U+00DC,U+00E1,U+00E9,U+00ED,U+00F3,U+00F6,U+00FA,U+00FC,U+2013,U+2014,U+2019,U+201D,U+201E,U+2026}
+@font-face{font-family:'Bricolage Grotesque';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/bricolage-grotesque-600-hu.woff2') format('woff2');unicode-range:U+0020,U+0041,U+00C1,U+0150,U+0151,U+0170,U+0171}
+@font-face{font-family:'Bricolage Grotesque';font-style:normal;font-weight:800;font-display:swap;src:url('fonts/bricolage-grotesque-800.woff2') format('woff2');unicode-range:U+0020,U+0021,U+0022,U+0023,U+0024,U+0025,U+0026,U+0027,U+0028,U+0029,U+002A,U+002B,U+002C,U+002D,U+002E,U+002F,U+0030,U+0031,U+0032,U+0033,U+0034,U+0035,U+0036,U+0037,U+0038,U+0039,U+003A,U+003B,U+003C,U+003D,U+003E,U+003F,U+0040,U+0041,U+0042,U+0043,U+0044,U+0045,U+0046,U+0047,U+0048,U+0049,U+004A,U+004B,U+004C,U+004D,U+004E,U+004F,U+0050,U+0051,U+0052,U+0053,U+0054,U+0055,U+0056,U+0057,U+0058,U+0059,U+005A,U+005B,U+005C,U+005D,U+005E,U+005F,U+0060,U+0061,U+0062,U+0063,U+0064,U+0065,U+0066,U+0067,U+0068,U+0069,U+006A,U+006B,U+006C,U+006D,U+006E,U+006F,U+0070,U+0071,U+0072,U+0073,U+0074,U+0075,U+0076,U+0077,U+0078,U+0079,U+007A,U+007B,U+007C,U+007D,U+007E,U+00B7,U+00C1,U+00C9,U+00CD,U+00D3,U+00D6,U+00D7,U+00DA,U+00DC,U+00E1,U+00E9,U+00ED,U+00F3,U+00F6,U+00FA,U+00FC,U+2013,U+2014,U+2019,U+201D,U+201E,U+2026}
+@font-face{font-family:'Bricolage Grotesque';font-style:normal;font-weight:800;font-display:swap;src:url('fonts/bricolage-grotesque-800-hu.woff2') format('woff2');unicode-range:U+0020,U+0041,U+00C1,U+0150,U+0151,U+0170,U+0171}
+@font-face{font-family:'Instrument Sans';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/instrument-sans-400.woff2') format('woff2');unicode-range:U+0020,U+0021,U+0022,U+0023,U+0024,U+0025,U+0026,U+0027,U+0028,U+0029,U+002A,U+002B,U+002C,U+002D,U+002E,U+002F,U+0030,U+0031,U+0032,U+0033,U+0034,U+0035,U+0036,U+0037,U+0038,U+0039,U+003A,U+003B,U+003C,U+003D,U+003E,U+003F,U+0040,U+0041,U+0042,U+0043,U+0044,U+0045,U+0046,U+0047,U+0048,U+0049,U+004A,U+004B,U+004C,U+004D,U+004E,U+004F,U+0050,U+0051,U+0052,U+0053,U+0054,U+0055,U+0056,U+0057,U+0058,U+0059,U+005A,U+005B,U+005C,U+005D,U+005E,U+005F,U+0060,U+0061,U+0062,U+0063,U+0064,U+0065,U+0066,U+0067,U+0068,U+0069,U+006A,U+006B,U+006C,U+006D,U+006E,U+006F,U+0070,U+0071,U+0072,U+0073,U+0074,U+0075,U+0076,U+0077,U+0078,U+0079,U+007A,U+007B,U+007C,U+007D,U+007E,U+00B7,U+00C1,U+00C9,U+00CD,U+00D3,U+00D6,U+00D7,U+00DA,U+00DC,U+00E1,U+00E9,U+00ED,U+00F3,U+00F6,U+00FA,U+00FC,U+2013,U+2014,U+2019,U+201D,U+201E,U+2026}
+@font-face{font-family:'Instrument Sans';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/instrument-sans-400-hu.woff2') format('woff2');unicode-range:U+0020,U+0041,U+00C1,U+0150,U+0151,U+0170,U+0171}
+@font-face{font-family:'Instrument Sans';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/instrument-sans-500.woff2') format('woff2');unicode-range:U+0020,U+0021,U+0022,U+0023,U+0024,U+0025,U+0026,U+0027,U+0028,U+0029,U+002A,U+002B,U+002C,U+002D,U+002E,U+002F,U+0030,U+0031,U+0032,U+0033,U+0034,U+0035,U+0036,U+0037,U+0038,U+0039,U+003A,U+003B,U+003C,U+003D,U+003E,U+003F,U+0040,U+0041,U+0042,U+0043,U+0044,U+0045,U+0046,U+0047,U+0048,U+0049,U+004A,U+004B,U+004C,U+004D,U+004E,U+004F,U+0050,U+0051,U+0052,U+0053,U+0054,U+0055,U+0056,U+0057,U+0058,U+0059,U+005A,U+005B,U+005C,U+005D,U+005E,U+005F,U+0060,U+0061,U+0062,U+0063,U+0064,U+0065,U+0066,U+0067,U+0068,U+0069,U+006A,U+006B,U+006C,U+006D,U+006E,U+006F,U+0070,U+0071,U+0072,U+0073,U+0074,U+0075,U+0076,U+0077,U+0078,U+0079,U+007A,U+007B,U+007C,U+007D,U+007E,U+00B7,U+00C1,U+00C9,U+00CD,U+00D3,U+00D6,U+00D7,U+00DA,U+00DC,U+00E1,U+00E9,U+00ED,U+00F3,U+00F6,U+00FA,U+00FC,U+2013,U+2014,U+2019,U+201D,U+201E,U+2026}
+@font-face{font-family:'Instrument Sans';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/instrument-sans-500-hu.woff2') format('woff2');unicode-range:U+0020,U+0041,U+00C1,U+0150,U+0151,U+0170,U+0171}
+@font-face{font-family:'Instrument Sans';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/instrument-sans-600.woff2') format('woff2');unicode-range:U+0020,U+0021,U+0022,U+0023,U+0024,U+0025,U+0026,U+0027,U+0028,U+0029,U+002A,U+002B,U+002C,U+002D,U+002E,U+002F,U+0030,U+0031,U+0032,U+0033,U+0034,U+0035,U+0036,U+0037,U+0038,U+0039,U+003A,U+003B,U+003C,U+003D,U+003E,U+003F,U+0040,U+0041,U+0042,U+0043,U+0044,U+0045,U+0046,U+0047,U+0048,U+0049,U+004A,U+004B,U+004C,U+004D,U+004E,U+004F,U+0050,U+0051,U+0052,U+0053,U+0054,U+0055,U+0056,U+0057,U+0058,U+0059,U+005A,U+005B,U+005C,U+005D,U+005E,U+005F,U+0060,U+0061,U+0062,U+0063,U+0064,U+0065,U+0066,U+0067,U+0068,U+0069,U+006A,U+006B,U+006C,U+006D,U+006E,U+006F,U+0070,U+0071,U+0072,U+0073,U+0074,U+0075,U+0076,U+0077,U+0078,U+0079,U+007A,U+007B,U+007C,U+007D,U+007E,U+00B7,U+00C1,U+00C9,U+00CD,U+00D3,U+00D6,U+00D7,U+00DA,U+00DC,U+00E1,U+00E9,U+00ED,U+00F3,U+00F6,U+00FA,U+00FC,U+2013,U+2014,U+2019,U+201D,U+201E,U+2026}
+@font-face{font-family:'Instrument Sans';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/instrument-sans-600-hu.woff2') format('woff2');unicode-range:U+0020,U+0041,U+00C1,U+0150,U+0151,U+0170,U+0171}
+@font-face{font-family:'Instrument Sans';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/instrument-sans-700.woff2') format('woff2');unicode-range:U+0020,U+0021,U+0022,U+0023,U+0024,U+0025,U+0026,U+0027,U+0028,U+0029,U+002A,U+002B,U+002C,U+002D,U+002E,U+002F,U+0030,U+0031,U+0032,U+0033,U+0034,U+0035,U+0036,U+0037,U+0038,U+0039,U+003A,U+003B,U+003C,U+003D,U+003E,U+003F,U+0040,U+0041,U+0042,U+0043,U+0044,U+0045,U+0046,U+0047,U+0048,U+0049,U+004A,U+004B,U+004C,U+004D,U+004E,U+004F,U+0050,U+0051,U+0052,U+0053,U+0054,U+0055,U+0056,U+0057,U+0058,U+0059,U+005A,U+005B,U+005C,U+005D,U+005E,U+005F,U+0060,U+0061,U+0062,U+0063,U+0064,U+0065,U+0066,U+0067,U+0068,U+0069,U+006A,U+006B,U+006C,U+006D,U+006E,U+006F,U+0070,U+0071,U+0072,U+0073,U+0074,U+0075,U+0076,U+0077,U+0078,U+0079,U+007A,U+007B,U+007C,U+007D,U+007E,U+00B7,U+00C1,U+00C9,U+00CD,U+00D3,U+00D6,U+00D7,U+00DA,U+00DC,U+00E1,U+00E9,U+00ED,U+00F3,U+00F6,U+00FA,U+00FC,U+2013,U+2014,U+2019,U+201D,U+201E,U+2026}
+@font-face{font-family:'Instrument Sans';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/instrument-sans-700-hu.woff2') format('woff2');unicode-range:U+0020,U+0041,U+00C1,U+0150,U+0151,U+0170,U+0171}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/jetbrains-mono-500.woff2') format('woff2');unicode-range:U+0020,U+0021,U+0022,U+0023,U+0024,U+0025,U+0026,U+0027,U+0028,U+0029,U+002A,U+002B,U+002C,U+002D,U+002E,U+002F,U+0030,U+0031,U+0032,U+0033,U+0034,U+0035,U+0036,U+0037,U+0038,U+0039,U+003A,U+003B,U+003C,U+003D,U+003E,U+003F,U+0040,U+0041,U+0042,U+0043,U+0044,U+0045,U+0046,U+0047,U+0048,U+0049,U+004A,U+004B,U+004C,U+004D,U+004E,U+004F,U+0050,U+0051,U+0052,U+0053,U+0054,U+0055,U+0056,U+0057,U+0058,U+0059,U+005A,U+005B,U+005C,U+005D,U+005E,U+005F,U+0060,U+0061,U+0062,U+0063,U+0064,U+0065,U+0066,U+0067,U+0068,U+0069,U+006A,U+006B,U+006C,U+006D,U+006E,U+006F,U+0070,U+0071,U+0072,U+0073,U+0074,U+0075,U+0076,U+0077,U+0078,U+0079,U+007A,U+007B,U+007C,U+007D,U+007E,U+00B7,U+00C1,U+00C9,U+00CD,U+00D3,U+00D6,U+00D7,U+00DA,U+00DC,U+00E1,U+00E9,U+00ED,U+00F3,U+00F6,U+00FA,U+00FC,U+2013,U+2014,U+2019,U+201D,U+201E,U+2026}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/jetbrains-mono-500-hu.woff2') format('woff2');unicode-range:U+0020,U+0041,U+00C1,U+0150,U+0151,U+0170,U+0171}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/jetbrains-mono-700.woff2') format('woff2');unicode-range:U+0020,U+0021,U+0022,U+0023,U+0024,U+0025,U+0026,U+0027,U+0028,U+0029,U+002A,U+002B,U+002C,U+002D,U+002E,U+002F,U+0030,U+0031,U+0032,U+0033,U+0034,U+0035,U+0036,U+0037,U+0038,U+0039,U+003A,U+003B,U+003C,U+003D,U+003E,U+003F,U+0040,U+0041,U+0042,U+0043,U+0044,U+0045,U+0046,U+0047,U+0048,U+0049,U+004A,U+004B,U+004C,U+004D,U+004E,U+004F,U+0050,U+0051,U+0052,U+0053,U+0054,U+0055,U+0056,U+0057,U+0058,U+0059,U+005A,U+005B,U+005C,U+005D,U+005E,U+005F,U+0060,U+0061,U+0062,U+0063,U+0064,U+0065,U+0066,U+0067,U+0068,U+0069,U+006A,U+006B,U+006C,U+006D,U+006E,U+006F,U+0070,U+0071,U+0072,U+0073,U+0074,U+0075,U+0076,U+0077,U+0078,U+0079,U+007A,U+007B,U+007C,U+007D,U+007E,U+00B7,U+00C1,U+00C9,U+00CD,U+00D3,U+00D6,U+00D7,U+00DA,U+00DC,U+00E1,U+00E9,U+00ED,U+00F3,U+00F6,U+00FA,U+00FC,U+2013,U+2014,U+2019,U+201D,U+201E,U+2026}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/jetbrains-mono-700-hu.woff2') format('woff2');unicode-range:U+0020,U+0041,U+00C1,U+0150,U+0151,U+0170,U+0171}
+/* =====================================================================
+   Kockajelszó – új arculat (a Ravasz négyes / Táblajátékok színvilága)
+   A diceware-theme.css UTÁN kell betölteni. Csak felülír, nem töröl:
+   minden szabály :root előtaggal, a régi szabályokkal azonos vagy
+   nagyobb erősséggel, a színek változókból jönnek, így ugyanaz a
+   szabály a világos és a sötét témában is érvényes.
+   ===================================================================== */
+
+/* ---------- Színek: világos téma ---------- */
+:root {
+  --ui-font-stack: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --kj-display: "Bricolage Grotesque", "Instrument Sans", system-ui, sans-serif;
+  --kj-mono: "JetBrains Mono", ui-monospace, Consolas, Menlo, monospace;
+
+  --background-color: #eef2f8;
+  --text-color: #0f172a;
+
+  --kj-bg: #eef2f8;
+  --kj-bg-img:
+    radial-gradient(900px 600px at 0% -10%, rgba(34, 211, 238, .16), transparent 60%),
+    radial-gradient(800px 600px at 110% 110%, rgba(251, 113, 133, .12), transparent 60%);
+  --kj-text: #0f172a;
+  --kj-muted: #52607a;
+  --kj-border: rgba(15, 23, 42, .12);
+  --kj-border-strong: rgba(15, 23, 42, .24);
+  --kj-surface: rgba(15, 23, 42, .035);
+  --kj-card: linear-gradient(160deg, #ffffff 0%, #f6f8fc 100%);
+  --kj-card-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 18px 40px -24px rgba(15, 23, 42, .28);
+  --kj-field: #ffffff;
+  --kj-nav: rgba(238, 242, 248, .82);
+
+  --kj-blue: #22d3ee;          /* fő gomb háttere */
+  --kj-blue-ink: #04202a;      /* szöveg a kék gombon */
+  --kj-blue-line: #0891b2;     /* kék keret, kiemelés világos háttéren */
+  --kj-blue-soft: rgba(34, 211, 238, .14);
+  --kj-red: #e11d48;
+  --kj-red-soft: rgba(251, 113, 133, .14);
+  --kj-gold: #b45309;          /* arany szöveg világos háttéren */
+  --kj-gold-line: #f59e0b;
+  --kj-gold-soft: rgba(251, 191, 36, .16);
+  --kj-violet: #7c3aed;
+  --kj-green: #047857;
+  --kj-green-soft: rgba(16, 185, 129, .14);
+
+  --kj-result-bg: #fffbeb;     /* a jelmondat mezője */
+  --kj-result-ink: #92400e;
+  --kj-track: rgba(15, 23, 42, .10);
+  --kj-focus: rgba(34, 211, 238, .35);
+}
+
+/* ---------- Színek: sötét téma ---------- */
+[data-theme="dark"] {
+  --background-color: #060a17;
+  --text-color: #e2e8f0;
+
+  --kj-bg: #060a17;
+  --kj-bg-img:
+    radial-gradient(900px 600px at 0% -10%, rgba(34, 211, 238, .13), transparent 60%),
+    radial-gradient(800px 600px at 110% 110%, rgba(251, 113, 133, .13), transparent 60%),
+    linear-gradient(160deg, #121b35 0%, #0a0f1f 55%, #060a17 100%);
+  --kj-text: #e2e8f0;
+  --kj-muted: #94a3b8;
+  --kj-border: rgba(148, 163, 184, .16);
+  --kj-border-strong: rgba(148, 163, 184, .34);
+  --kj-surface: rgba(255, 255, 255, .04);
+  --kj-card: radial-gradient(120% 90% at 30% 0%, rgba(148,163,184,.08), transparent 60%), linear-gradient(160deg, #18233f 0%, #0d1428 100%);
+  --kj-card-shadow: 0 1px 0 rgba(255,255,255,.05) inset, 0 24px 48px -24px rgba(2, 6, 23, .8);
+  --kj-field: rgba(2, 6, 23, .45);
+  --kj-nav: rgba(6, 10, 23, .78);
+
+  --kj-blue: #22d3ee;
+  --kj-blue-ink: #04202a;
+  --kj-blue-line: #22d3ee;
+  --kj-blue-soft: rgba(34, 211, 238, .12);
+  --kj-red: #fb7185;
+  --kj-red-soft: rgba(251, 113, 133, .12);
+  --kj-gold: #fbbf24;
+  --kj-gold-line: #fbbf24;
+  --kj-gold-soft: rgba(251, 191, 36, .10);
+  --kj-violet: #a78bfa;
+  --kj-green: #6ee7b7;
+  --kj-green-soft: rgba(16, 185, 129, .14);
+
+  --kj-result-bg: rgba(2, 6, 23, .55);
+  --kj-result-ink: #fbbf24;
+  --kj-track: rgba(148, 163, 184, .18);
+  --kj-focus: rgba(34, 211, 238, .30);
+}
+
+/* ---------- Alap ---------- */
+:root, :root body {
+  background-color: var(--kj-bg);
+  color: var(--kj-text);
+  font-family: var(--ui-font-stack);
+}
+:root body {
+  background-image: var(--kj-bg-img);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  line-height: 1.6;
+}
+:root h1, :root h2, :root h3, :root h4 { font-family: var(--kj-display); letter-spacing: -.01em; }
+:root h2 { color: var(--kj-text); }
+:root a { color: var(--kj-blue-line); text-underline-offset: 2px; }
+:root a:hover { color: var(--kj-text); }
+:root code, :root kbd {
+  font-family: var(--kj-mono); font-size: .88em;
+  background: var(--kj-surface); border: 1px solid var(--kj-border); border-radius: 5px; padding: .05em .35em;
+}
+:root ::selection { background: rgba(34, 211, 238, .30); }
+:root :focus-visible { outline: 2px solid var(--kj-gold-line); outline-offset: 2px; }
+
+/* ---------- Fejsor ---------- */
+:root .navbar,
+[data-theme="dark"] .navbar {
+  background: var(--kj-nav);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--kj-border);
+  padding: .6rem 1.1rem;
+}
+:root .navbar a.logo-link,
+:root .dw-theme-toggle,
+[data-theme="dark"] .dw-theme-toggle {
+  display: inline-grid; place-items: center;
+  width: 40px; height: 40px; padding: 0;
+  border-radius: 10px;
+  border: 1px solid var(--kj-border);
+  background: var(--kj-surface);
+  color: var(--kj-text);
+  transition: border-color .18s ease, transform .18s ease;
+}
+:root .navbar a.logo-link { color: var(--kj-gold); }
+:root .navbar a.logo-link:hover,
+:root .dw-theme-toggle:hover { border-color: var(--kj-gold-line); transform: translateY(-1px); }
+:root .navbar svg, :root .dw-theme-toggle svg { width: 18px; height: 18px; }
+
+/* ---------- Fejléc ---------- */
+:root .dw-hero { padding: 5.25rem 1rem 1.25rem; }
+:root .dw-hero h1,
+[data-theme="dark"] .dw-hero h1 {
+  font-family: var(--kj-display); font-weight: 800;
+  font-size: clamp(1.9rem, 4.6vw, 2.8rem); line-height: 1.05; letter-spacing: -.02em;
+  color: var(--kj-text);
+}
+:root .dw-hero p, [data-theme="dark"] .dw-hero p { color: var(--kj-muted); }
+
+/* ---------- Kártyák, szövegblokkok ---------- */
+:root .dw-card,
+[data-theme="dark"] .dw-card {
+  background: var(--kj-card);
+  border: 1px solid var(--kj-border);
+  border-radius: 18px;
+  box-shadow: var(--kj-card-shadow);
+  padding: 1.5rem 1.5rem 1.6rem;
+}
+:root .dw-card h2,
+[data-theme="dark"] .dw-card h2 { color: var(--kj-text); font-weight: 800; font-size: 1.35rem; }
+:root .dw-info-block { color: var(--kj-text); }
+:root .dw-info-block p, :root .dw-info-block li { color: var(--kj-text); }
+:root .dw-info-block h2,
+[data-theme="dark"] .dw-info-block h2 {
+  color: var(--kj-text); font-weight: 800; font-size: 1.35rem;
+  border-bottom: 2px solid var(--kj-gold-line);
+}
+:root .dw-info-block h3,
+[data-theme="dark"] .dw-info-block h3 { color: var(--kj-gold); }
+:root .dw-source-note { color: var(--kj-muted); font-size: .9rem; }
+
+/* ---------- Szószedet választó (szegmens) ---------- */
+:root .dw-list-btn,
+[data-theme="dark"] .dw-list-btn {
+  background: var(--kj-surface);
+  color: var(--kj-text);
+  border: 1px solid var(--kj-border);
+  border-radius: 12px;
+  font-weight: 600;
+}
+:root .dw-list-btn small { color: var(--kj-muted); opacity: 1; font-weight: 400; }
+:root .dw-list-btn:hover { border-color: var(--kj-border-strong); }
+:root .dw-list-btn.is-active,
+[data-theme="dark"] .dw-list-btn.is-active {
+  background: var(--kj-blue-soft);
+  color: var(--kj-text);
+  border-color: var(--kj-blue-line);
+  box-shadow: inset 0 -3px 0 var(--kj-blue-line);
+}
+:root .dw-list-meta,
+[data-theme="dark"] .dw-list-meta {
+  background: var(--kj-surface); color: var(--kj-muted);
+  border-left: 3px solid var(--kj-gold-line); border-radius: 8px;
+}
+:root .dw-list-meta.is-error,
+[data-theme="dark"] .dw-list-meta.is-error { background: var(--kj-red-soft); color: var(--kj-red); border-left-color: var(--kj-red); }
+
+/* ---------- Szavak száma ---------- */
+:root .dw-count-btn,
+[data-theme="dark"] .dw-count-btn {
+  background: var(--kj-surface); color: var(--kj-text);
+  border: 1px solid var(--kj-border); border-radius: 10px;
+  font-family: var(--kj-display); font-weight: 700; font-size: 1.05rem;
+}
+:root .dw-count-btn:hover,
+[data-theme="dark"] .dw-count-btn:hover { background: var(--kj-blue-soft); color: var(--kj-text); border-color: var(--kj-blue-line); }
+:root .dw-count-btn.is-active, :root .dw-count-btn.active, :root .dw-count-btn[aria-pressed="true"],
+[data-theme="dark"] .dw-count-btn.is-active, [data-theme="dark"] .dw-count-btn.active, [data-theme="dark"] .dw-count-btn[aria-pressed="true"] {
+  background: var(--kj-blue); color: var(--kj-blue-ink); border-color: var(--kj-blue);
+}
+:root .dw-count-btn.action,
+[data-theme="dark"] .dw-count-btn.action {
+  background: transparent; color: var(--kj-gold); border-color: var(--kj-gold-line);
+  font-family: var(--ui-font-stack); font-size: .95rem;
+}
+:root .dw-count-btn.action:hover,
+[data-theme="dark"] .dw-count-btn.action:hover { background: var(--kj-gold-soft); color: var(--kj-gold); }
+
+/* ---------- A jelmondat ---------- */
+:root #passphraseOutput,
+[data-theme="dark"] #passphraseOutput,
+:root .dw-dice-passphrase,
+[data-theme="dark"] .dw-dice-passphrase {
+  font-family: var(--kj-mono); font-weight: 500;
+  background: var(--kj-result-bg); color: var(--kj-result-ink);
+  border: 1px solid var(--kj-gold-line); border-radius: 14px;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,.08), 0 0 0 4px var(--kj-gold-soft);
+}
+[data-theme="dark"] #passphraseOutput,
+[data-theme="dark"] .dw-dice-passphrase { text-shadow: 0 0 12px rgba(251, 191, 36, .25); }
+:root #passphraseOutput::placeholder { color: var(--kj-muted); font-style: normal; }
+:root .dw-output-meta,
+[data-theme="dark"] .dw-output-meta { color: var(--kj-muted); }
+:root .dw-output-meta strong { color: var(--kj-text); font-family: var(--kj-display); }
+
+/* ---------- Gombok ---------- */
+:root .btn { border-radius: 10px; font-family: var(--ui-font-stack); }
+:root .btn.primary {
+  background: var(--kj-blue); color: var(--kj-blue-ink);
+  border: 1px solid var(--kj-blue); font-weight: 700;
+  box-shadow: 0 8px 22px -12px rgba(34, 211, 238, .9);
+}
+:root .btn.primary:hover { background: #67e8f9; }
+:root .btn.primary:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+:root button:active { background-color: inherit; }
+:root .btn.primary:active { background: #22d3ee; }
+:root #copyBtn.copy-ok, :root #diceCopyBtn.copy-ok { background: #34d399 !important; border-color: #34d399 !important; color: #022c22 !important; }
+:root #copyBtn.copy-fail, :root #diceCopyBtn.copy-fail { background: #fb7185 !important; border-color: #fb7185 !important; color: #2b060d !important; }
+
+/* ---------- Beállítások ---------- */
+:root .dw-options,
+[data-theme="dark"] .dw-options { border-top: 1px solid var(--kj-border); }
+:root .dw-option-group h3,
+[data-theme="dark"] .dw-option-group h3 {
+  font-family: var(--ui-font-stack); font-size: .72rem; font-weight: 700;
+  letter-spacing: .12em; color: var(--kj-muted);
+}
+:root .dw-radio-row label,
+[data-theme="dark"] .dw-radio-row label {
+  background: var(--kj-surface); color: var(--kj-text);
+  border: 1px solid var(--kj-border); border-radius: 9px; font-weight: 600;
+}
+:root .dw-radio-row label:hover { border-color: var(--kj-border-strong); }
+:root .dw-radio-row label:has(input:checked),
+[data-theme="dark"] .dw-radio-row label:has(input:checked) {
+  background: var(--kj-blue-soft); color: var(--kj-text);
+  border-color: var(--kj-blue-line); box-shadow: inset 0 -2px 0 var(--kj-blue-line);
+}
+:root .dw-radio-row label:has(input:focus-visible) { outline: 2px solid var(--kj-gold-line); outline-offset: 2px; }
+:root .dw-toggle-row label.toggle-text { color: var(--kj-text); font-weight: 600; }
+:root .dw-toggle-row small { color: var(--kj-muted); font-weight: 400; }
+
+/* kapcsoló: mint a játékokban, bekapcsolva lila */
+:root .toggle {
+  width: 46px; height: 26px; flex: 0 0 46px;
+  background: var(--kj-track);
+  border-radius: 999px;
+}
+:root .dw-toggle-row .toggle { flex: 0 0 46px; }
+:root .toggle::before {
+  top: 3px; left: 3px; width: 20px; height: 20px;
+  border: 0; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  transition: transform .2s ease;
+}
+:root .toggle:checked { background-color: var(--kj-violet); }
+:root .toggle:checked::before { transform: translateX(20px); }
+:root .toggle:focus-visible { outline: 2px solid var(--kj-gold-line); outline-offset: 2px; }
+
+/* ---------- Entrópia ---------- */
+:root .dw-entropy-summary { color: var(--kj-muted); }
+:root .dw-entropy-summary strong,
+[data-theme="dark"] .dw-entropy-summary strong { color: var(--kj-text); font-family: var(--kj-display); font-size: 1.2rem; }
+:root .dw-meter,
+[data-theme="dark"] .dw-meter { background: var(--kj-track); height: 12px; border-radius: 999px; }
+:root .meter-fill { border-radius: 999px; }
+:root .meter-weak      { background: #fb7185; }
+:root .meter-fair      { background: #fbbf24; }
+:root .meter-good      { background: #22d3ee; }
+:root .meter-strong    { background: #34d399; }
+:root .meter-excellent { background: linear-gradient(90deg, #22d3ee, #a78bfa); box-shadow: 0 0 12px rgba(167, 139, 250, .45); }
+
+/* minősítés: a játékok címkéi */
+:root .entropy-label {
+  font-family: var(--kj-mono); font-size: .74rem; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  border-radius: 6px; padding: .2rem .5rem;
+  background: var(--kj-surface); color: var(--kj-muted); border: 1px solid var(--kj-border);
+}
+:root .entropy-weak      { background: #fb7185; color: #2b060d; border-color: #fb7185; }
+:root .entropy-fair      { background: #fbbf24; color: #1c1300; border-color: #fbbf24; }
+:root .entropy-good      { background: #22d3ee; color: #03232b; border-color: #22d3ee; }
+:root .entropy-strong    { background: #34d399; color: #022c22; border-color: #34d399; }
+:root .entropy-excellent { background: #a78bfa; color: #160c33; border-color: #a78bfa; }
+
+/* feltörési idő táblázat */
+:root .dw-crack-heading { font-size: 1rem; color: var(--kj-text); margin-top: 1.5rem; }
+:root .dw-crack-subheading { font-family: var(--ui-font-stack); font-weight: 400; color: var(--kj-muted); font-size: .9rem; }
+:root .crack-table th, :root .crack-table td,
+[data-theme="dark"] .crack-table th, [data-theme="dark"] .crack-table td { border-bottom: 1px solid var(--kj-border); }
+:root .crack-table th,
+[data-theme="dark"] .crack-table th { color: var(--kj-muted); font-family: var(--ui-font-stack); font-size: .72rem; letter-spacing: .1em; }
+:root .crack-table td { color: var(--kj-text); }
+:root .crack-time { font-family: var(--kj-mono); color: var(--kj-gold); }
+:root .crack-table th.crack-time-th { text-align: right; }
+:root .dw-crack-note { color: var(--kj-muted); font-size: .85rem; }
+
+/* ---------- Figyelmeztetés ---------- */
+:root .dw-warning,
+[data-theme="dark"] .dw-warning {
+  background: var(--kj-gold-soft); color: var(--kj-text);
+  border: 1px solid rgba(251, 191, 36, .45); border-left: 4px solid var(--kj-gold-line);
+  border-radius: 14px;
+}
+:root .dw-warning strong { color: var(--kj-gold); }
+
+/* ---------- Kockadobás → szó ---------- */
+:root .dw-dice-desc { color: var(--kj-muted); }
+:root .dw-dice-label { font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--kj-muted); }
+:root .dw-dice-select,
+[data-theme="dark"] .dw-dice-select,
+:root .custom-dropdown select {
+  font-family: var(--ui-font-stack); font-weight: 600;
+  background: var(--kj-field); color: var(--kj-text);
+  border: 1px solid var(--kj-border-strong); border-radius: 10px;
+  padding: .7rem 2.2rem .7rem .85rem;
+}
+:root .custom-dropdown select:focus { border-color: var(--kj-blue-line); box-shadow: 0 0 0 3px var(--kj-focus); }
+:root .custom-dropdown::after { color: var(--kj-muted); font-size: 12px; }
+:root .dw-dice-select option { background: #0d1428; color: #e2e8f0; }
+:root:not([data-theme="dark"]) .dw-dice-select option { background: #ffffff; color: #0f172a; }
+:root .dw-dice-input,
+[data-theme="dark"] .dw-dice-input,
+:root #diceRollInput,
+[data-theme="dark"] #diceRollInput {
+  font-family: var(--kj-mono);
+  background: var(--kj-field); color: var(--kj-text);
+  border: 1px solid var(--kj-border-strong); border-radius: 10px;
+}
+:root .dw-dice-input:focus, :root #diceRollInput:focus,
+:root #passphraseOutput:focus, :root .dw-dice-passphrase:focus {
+  border: 1px solid var(--kj-blue-line); box-shadow: 0 0 0 3px var(--kj-focus); outline: none;
+}
+:root .dw-dice-input::placeholder, :root #diceRollInput::placeholder { color: var(--kj-muted); font-style: normal; letter-spacing: .05em; }
+:root .dw-dice-ok,
+[data-theme="dark"] .dw-dice-ok {
+  background: var(--kj-green-soft); color: var(--kj-green);
+  border-left: 4px solid #34d399; border-radius: 10px; font-family: var(--kj-mono);
+}
+:root .dw-dice-error,
+[data-theme="dark"] .dw-dice-error {
+  background: var(--kj-gold-soft); color: var(--kj-text);
+  border-left: 4px solid var(--kj-gold-line); border-radius: 10px;
+}
+:root .dw-dice-collected-wrap,
+[data-theme="dark"] .dw-dice-collected-wrap { border-top: 1px solid var(--kj-border); }
+:root .dw-dice-collected-header { color: var(--kj-muted); }
+:root .dw-dice-clear-btn,
+[data-theme="dark"] .dw-dice-clear-btn { border: 1px solid var(--kj-border-strong); color: var(--kj-muted); border-radius: 9px; background: transparent; }
+:root .dw-dice-clear-btn:hover { border-color: var(--kj-red); color: var(--kj-red); }
+:root .dw-dice-chip,
+[data-theme="dark"] .dw-dice-chip {
+  font-family: var(--kj-mono);
+  background: var(--kj-gold-soft); color: var(--kj-result-ink);
+  border: 1px solid var(--kj-gold-line); border-radius: 9px;
+}
+
+/* ---------- Lábléc ---------- */
+:root .dw-footer,
+[data-theme="dark"] .dw-footer { color: var(--kj-muted); font-size: .85rem; }
+:root .dw-footer + .dw-footer { padding-top: 0; }
+
+/* ---------- Mobil ---------- */
+@media (max-width: 600px) {
+  :root .dw-card, [data-theme="dark"] .dw-card { padding: 1.1rem 1rem 1.2rem; border-radius: 16px; width: 94%; }
+  :root .dw-info-block { width: 94%; }
+  :root .dw-hero { padding: 4.75rem 1rem 1rem; }
+  :root .dw-list-btn { min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root .navbar a.logo-link, :root .dw-theme-toggle, :root .toggle::before { transition: none; }
+}
+:root .crack-table td.crack-time,
+:root .crack-table td:last-child:not(:first-child) { text-align: right; }
