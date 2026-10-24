@@ -460,9 +460,9 @@ button:focus-visible{outline:2px solid var(--q-gold); outline-offset:2px}
         <summary>Szabályok</summary>
         <div class="attrs" id="attrs"></div>
         <ul>
-          <li>16 bábu van, mindegyik más: <b>magas vagy alacsony</b>, <b>kék vagy piros</b>, <b>kerek vagy szögletes</b>, <b>lyukas vagy tömör</b>.</li>
+          <li>16 bábu van, mindegyik más: <b>kicsi vagy nagy</b>, <b>kék vagy piros</b>, <b>kerek vagy szögletes</b>, <b>lyukas vagy tömör</b>.</li>
           <li>A bábut, amit leteszel, mindig az ellenfeled választja ki. Miután letetted, te választasz neki egyet a maradékból.</li>
-          <li>Az nyer, aki egy sorba, oszlopba vagy átlóba a negyedik olyan bábut teszi, amelynek a másik hárommal van <b>közös tulajdonsága</b> (pl. mind a négy magas).</li>
+          <li>Az nyer, aki egy sorba, oszlopba vagy átlóba a negyedik olyan bábut teszi, amelynek a másik hárommal van <b>közös tulajdonsága</b> (pl. mind a négy nagy).</li>
           <li id="ruleSq">A „2×2 is” változatban négy szomszédos mező négyzete is nyer.</li>
           <li>A legnagyobb veszély: ha a táblán van egy <b>hármas</b>, az illő bábut már nem adhatod oda. Ha minden maradék bábu illik valamelyik hármashoz, vesztettél.</li>
         </ul>
@@ -567,11 +567,11 @@ button:focus-visible{outline:2px solid var(--q-gold); outline-offset:2px}
 
 <script id="engine-src">
 // ===== Ravasz négyes motor: 4x4 tábla, 16 bábu, 4 tulajdonság =====
-// Bábu: 4 bit. 1 = magas, 2 = piros, 4 = kerek, 8 = lyukas (0 bit: alacsony, kék, szögletes, tömör)
+// Bábu: 4 bit. 1 = nagy, 2 = piros, 4 = kerek, 8 = lyukas (0 bit: kicsi, kék, szögletes, tömör)
 // Tábla: b[i] = bábu (0..15) vagy -1 (üres). i = sor*4 + oszlop, a 0. sor a tábla teteje.
 // avail: a még ki nem adott bábuk bitmaszkja (a kézben lévőt nem tartalmazza).
 var QN = 4, QS = 16, COLS = 'ABCD';
-var ATTR = [['alacsony', 'magas'], ['kék', 'piros'], ['szögletes', 'kerek'], ['tömör', 'lyukas']];
+var ATTR = [['kicsi', 'nagy'], ['kék', 'piros'], ['szögletes', 'kerek'], ['tömör', 'lyukas']];
 function toName(i){ return COLS[i % 4] + (4 - ((i / 4) | 0)); }
 var LINES_C = [], LINES_S = [];
 (function(){
@@ -1348,7 +1348,7 @@ function dropMark(k){ for (const i in g.marks) g.marks[i] = g.marks[i].replace('
 
 // ---- Fejléc, szabályok ----
 $('#hpA').innerHTML = pieceSVG(1 | 4); $('#hpB').innerHTML = pieceSVG(2 | 8);
-$('#attrs').innerHTML = [[1 | 4, 4, 'magas · alacsony'], [4, 2 | 4, 'kék · piros'], [4, 0, 'kerek · szögletes'], [4, 4 | 8, 'tömör · lyukas']]
+$('#attrs').innerHTML = [[1 | 4, 4, 'nagy · kicsi'], [4, 2 | 4, 'kék · piros'], [4, 0, 'kerek · szögletes'], [4, 4 | 8, 'tömör · lyukas']]
   .map(([a, b, t]) => `<div><span class="pair"><span>${pieceSVG(a)}</span><span>${pieceSVG(b)}</span></span>${t}</div>`).join('');
 
 // ---- Vezérlők ----
