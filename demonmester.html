@@ -468,7 +468,7 @@ select{font:600 14px var(--f-body); color:var(--text); background:#0f1830; borde
         <summary>Szabályok és kezelés</summary>
         <ul>
           <li>Lépés: koppints a figurádra, aztán a pontozott mezőre. Ha két kártyád is odavisz, megkérdezem, melyikkel lépsz, de előre is kiválaszthatod a kártyát.</li>
-          <li>Mindkét félnek egy mestere (szarvas maszkos) és négy diákja van. A tábla 5×5-ös.</li>
+          <li>Mindkét félnek egy mestere (szarvas maszkos) és négy tanítványa van. A tábla 5×5-ös.</li>
           <li>Lépni csak a saját két kártyád valamelyikével lehet: a kártya mutatja, a figura honnan hova mehet (a világos négyzet a figura, a színesek a célmezők). Saját figurára nem léphetsz, ellenfélére igen: azt leütöd.</li>
           <li>A kijátszott kártya középre kerül, te pedig elveszed a középen lévőt. A te kártyád így a másik fél következő lépése után az övé lesz.</li>
           <li>Nyersz, ha leütöd a másik mesterét (a kő útja), vagy a mestereddel beállsz a másik templomába, a mestere kezdőmezőjére (a patak útja).</li>
@@ -1342,7 +1342,7 @@ function renderView(V, o){
       pn.className = 'pn ' + pl.side + (o.planFocus === i ? ' focus' : ''); pn.textContent = pl.n;
     } else if (pn) pn.remove();
     c.classList.toggle('has-plan', !!pl);
-    c.setAttribute('aria-label', toName(i) + (sd >= 0 ? `, ${side_[sd]} ${master ? 'mester' : 'diák'}` : ', üres') + (tmp >= 0 ? `, ${side_[tmp]} templom` : '') + (tg.has(i) ? ', ide léphetsz' : ''));
+    c.setAttribute('aria-label', toName(i) + (sd >= 0 ? `, ${side_[sd]} ${master ? 'mester' : 'tanítvány'}` : ', üres') + (tmp >= 0 ? `, ${side_[tmp]} templom` : '') + (tg.has(i) ? ', ide léphetsz' : ''));
   }
   const bottom = V.flip ? 1 : 0, topSide = 1 - bottom;
   const row = (el, sd) => {
@@ -1843,7 +1843,7 @@ function applyReveal(fresh){
   } else {
     if (r.hang.length){
       const hs = uniqN(r.hang.map(h => h.to));
-      items.push({ c: 'plain', tag: 'Ütésben', t: `A gép a következő lépésében leütheti ${hs.length > 1 ? 'ezeket a diákjaidat' : 'ezt a diákodat'}: ${hs.map(sq).join(', ')}. Ha nincs ennél fontosabb dolgod, védd vagy vidd el.` });
+      items.push({ c: 'plain', tag: 'Ütésben', t: `A gép a következő lépésében leütheti ${hs.length > 1 ? 'ezeket a tanítványaidat' : 'ezt a tanítványodat'}: ${hs.map(sq).join(', ')}. Ha nincs ennél fontosabb dolgod, védd vagy vidd el.` });
     } else items.push({ c: 'plain', tag: 'Nyugi', t: 'Nincs fenyegetés. A most kijátszott kártyád a gép következő lépése után az övé lesz.' });
   }
   if (!r.myNow && r.myWin && !(g.reveal >= 2 && threat)) items.push({ c: 'gold', tag: 'Lehetőség', t: 'Neked is van kényszerítő nyerésed. Keresd meg!' });
@@ -1973,7 +1973,7 @@ function aProblem(){
   return '';
 }
 function renderA(){ renderView(AV, { s: aState(), flip: false, marks: aMarks, plan: aPlan }); }
-const TOOLS = [[1, 'Kék diák', PSVG(0, false)], [2, 'Kék mester', PSVG(0, true)], [3, 'Piros diák', PSVG(1, false)], [4, 'Piros mester', PSVG(1, true)], [0, 'Radír', '<svg viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px"><path d="M4 16l8-8 6 6-5 5H8z M10 19h10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/></svg>']];
+const TOOLS = [[1, 'Kék tanítvány', PSVG(0, false)], [2, 'Kék mester', PSVG(0, true)], [3, 'Piros tanítvány', PSVG(1, false)], [4, 'Piros mester', PSVG(1, true)], [0, 'Radír', '<svg viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px"><path d="M4 16l8-8 6 6-5 5H8z M10 19h10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/></svg>']];
 $('#aTool').innerHTML = TOOLS.map(t => `<button data-v="${t[0]}" aria-label="${t[1]}" title="${t[1]}">${t[2]}</button>`).join('');
 function renderCardSel(){
   const opts = sel => CARDS.map((C, k) => `<option value="${k}"${k === sel ? ' selected' : ''}>${C.name} (${side_[C.col]})</option>`).join('');
@@ -1992,7 +1992,7 @@ function renderTools(){
   setSeg('#aTurn', A.turn);
   renderCardSel();
   const c = counts(), pr = aProblem();
-  let t = `Kék: ${c[2] ? 'mester és ' : ''}${c[1]} diák. Piros: ${c[4] ? 'mester és ' : ''}${c[3]} diák. ${SIDE[A.turn]} lép.`;
+  let t = `Kék: ${c[2] ? 'mester és ' : ''}${c[1]} tanítvány. Piros: ${c[4] ? 'mester és ' : ''}${c[3]} tanítvány. ${SIDE[A.turn]} lép.`;
   if (pr) t = pr + ' ' + t;
   if (A.note) t = A.note + ' ' + t;
   $('#aCount').textContent = t; $('#aCount').classList.toggle('warnc', !!pr);
@@ -2009,7 +2009,7 @@ function aEdit(i){
     if (t === 2 || t === 4){ for (let j = 0; j < NN; j++) if (A.p[j] === t) A.p[j] = 0; }
     else {
       const c = counts();
-      if (c[t] >= 4 && v !== t){ A.note = `Legfeljebb négy ${t === 1 ? 'kék' : 'piros'} diák lehet.`; A.hist.pop(); renderTools(); return; }
+      if (c[t] >= 4 && v !== t){ A.note = `Legfeljebb négy ${t === 1 ? 'kék' : 'piros'} tanítvány lehet.`; A.hist.pop(); renderTools(); return; }
     }
     A.p[i] = t;
   }
@@ -2084,7 +2084,7 @@ function evalTxt(v, sd){
   const x = v / 100, a = Math.abs(x);
   if (a < 0.25) return 'kiegyenlített állás';
   const who = x > 0 ? side_[sd] : side_[1 - sd];
-  return `${who} előnyben (kb. ${a.toFixed(1).replace('.', ',')} diáknyi)`;
+  return `${who} előnyben (kb. ${a.toFixed(1).replace('.', ',')} tanítványnyi)`;
 }
 function planHtml(r, s){
   if (!r.plan || r.plan.length < 2) return '';
