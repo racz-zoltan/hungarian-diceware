@@ -394,10 +394,10 @@ button:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
 </svg>
 
 <div class="page">
-<section class="app" aria-label="Viking játék">
+<section class="app" aria-label="Vikingek játék">
   <div class="head">
     <div>
-      <h1><svg viewBox="-1 -1.05 2 2.1" aria-hidden="true"><use href="#hx" class="tile w"/></svg>Viking<svg viewBox="-1 -1.05 2 2.1" aria-hidden="true"><use href="#hx" class="tile b"/></svg></h1>
+      <h1><svg viewBox="-1 -1.05 2 2.1" aria-hidden="true"><use href="#hx" class="tile w"/></svg>Vikingek<svg viewBox="-1 -1.05 2 2.1" aria-hidden="true"><use href="#hx" class="tile b"/></svg></h1>
       <p id="headSub"></p>
     </div>
     <div class="head-right">
@@ -2412,7 +2412,7 @@ function bindDuoButtons(){
   on('dInvite', () => duoInvite());
   on('dHaveCode', () => { duoReset(); D.role = 'guest-wait'; duoRender(); const t = document.getElementById('dPaste'); if (t) t.focus(); });
   on('dCancel', () => { duoReset(); duoRender(); });
-  on('dShare', () => D.role === 'host' ? shareCode(D.offerCode, 'Viking meghívó kód: nyisd meg a játék Barát lapját, nyomd meg a „Van kódom” gombot, és illeszd be:') : shareCode(D.answerCode, 'Viking válaszkód: illeszd be a Barát lapon:'));
+  on('dShare', () => D.role === 'host' ? shareCode(D.offerCode, 'Vikingek meghívó kód: nyisd meg a játék Barát lapját, nyomd meg a „Van kódom” gombot, és illeszd be:') : shareCode(D.answerCode, 'Vikingek válaszkód: illeszd be a Barát lapon:'));
   on('dCopy', () => copyCode(D.role === 'host' ? D.offerCode : D.answerCode));
   on('dPasteBtn', () => pasteInto('dPaste'));
   const p = document.getElementById('dPaste');
