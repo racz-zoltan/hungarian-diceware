@@ -131,7 +131,7 @@ button:focus-visible, select:focus-visible{outline:2px solid var(--gold); outlin
 .cell.t-best::before{content:"★"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:calc(var(--cell) * .4); color:var(--gold); z-index:2; pointer-events:none}
 .cell.t-best.filled::before{align-items:flex-start; justify-content:flex-end; padding:2px 5px; font-size:calc(var(--cell) * .26)}
 .cell.t-warn .mk{inset:4px; border:2px dashed var(--text); opacity:.8}
-.cell .pn{position:absolute; left:3px; top:2px; font:700 calc(var(--cell) * .22) var(--f-mono); pointer-events:none; z-index:3; line-height:1; padding:2px 4px; border-radius:6px; background:rgba(6,10,23,.75)}
+.cell .pn{position:absolute; left:3px; top:2px; white-space:nowrap; max-width:calc(100% - 6px); overflow:hidden; font:700 calc(var(--cell) * .22) var(--f-mono); pointer-events:none; z-index:3; line-height:1; padding:2px 4px; border-radius:6px; background:rgba(6,10,23,.75)}
 .cell .pn.u{color:var(--gold); box-shadow:0 0 0 1.5px var(--gold)} .cell .pn.m{color:var(--violet); box-shadow:0 0 0 1.5px var(--violet)}
 .cell .pn.focus{box-shadow:0 0 0 2.5px currentColor, 0 0 12px currentColor}
 .cell.has-plan.t-best::before{display:none}
@@ -1071,7 +1071,7 @@ function analyze(st, ms, D){
       res.cause = [res.trap.m.f]; res.danger = [res.trap.m.to];
     }
   }
-  // ütésben álló diákok
+  // ütésben álló tanítványok
   var mine = s.p[u] & ~(1 << s.k[u]);
   for (var sl = 0; sl < 2; sl++){
     var c = s.h[m][sl], p = s.p[m];
@@ -1888,7 +1888,9 @@ function planLis(line, uSide){
   return line.map((s, k) => { const u = s.side === uSide;
     return `<li class="${u ? 'u' : 'm'}" data-i="${s.pass ? -1 : s.to}"><span class="n">${k + 1}.</span><span class="who">${u ? 'Te' : 'Gép'}</span><span>${mvTxt(s)} ${(u ? PLAN_U : PLAN_M)[s.kind] || ''}${s.forced && k > 0 ? '<span class="forced">kényszer</span>' : ''}</span></li>`; }).join('');
 }
-function planMap(line, uSide){ const map = {}; line.forEach((s, k) => { if (!s.pass) map[s.to] = { n: k + 1, side: s.side === uSide ? 'u' : 'm' }; }); return map; }
+// ha a terv több lépése is ugyanarra a mezőre érkezik, mindegyik száma látszik (pl. „1·5”), a szín az elsőé
+function addPlanNo(map, to, n, side){ if (map[to]) map[to].n += '·' + n; else map[to] = { n: String(n), side }; }
+function planMap(line, uSide){ const map = {}; line.forEach((s, k) => { if (!s.pass) addPlanNo(map, s.to, k + 1, s.side === uSide ? 'u' : 'm'); }); return map; }
 function showTrap(line){
   g.plan = { line, map: planMap(line, g.user), kind: 'trap' };
   $('#plan').classList.add('trap');
@@ -1948,7 +1950,7 @@ $('#hint').onclick = async () => {
 // ===================================================================
 // ---- ELEMZÉS MÓD: állás felrakása kézzel ----
 // ===================================================================
-// A.p: mezőnként 0 üres, 1 kék diák, 2 kék mester, 3 piros diák, 4 piros mester
+// A.p: mezőnként 0 üres, 1 kék tanítvány, 2 kék mester, 3 piros tanítvány, 4 piros mester
 const A = { p: new Int8Array(NN), cards: dealCards(), turn: 0, tool: 1, hist: [], res: {}, focus: 0, token: 0, note: '', running: false };
 function aStart(){ A.p = new Int8Array(NN); for (let x = 0; x < N; x++){ A.p[20 + x] = x === 2 ? 2 : 1; A.p[x] = x === 2 ? 4 : 3; } }
 aStart();
@@ -2128,7 +2130,7 @@ function applyAMarks(){
     r.defend.filter(m => !r.best || mkey(m) !== mkey(r.best)).slice(0, 8).forEach(m => M(m.to, 't-def'));
   }
   if (r.best && !r.best.pass){ M(r.best.f, 't-bestfrom'); M(r.best.to, 't-best'); }
-  if (r.plan && r.plan.length > 1 && r.state !== 'lost') r.plan.forEach((e, k) => { if (k > 0 && !e.pass) aPlan[e.to] = { n: k + 1, side: e.side === sd ? 'u' : 'm' }; });
+  if (r.plan && r.plan.length > 1 && r.state !== 'lost') r.plan.forEach((e, k) => { if (k > 0 && !e.pass) addPlanNo(aPlan, e.to, k + 1, e.side === sd ? 'u' : 'm'); });
   renderA();
 }
 $('#aStep').onclick = () => {
@@ -2452,7 +2454,7 @@ $('#dNewGame').onclick = () => { if (!D.connected) return; const hs = 1 - D.host
 $('#dLearn').onchange = () => { D.learn = $('#dLearn').checked; store.set('duoLearn', D.learn); duoSend({ t: 'learn', on: D.learn }); duoCoach(); duoRender(); };
 $('#dLeave').onclick = () => { duoSend({ t: 'bye' }); duoReset(); D.score = { me: 0, fr: 0, d: 0 }; duoNewGame(0, dealCards()); duoRender(); };
 window.__duo = { offer: () => D.offerCode, answer: () => D.answerCode, st: () => ({ role: D.role, connected: D.connected, moves: D.moves.length, me: mySide(), turn: D.s.t, over: D.over, fail: D.fail || '', note: D.note || '', score: D.score }) };
-window.__g = () => g; window.__dS = () => D.s;
+window.__g = () => g; window.__showPlan = l => { showPlan(l, 0); renderBoard(); }; window.__dS = () => D.s;
 
 // ---- Mód váltás ----
 function setMode(m){
