@@ -38,6 +38,13 @@
   .c.w { background:var(--win); }
   .c.pop { animation:pop .18s ease-out; }
   @keyframes pop { from { transform:scale(.6); opacity:.3; } to { transform:scale(1); opacity:1; } }
+  #board.shake { animation:shake .22s ease-out; }
+  @keyframes shake {
+    0%,100% { transform:translate(0,0); }
+    20% { transform:translate(-3px,1px); }  40% { transform:translate(3px,-1px); }
+    60% { transform:translate(-2px,0); }    80% { transform:translate(1px,1px); }
+  }
+  @media (prefers-reduced-motion: reduce) { #board.shake { animation:none; } }
   #status { font-weight:600; margin:0 0 10px; min-height:1.4em; }
 </style>
 </head>
@@ -407,8 +414,17 @@ function newGame(sound = true) {
   if (sound) { FX.play('newGame'); log('új játék'); }
 }
 
+// Rövid táblarázás – iPhone-on a gép lépésénél ez pótolja a rezgést (ott nincs érintés, nincs haptika)
+function shake() {
+  boardEl.classList.remove('shake');
+  void boardEl.offsetWidth;            // animáció újraindítása
+  boardEl.classList.add('shake');
+}
+boardEl.addEventListener('animationend', e => { if (e.target === boardEl) boardEl.classList.remove('shake'); });
+
 function place(i) {
   const who = turn; board[i] = who; hist.push(i);
+  if (aiEl.checked && who === 'O') shake();
   const ln = line(i, who);
   if (ln.length >= WIN) {
     over = true;
