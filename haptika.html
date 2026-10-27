@@ -60,8 +60,8 @@
   <label class="native">Hang <input type="checkbox" switch id="snd"></label>
   <div class="row"><span>Hangerő</span><input type="range" id="vol" min="0" max="1" step="0.05"></div>
   <label class="native">Rezgés <input type="checkbox" switch id="hap"></label>
-  <div class="row"><span>iOS tick-köz: <b id="gapv"></b> ms</span><input type="range" id="gap" min="30" max="200" step="10"></div>
-  <p class="hint">iPhone-on a néma kapcsoló a hangot is elnémítja (szándékosan, játékhoz ez illik).</p>
+  <p class="hint">iPhone-on a néma kapcsoló a hangot is elnémítja (szándékosan, játékhoz ez illik).
+    iPhone-on rezgés csak közvetlenül a koppintott elemen van, egy tick – a gép lépésére és mintákra nincs.</p>
 </div>
 
 <div class="card">
@@ -89,6 +89,9 @@
    iOS Safari 17.4+: rejtett <input type="checkbox" switch> trükk
    ================================================================ */
 const Haptics = (() => {
+  /* iOS 26.5+ óta a programból hívott label.click() NEM rezeg (nem „megbízható” kattintás).
+     Ezért iOS-en minden koppintható elemre egy átlátszó <label> kerül, benne rejtett switch-csel:
+     a felhasználó valódi érintése váltja a kapcsolót → rendszer-haptika. Elemenként 1 tick, minta nincs. */
   const PRESETS = {
     tap:     { android: 10,                    ios: 1 },
     select:  { android: 6,                     ios: 1 },
@@ -108,45 +111,48 @@ const Haptics = (() => {
                      : (typeof navigator.vibrate === 'function' ? 'vibrate' : 'none');
   let enabled = true;
   try { enabled = localStorage.getItem(KEY) !== '0'; } catch (e) {}
-  let iosGap = 70, timers = [], label = null;
+  const switches = new Set();
 
   if (mode === 'ios-switch') {
-    const inp = document.createElement('input');
-    inp.type = 'checkbox'; inp.id = 'hx-' + Math.random().toString(36).slice(2);
-    inp.setAttribute('switch', ''); inp.tabIndex = -1;
-    label = document.createElement('label'); label.htmlFor = inp.id;
-    for (const el of [inp, label]) {
-      el.setAttribute('aria-hidden', 'true');
-      el.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none;';
-    }
-    const attach = () => document.body.append(inp, label);
-    document.body ? attach() : document.addEventListener('DOMContentLoaded', attach);
+    const css = document.createElement('style');
+    css.textContent =
+      '.hx-hit{position:absolute;inset:0;z-index:1;border-radius:inherit;-webkit-tap-highlight-color:transparent}' +
+      '.hx-hit>input{position:absolute;left:0;top:0;width:1px;height:1px;margin:0;opacity:0;pointer-events:none}';
+    document.head.append(css);
   }
 
-  function cancel() {
-    timers.forEach(clearTimeout); timers = [];
-    if (mode === 'vibrate') navigator.vibrate(0);
+  /** iOS: koppintásra rezgő réteget tesz az elemre. Androidon/egyéb helyen nem csinál semmit. */
+  function attach(el) {
+    if (mode !== 'ios-switch' || el.querySelector(':scope > .hx-hit')) return el;
+    if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+    const lab = document.createElement('label');
+    lab.className = 'hx-hit'; lab.setAttribute('aria-hidden', 'true');
+    const inp = document.createElement('input');
+    inp.type = 'checkbox'; inp.setAttribute('switch', ''); inp.tabIndex = -1;
+    inp.disabled = !enabled;                          // letiltott switch = nincs rezgés
+    inp.addEventListener('click', e => e.stopPropagation()); // ne fusson le kétszer az elem click-kezelője
+    lab.append(inp); el.append(lab); switches.add(inp);
+    return el;
   }
+
+  function cancel() { if (mode === 'vibrate') navigator.vibrate(0); }
+
+  /** Android: rezgésminta. iOS-en nincs hatása – ott az attach()-olt elem érintése ad egy ticket. */
   function play(what = 'tap') {
-    if (!enabled || mode === 'none') return false;
-    cancel();
+    if (!enabled || mode !== 'vibrate') return false;
     const p = typeof what === 'string' ? PRESETS[what] : null;
     if (typeof what === 'string' && !p) return false;
-    if (mode === 'vibrate') return navigator.vibrate(p ? p.android : what);
-    const n = p ? p.ios : Array.isArray(what) ? Math.ceil(what.length / 2) : 1;
-    label.click();
-    for (let i = 1; i < n; i++) timers.push(setTimeout(() => label.click(), i * iosGap));
-    return true;
+    return navigator.vibrate(p ? p.android : what);
   }
   function setEnabled(v) {
     enabled = !!v;
     try { localStorage.setItem(KEY, enabled ? '1' : '0'); } catch (e) {}
+    switches.forEach(s => { s.isConnected ? (s.disabled = !enabled) : switches.delete(s); });
     if (!enabled) cancel();
   }
   return {
-    play, cancel, setEnabled, presets: PRESETS,
+    play, attach, cancel, setEnabled, presets: PRESETS,
     get enabled() { return enabled; }, get mode() { return mode; },
-    get iosGap() { return iosGap; }, set iosGap(ms) { iosGap = Math.max(20, +ms || 70); },
   };
 })();
 
@@ -336,14 +342,12 @@ const upd = () => mark($('#net'), navigator.onLine);
 upd(); addEventListener('online', upd); addEventListener('offline', upd);
 setInterval(() => mark($('#ctxs'), Sound.state === 'running', Sound.state), 500);
 
-const snd = $('#snd'), vol = $('#vol'), hap = $('#hap'), gap = $('#gap');
+const snd = $('#snd'), vol = $('#vol'), hap = $('#hap');
 snd.checked = Sound.enabled; vol.value = Sound.volume; hap.checked = Haptics.enabled;
-gap.value = Haptics.iosGap; $('#gapv').textContent = gap.value;
 snd.addEventListener('change', () => Sound.setEnabled(snd.checked));
 vol.addEventListener('input', () => Sound.setVolume(vol.value));
 vol.addEventListener('change', () => FX.play('placeX', { haptic: false }));
 hap.addEventListener('change', () => Haptics.setEnabled(hap.checked));
-gap.addEventListener('input', () => { Haptics.iosGap = gap.value; $('#gapv').textContent = gap.value; });
 
 const LABELS = { placeX:'X lerakása', placeO:'O lerakása', select:'Kijelölés', error:'Foglalt mező',
   threat:'Fenyegetés', undo:'Visszavonás', win:'Győzelem', lose:'Vereség', draw:'Döntetlen', newGame:'Új játék' };
@@ -352,6 +356,7 @@ for (const name of FX.events) {
   b.innerHTML = `${LABELS[name]}<small>${name}</small>`;
   b.addEventListener('click', () => { FX.play(name); log(name); });
   $('#fxgrid').append(b);
+  Haptics.attach(b);
 }
 
 /* ---------- Mini amőba ---------- */
@@ -372,16 +377,25 @@ function line(i, who) {
   return best;
 }
 
+// A cellák egyszer jönnek létre és helyben frissülnek: ha a koppintott elemet
+// a kattintás közben kicserélnénk, a rejtett switch már nem kapná meg az érintést.
+const cells = [];
+for (let i = 0; i < N * N; i++) {
+  const c = document.createElement('div'), m = document.createElement('span');
+  c.append(m);
+  c.addEventListener('click', () => onCell(i));
+  boardEl.append(c);
+  Haptics.attach(c);
+  cells.push({ c, m });
+}
+
 function render(winCells = [], popIdx = -1) {
-  boardEl.innerHTML = '';
   const last = hist[hist.length - 1];
   board.forEach((v, i) => {
-    const c = document.createElement('div');
-    c.className = 'c' + (v ? ' ' + v : '') + (i === last ? ' last' : '') +
-                  (winCells.includes(i) ? ' w' : '') + (i === popIdx ? ' pop' : '');
-    c.textContent = v;
-    c.addEventListener('pointerdown', e => { e.preventDefault(); onCell(i); });
-    boardEl.append(c);
+    const { c, m } = cells[i];
+    c.className = 'c' + (v ? ' ' + v : '') + (i === last ? ' last' : '') + (winCells.includes(i) ? ' w' : '');
+    m.textContent = v;
+    if (i === popIdx) { void c.offsetWidth; c.classList.add('pop'); }
   });
   if (!over) statusEl.textContent = (aiEl.checked && turn === 'O') ? 'A gép gondolkodik…' : `${turn} következik`;
 }
@@ -447,6 +461,7 @@ $('#undo').addEventListener('click', () => {
   over = false; FX.play('undo'); log('visszavonás'); render();
 });
 aiEl.addEventListener('change', () => newGame(false));
+Haptics.attach($('#new')); Haptics.attach($('#undo'));
 
 newGame(false);
 </script>
