@@ -314,6 +314,30 @@ body.darkround svg.map{filter:brightness(.55) saturate(.6)}
 .chapban{display:flex;gap:12px;align-items:center;margin:6px 0}.chapban>span{width:150px;height:120px;flex:none}.chapban .ic{width:100%;height:100%}.chapban b{color:var(--gold)}
 .pskull{display:inline-block}.pskull .ic{width:100%;height:100%}
 .acard2 .half .cico.big.pskull{width:40px;height:40px}
+.cb-side{display:none}
+.setcol{display:grid;gap:16px;align-content:start;min-width:0}
+.side{display:grid;gap:10px;align-content:start;min-width:0}
+@media (min-width:880px){.layout .mapwrap{grid-row:span 2}.layout .side{grid-column:2}}
+/* asztali gép: a teljes képernyőt kihasználjuk */
+@media (min-width:1100px){
+  .page{max-width:none;padding:16px 24px 24px}
+  .kk{padding:20px 24px}
+  .setup{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start;gap:28px}
+  .layout{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px}
+  .layout .mapwrap{position:sticky;top:12px}
+  .cb-top{display:none}.cb-side{display:block}
+  .cb-side .units{grid-template-columns:repeat(2,minmax(0,1fr))}
+  svg.map{max-height:calc(100vh - 130px)}
+  .dlg{width:min(780px,100%)}
+  .sub{max-width:90ch}
+}
+@media (min-width:1360px){
+  .layout{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,.95fr)}
+  .layout .mapwrap{grid-row:auto}.layout .side{grid-column:auto}
+  .side .heroes{grid-template-columns:1fr}
+  .side .log{max-height:max(260px,calc(100vh - 560px))}
+}
+@media (min-width:2600px){.page{max-width:2600px}}
 </style>
 </head>
 <body>
@@ -1679,7 +1703,7 @@ body.darkround svg.map{filter:brightness(.55) saturate(.6)}
       ${profSummaryHtml()}
       <div class="joinbar card"><span>A barátod telefonján indul a játék?</span><button class="btn small violet" id="joinAs">Csatlakozás barátként</button></div>
       <p class="sub">Együtt kell legyőzni a Mélység Urát, mielőtt kialszik a fáklya – de csak a legnagyobb hírnevű hős nyer. A lapjaid erősebbé tesznek, de minden kijátszott lap a kazamatát is erősíti.</p>
-      <div class="setup">
+      <div class="setup"><div class="setcol main">
         <div>
           <p class="label">Játékforma</p>
           <div class="seg" role="group"><button data-form="single" aria-pressed="${S.form === 'single'}">Egyszintes</button><button data-form="exp" aria-pressed="${S.form === 'exp'}">Expedíció (3 szint)</button><button data-form="campaign" aria-pressed="${isCamp}">Kampány (12 expedíció)</button></div>
@@ -1717,6 +1741,7 @@ body.darkround svg.map{filter:brightness(.55) saturate(.6)}
           <div class="seg" role="group">${[['slow', 'Lassú'], ['normal', 'Normál'], ['fast', 'Gyors']].map(([k, l]) => `<button data-speed="${k}" aria-pressed="${S.speed === k}">${l}</button>`).join('')}</div>
         </div>
         <div class="row"><button class="btn primary" id="start">${isCamp ? (cs ? 'Tovább a Menedékbe' : 'Kampány indítása') : 'Játék indítása'}</button></div>
+        </div><div class="setcol info">
         <div>
           <p class="label">Szörnyek</p>
           <div class="roster">
@@ -1740,7 +1765,7 @@ body.darkround svg.map{filter:brightness(.55) saturate(.6)}
           <p class="note">Az ereklyék a 2. szinten rejtőznek; mindegyikkel egyszer lehet valamit tenni. A megszerzett ereklyék (Csontkorona, Árnyak gyűrűje, Vérkristály) a kincstáradba kerülnek. A támogatási pontok a 3. szinten vannak.</p>
         </div>
         ${rulesHtml()}
-      </div>`;
+      </div></div>`;
     app.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { S.mode = b.dataset.mode; save(); renderSetup(); });
     app.querySelectorAll('[data-form]').forEach(b => b.onclick = () => { S.form = b.dataset.form; if (S.form === 'single' && S.seats.length < 2) S.seats.push({ name: 'Bot 1', human: false, remote: false, cls: K.CLASSES.find(c => c !== S.seats[0].cls) }); save(); renderSetup(); });
     app.querySelectorAll('[data-level]').forEach(b => b.onclick = () => { S.level = b.dataset.level; save(); renderSetup(); });
@@ -2865,7 +2890,7 @@ body.darkround svg.map{filter:brightness(.55) saturate(.6)}
   }
   function mapSvg(targets) {
     const st = G.st;
-    let s = `<svg class="map" viewBox="0 0 300 400" role="img" aria-label="A kazamata térképe">`;
+    let s = `<svg class="map" viewBox="0 0 300 408" role="img" aria-label="A kazamata térképe">`;
     for (const [a, b] of K.EDGES) { const [x1, y1] = POS[a], [x2, y2] = POS[b]; const diag = a !== 'E' && b !== 'B' && x1 !== x2 && y1 !== y2; s += `<line class="edge ${diag ? 'diag' : ''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`; }
     for (const z of K.ZONES) {
       const [x, y] = POS[z], d = K.DEPTH[z], t = targets[z], ui = G.ui;
@@ -2927,12 +2952,15 @@ body.darkround svg.map{filter:brightness(.55) saturate(.6)}
         <div class="row"><span class="stat" title="A legerősebb hős ereje + a többiek segítsége, lapok nélkül">közös erő <b style="color:${teamPw > K.bossStr(st) ? 'var(--green)' : 'var(--hero)'}">${teamPw}</b> / Mélység Ura <b>${st.camp ? campBossNow(st) : K.bossStr(st)}</b></span>
           <button class="btn small" id="help">?</button><button class="btn small" id="quit">Kilépés</button></div>
       </div>
-      ${st.camp ? campBar(st) : bossBreakdown(st)}
+      <div class="cb-top">${st.camp ? campBar(st) : bossBreakdown(st)}</div>
       <div class="layout">
         <div class="card mapwrap">${dungeonNowHtml(st)}${mapSvg(targets)}</div>
         <div class="panel">
+          <div class="cb-side">${st.camp ? campBar(st) : bossBreakdown(st)}</div>
           ${turnPanel(acts)}
           ${st.camp ? campLevelPanel(st) : ''}
+        </div>
+        <div class="side">
           <div class="heroes">${st.heroes.map(heroCard).join('')}</div>
           <div class="card"><p class="label">Napló</p><div class="log">${logHtml()}</div></div>
         </div>
