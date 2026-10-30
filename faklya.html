@@ -85,11 +85,11 @@ button{font:inherit; color:inherit}
 .hearts{display:inline-flex; gap:2px; align-items:center} .hearts .ht{height:20px; width:auto}
 .grp{display:inline-flex; align-items:center; gap:5px}
 .grp > small{font:700 10.5px var(--ff); letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
-.hearts.hp{gap:1px}
-.hh{position:relative; display:inline-block; height:22px}
-.hh img{height:22px; width:auto; display:block}
-.hh img.on{position:absolute; inset:0; filter:drop-shadow(0 0 3px rgba(239,68,68,.5))}
-.hearts.lives{gap:3px} .hearts.lives .ht{height:26px; filter:drop-shadow(0 0 4px rgba(34,211,238,.35))}
+.hearts.hp{gap:2px}
+.hh{position:relative; display:inline-block; height:26px}
+.hh img{height:26px; width:auto; display:block}
+.hh img.on{position:absolute; inset:0; filter:drop-shadow(0 0 4px rgba(34,211,238,.45))}
+.hearts.lives{gap:2px} .hearts.lives .ht{height:22px}
 .resstatus{display:flex; flex-wrap:wrap; justify-content:center; margin:2px 0 12px}
 #result .card{width:min(680px,100%)}
 .resstatus:empty{display:none}
@@ -255,7 +255,7 @@ input[type=range]{width:160px; accent-color:var(--gold)}
 <div class="dlg" id="pause" hidden><div class="card">
   <h2>Szünet</h2>
   <p id="pauseTxt">Tartsd a telefont kényelmes szögben, majd kalibrálj: ez lesz az alaphelyzet.</p>
-  <div class="row"><button class="btn primary" id="resumeBtn">Folytatás</button><button class="btn" id="calibBtn">Kalibrálás</button><button class="btn ghost" id="quitBtn">Feladás</button></div>
+  <div class="row"><button class="btn primary" id="resumeBtn">Folytatás</button><button class="btn" id="calibBtn">Kalibrálás</button><button class="btn" id="exitBtn">Kilépés</button><button class="btn ghost" id="quitBtn">Feladás</button></div>
 </div></div>
 
 <div class="dlg" id="result" hidden><div class="card">
@@ -276,9 +276,9 @@ input[type=range]{width:160px; accent-color:var(--gold)}
     <li>Az Árnyharcos fizikai pajzsa mindent megfog, de közben lassan mozogsz. A Lidércpap erőpajzsa tovább tart és nem lassít, de csak a sebzés 70%-át fogja meg.</li>
     <li><b>Hadjárat:</b> három felvonás. Előbb a kazamata szörnyei, aztán a Mélység seregének négy ereklyeőrzője, végül a Sötét vezér és A Mélység Ura. Minden ereklyét megtörhetsz (A Mélység Ura gyengül tőle) vagy megszerezhetsz (felszerelhető tárgy lesz). A Vérkristályt csak megszerezni lehet.</li>
     <li>Akit először legyőzöl, csatlakozik hozzád választható hősként. A szörnyeknek gyengéjük van: az Orknak a Harcos, a Lidércnek a Pap, a póknak a Tolvaj, a Kőgólemnek a Mágus (+30% sebzés).</li>
-    <li><b>A fáklya:</b> felvonásonként 7 / 6 / 4 láng. Minden csata egy lángba kerül, a vereség háromba, a pihenés (teljes gyógyulás) egybe. Az életerő a csaták között megmarad. Ha kialszik a fáklya, a felvonás elejére kerülsz vissza; a TP, a képességek és a tárgyak megmaradnak. Félbehagyott csata vereségnek számít.</li>
-    <li><b>Gyógyforrás:</b> felvonásonként egy biztos (a második győzelem után), és egy rejtett, ha legalább 75% életerővel nyersz. Választhatsz: gyógyulás vagy +2 láng (Utolsó láng módban +1 lélekkristály is).</li>
-    <li><b>Utolsó láng mód:</b> az első győzelem után nyílik meg. Felvonásonként 3 lélekkristály (élet), a vereség egyet megrepeszt; ha mind megreped, vagy kialszik a fáklya, az egész hadjárat elölről indul.</li>
+    <li><b>A fáklya:</b> felvonásonként 7 / 6 / 4 láng. Minden csata egy lángba kerül, a vereség háromba, a pihenés (teljes gyógyulás) egybe. Az életerő a csaták között megmarad. Ha kialszik a fáklya, a felvonás elejére kerülsz vissza; a TP, a képességek és a tárgyak megmaradnak. A szünetben a Kilépés elmenti a csata állását (a böngésző bezárása is), és onnan folytathatod; csak a Feladás számít vereségnek.</li>
+    <li><b>Gyógyforrás:</b> felvonásonként egy biztos (a második győzelem után), és egy rejtett, ha legalább 75% életerővel nyersz. Választhatsz: gyógyulás vagy +2 láng (Utolsó láng módban +1 élet is).</li>
+    <li><b>Utolsó láng mód:</b> az első győzelem után nyílik meg. Felvonásonként 3 élet, a vereség egy életbe kerül; ha elfogy, vagy kialszik a fáklya, az egész hadjárat elölről indul.</li>
     <li><b>Kihívások:</b> teljesítésükért jelvényt kapsz, amelyből egyet viselhetsz: címet ad és egy kis, sajátos hatást.</li>
     <li><b>Képességek:</b> a fáklya négy hőse TP-ért tanul képességeket, hősönként hármat, sorban.</li>
     <li>A jelzett csapások (a Mágus villáma, a Kőgólem földrengése, a Pap napsugara) előbb kirajzolják a helyüket: lépj ki belőle.</li>
@@ -595,7 +595,7 @@ function startAct(r, a){
   r.brokenStart = r.broken.slice(); r.sp = { fixed: false, hidden: false }; r.actWins = 0;
 }
 function newRun(mode, restarts){ const r = { mode, broken: [], restarts: restarts || 0, inFight: false }; startAct(r, 0); return r; }
-const canRest = r => r && r.hpFrac < 0.995 && r.flames >= 2;
+const canRest = r => r && !r.inFight && r.hpFrac < 0.995 && r.flames >= 2;
 function rest(){ const r = S.run; if (!canRest(r)) return; r.flames--; r.hpFrac = 1; save(); }
 function grantBadge(id){
   if (S.badges.includes(id)) return '';
@@ -604,30 +604,41 @@ function grantBadge(id){
   return `<span class="badgegot"><img class="medal" src="${IMG['bd_' + id].src}" alt=""><span>Kihívás teljesítve: <b>${b.name}</b>. Jutalom: „${b.title}” cím és ${b.eff.charAt(0).toLowerCase() + b.eff.slice(1)}</span></span>`;
 }
 const checkVadasz = () => RELICS.every(k => S.inv[k]) ? grantBadge('vadasz') : '';
-// félbehagyott csata (bezárt böngésző, kilépés) vereségnek számít
+// félbehagyott csata (kilépés, bezárt böngésző): az állása mentve van, a Harc! gombbal onnan folytatható
 let abandonNote = '';
-if (S.run && S.run.inFight){
-  const r = S.run; r.inFight = false;
-  if (r.mode === 'hard'){ r.lives--; r.hpFrac = 1; if (r.lives <= 0) S.run = newRun('hard', r.restarts + 1); }
-  else { r.flames -= LOSS_FLAMES; r.hpFrac = 1; if (r.flames <= 0){ r.restarts++; r.broken = r.brokenStart.slice(); startAct(r, r.act); } }
-  abandonNote = 'Az előző hadjárati csatát félbehagytad: vereségnek számított.';
+if (S.run && S.run.inFight) abandonNote = 'Félbehagyott csatád van: a Harc folytatása gombbal ott folytatod, ahol abbahagytad.';
+// a csata pillanatnyi állása (a repülő lövedékek nélkül)
+const SNAP_F = ['hp', 'x', 'y', 'cdB', 'cdS', 'cdU', 'shieldT', 'buffT', 'slowT', 'poisonT', 'poisonDps', 'lsUsed'];
+function saveSnap(){
+  const r = S.run;
+  if (!r || !r.inFight || !G.on || G.over || G.net || !G.stage || G.stage.free || LADDER.indexOf(G.stage) !== r.idx) return;
+  const pick = f => { const o = {}; SNAP_F.forEach(k => { o[k] = typeof f[k] === 'number' ? +f[k].toFixed(3) : f[k]; }); return o; };
+  r.snap = { idx: r.idx, me: pick(G.me), foe: pick(G.foe), meHit: G.meHit };
   save();
+}
+function loadSnap(sn){
+  const fix = (f, o) => {
+    SNAP_F.forEach(k => { if (o[k] !== undefined) f[k] = o[k]; });
+    f.hp = clamp(f.hp, 1, f.maxhp); f.tx = f.x; f.ty = f.y;
+    f.cdS = Math.min(f.cdS, f.sCd); f.cdU = Math.min(f.cdU, f.uCd); f.shieldT = Math.min(f.shieldT, f.sDur);
+  };
+  fix(G.me, sn.me); fix(G.foe, sn.foe); G.meHit = !!sn.meHit;
 }
 function flamesHtml(r){
   const n = Math.max(FLAMES[r.act], r.flames);
   let h = '<span class="grp"><small>Fáklya</small><span class="flames" aria-label="' + r.flames + ' láng">';
   for (let i = 0; i < n; i++) h += `<img class="fl" src="${IMG[i < r.flames ? 'torchOn' : 'torchOff'].src}" alt="">`;
   h += '</span></span>';
-  if (r.mode === 'hard'){ h += '<span class="grp"><small>Lélekkristály</small><span class="hearts lives">'; for (let i = 0; i < Math.max(LIVES, r.lives); i++) h += `<img class="ht" src="${IMG[i < r.lives ? 'soulOn' : 'soulOff'].src}" alt="">`; h += '</span></span>'; }
+  if (r.mode === 'hard'){ h += '<span class="grp"><small>Élet</small><span class="hearts lives">'; for (let i = 0; i < Math.max(LIVES, r.lives); i++) h += `<img class="ht" src="${IMG[i < r.lives ? 'lifeOn' : 'lifeOff'].src}" alt="">`; h += '</span></span>'; }
   return h;
 }
-// az életerő öt szívvel: minden szív 20%, alulról töltődik (a lángoló szív a kihunyt fölött)
+// az életerő öt lélekkristállyal: mindegyik 20%, alulról töltődik (az izzó kristály a repedt fölött)
 const HP_HEARTS = 5;
 function hpHearts(frac){
   let h = `<span class="grp"><small>Életerő</small><span class="hearts hp" aria-label="életerő ${Math.round(frac * 100)}%">`;
   for (let i = 0; i < HP_HEARTS; i++){
     const f = clamp(frac * HP_HEARTS - i, 0, 1);
-    h += `<span class="hh"><img src="${IMG.lifeOff.src}" alt="">${f > 0 ? `<img class="on" src="${IMG.lifeOn.src}" alt="" style="clip-path:inset(${Math.round((1 - f) * 100)}% 0 0 0)">` : ''}</span>`;
+    h += `<span class="hh"><img src="${IMG.soulOff.src}" alt="">${f > 0 ? `<img class="on" src="${IMG.soulOn.src}" alt="" style="clip-path:inset(${Math.round((1 - f) * 100)}% 0 0 0)">` : ''}</span>`;
   }
   return h + `</span><span class="mono">${Math.round(frac * 100)}%</span></span>`;
 }
@@ -705,16 +716,17 @@ function renderMenu(){
     ? (gyro.seen ? 'Döntsd a telefont abba az irányba, amerre a hősnek mennie kell. Harc előtt a kezdő tartás lesz az alaphelyzet.' : 'Döntéssel mozogsz. Ha a böngésző engedélyt kér a mozgásérzékelőhöz, engedélyezd.')
     : 'A képernyő bal felén húzd az ujjad: ott jelenik meg a botkormány.';
 }
-$('#mode').querySelectorAll('button').forEach(b => b.onclick = () => { S.mode = b.dataset.v; save(); renderMenu(); });
+$('#mode').querySelectorAll('button').forEach(b => b.onclick = () => { S.mode = b.dataset.v; save(); renderMenu(); if (S.mode !== 'ai') $('#goBtn').textContent = 'Harc!'; });
 function renderRun(){
   const r = S.run, box = $('#runBox');
+  $('#goBtn').textContent = S.mode === 'ai' && r && r.inFight && r.snap ? 'Harc folytatása' : 'Harc!';
   document.documentElement.style.setProperty('--bgimg', `url(${IMG[r ? ['arena1', 'arena2', 'arena'][r.act] : 'arena1'].src})`);
   let h = '';
-  if (abandonNote) h += `<p class="note warn">${abandonNote}</p>`;
+  if (abandonNote) h += `<p class="note" style="color:var(--gold)">${abandonNote}</p>`;
   if (!r){
     h += `<div class="runhead"><b>Új expedíció</b><div class="seg" id="runMode"><button data-v="normal">Normál</button><button data-v="hard"${S.normalDone ? '' : ' aria-disabled="true"'}>${S.normalDone ? '' : '🔒 '}Utolsó láng</button></div></div>`;
     h += S.runMode === 'hard' && S.normalDone
-      ? `<p class="note">Felvonásonként ${LIVES} lélekkristály (élet), a vereség egyet megrepeszt. Ha mind megreped, vagy kialszik a fáklya, <b>az egész hadjárat elölről indul</b>. A fejlődésed megmarad.</p>`
+      ? `<p class="note">Felvonásonként ${LIVES} élet, a vereség egy életbe kerül. Ha elfogy az élet, vagy kialszik a fáklya, <b>az egész hadjárat elölről indul</b>. A fejlődésed megmarad.</p>`
       : `<p class="note">A fáklya felvonásonként ${FLAMES.join(' / ')} lángig ég. Minden csata egy láng, a vereség ${LOSS_FLAMES}, a pihenés egy. Az életerő a csaták között megmarad. Ha kialszik a fáklya, a felvonás elejére térsz vissza, a fejlődésed megmarad.${S.normalDone ? '' : ' Az Utolsó láng mód az első győzelem után nyílik meg.'}</p>`;
   } else {
     h += `<div class="runhead"><b>${r.mode === 'hard' ? 'Utolsó láng' : 'Expedíció'} · ${ACTS[r.act]}</b>${r.restarts ? `<span class="mono" style="color:var(--muted)">újrakezdés: ${r.restarts}</span>` : ''}</div>`;
@@ -1206,6 +1218,7 @@ function frame(now){
 }
 function update(dt){
   G.t += dt; G.shake = Math.max(0, G.shake - dt);
+  if (!window.__SIM && !G.counting && !G.over && (G.snapT = (G.snapT || 0) - dt) <= 0){ G.snapT = 1; saveSnap(); }
   const me = G.me, foe = G.foe;
   if (!G.counting && !G.over){
     const inp = readInput();
@@ -1295,11 +1308,11 @@ function springBox(name){
   box.innerHTML = `<div class="springic"></div><div><b>${name}</b><small>${name === 'Rejtett forrás' ? 'Szép győzelem: rejtett forrásra bukkantál. ' : ''}${onlyFlame ? 'A fáklya kialvóban van, csak táplálni tudod a forrással.' : 'Egyet választhatsz.'}</small>
     <div class="row" style="justify-content:flex-start; margin-top:6px">${onlyFlame ? '' : `<button class="btn" data-s="heal"${r.hpFrac >= 0.995 ? ' disabled' : ''}>Iszom belőle (gyógyulás ${Math.round(r.hpFrac * 100)}% → 100%)</button>`}
     <button class="btn primary" data-s="flame">Táplálom a fáklyát (+${plus} láng)</button>
-    ${r.mode === 'hard' && !onlyFlame ? `<button class="btn" data-s="life"${r.lives >= LIVES_MAX ? ' disabled' : ''}>Megáldom a lelkem (+1 lélekkristály)</button>` : ''}</div></div>`;
+    ${r.mode === 'hard' && !onlyFlame ? `<button class="btn" data-s="life"${r.lives >= LIVES_MAX ? ' disabled' : ''}>Megáldom a lelkem (+1 élet)</button>` : ''}</div></div>`;
   box.querySelectorAll('button').forEach(b => b.onclick = () => {
     const s = b.dataset.s;
     if (s === 'heal') r.hpFrac = 1; else if (s === 'flame') r.flames += plus; else r.lives = Math.min(LIVES_MAX, r.lives + 1);
-    box.innerHTML = `<div class="springic"></div><div><b>${name}</b><small>${s === 'heal' ? 'Teljesen felgyógyultál.' : s === 'flame' ? `A fáklya fellobbant: +${plus} láng.` : 'Új lélekkristály izzott fel.'}</small></div>`;
+    box.innerHTML = `<div class="springic"></div><div><b>${name}</b><small>${s === 'heal' ? 'Teljesen felgyógyultál.' : s === 'flame' ? `A fáklya fellobbant: +${plus} láng.` : 'Egy élettel több: új szív lángolt fel.'}</small></div>`;
     pendDone();
   });
   return box;
@@ -1331,7 +1344,7 @@ function campaignWon(r, flamesBefore, notes){
 }
 // a hadjárati csata utáni teendők; a választós dobozokat (ereklye, forrás) a boxes tömbbe teszi
 function campaignAfter(win, sg, notes, boxes){
-  const r = S.run; r.inFight = false;
+  const r = S.run; r.inFight = false; r.snap = null;
   const flamesBefore = r.flames;
   if (win){
     r.flames--; r.hpFrac = clamp(G.me.hp / G.me.maxhp, 0.01, 1); r.actWins++;
@@ -1355,8 +1368,8 @@ function campaignAfter(win, sg, notes, boxes){
     r.hpFrac = 1;
     if (r.mode === 'hard'){
       r.lives--;
-      if (r.lives <= 0){ hardFail(notes, 'Az utolsó lélekkristályod is megrepedt.'); return; }
-      notes.push(`Megrepedt egy lélekkristály, maradt ${r.lives}.`);
+      if (r.lives <= 0){ hardFail(notes, 'Elfogyott az életed.'); return; }
+      notes.push(`Elvesztettél egy életet, maradt ${r.lives}.`);
     } else notes.push(`A vereség ${LOSS_FLAMES} lángba került.`);
     if (r.mode !== 'hard') r.flames -= LOSS_FLAMES;
     checkBurn(notes);
@@ -1410,19 +1423,32 @@ function toMenu(){
 function pauseGame(){
   if (!G.on || G.over) return;
   if (!G.net) G.paused = true;
-  $('#pauseTxt').textContent = G.net ? 'Hálózati harcban a játék nem áll meg. Kalibrálni most is tudsz.' : 'Tartsd a telefont kényelmes szögben, majd kalibrálj: ez lesz az alaphelyzet.';
+  const camp = !G.net && G.stage && !G.stage.free && S.run;
+  $('#pauseTxt').textContent = G.net ? 'Hálózati harcban a játék nem áll meg. Kalibrálni most is tudsz.'
+    : camp ? 'A Kilépés elmenti a csata állását: a menüből ugyanonnan folytathatod. A Feladás vereségnek számít.'
+    : 'Tartsd a telefont kényelmes szögben, majd kalibrálj: ez lesz az alaphelyzet.';
+  const q = $('#quitBtn'); q.hidden = !camp; delete q.dataset.sure; q.textContent = 'Feladás';
+  $('#exitBtn').textContent = G.net ? 'Kilépés a harcból' : 'Kilépés';
   $('#pause').hidden = false;
 }
 $('#pauseBtn').onclick = pauseGame;
 $('#resumeBtn').onclick = () => { $('#pause').hidden = true; G.paused = false; last = performance.now(); };
 $('#calibBtn').onclick = () => { calibrate(); $('#pause').hidden = true; G.paused = false; last = performance.now(); };
-$('#quitBtn').onclick = () => {
+// kilépés: hadjáratban elmenti az állást, nem vereség
+$('#exitBtn').onclick = () => {
   if (G.net){ netSend({ t: 'dead' }); toMenu(); return; }
-  // hadjáratban a feladás vereségnek számít
+  saveSnap();
+  toMenu();
+};
+// feladás: csak hadjáratban, megerősítés után, vereségnek számít
+$('#quitBtn').onclick = () => {
+  const q = $('#quitBtn');
+  if (!q.dataset.sure){ q.dataset.sure = 1; q.textContent = `Biztosan? ${S.run && S.run.mode === 'hard' ? '1 élet' : LOSS_FLAMES + ' láng'}`; return; }
   if (G.on && !G.over && G.stage && !G.stage.free && S.run){ $('#pause').hidden = true; G.paused = false; endFight('R'); return; }
   toMenu();
 };
-document.addEventListener('visibilitychange', () => { if (document.hidden && G.on && !G.net && !G.over) pauseGame(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && G.on && !G.net && !G.over){ pauseGame(); saveSnap(); } });
+window.addEventListener('pagehide', saveSnap);
 
 function startFree(){
   G.net = false; G.stage = freeStage();
@@ -1447,6 +1473,8 @@ function startCampaignFight(){
   G.net = false; G.stage = sg;
   startFight(bossStats(sg));
   G.me.hp = Math.max(1, Math.round(G.me.maxhp * r.hpFrac));
+  if (r.snap && r.snap.idx === r.idx) loadSnap(r.snap);
+  abandonNote = '';
 }
 $('#goBtn').onclick = async () => {
   if (S.ctrl === 'gyro') await askGyro();
@@ -1741,12 +1769,12 @@ function drawIcon(k, cx, by, h){   // by = alsó él
 }
 // a fáklya a harcban: égő és kialudt fáklyák, Utolsó láng módban szívek
 function drawTorch(r){
-  const n = Math.max(FLAMES[r.act], r.flames), gap = 3.4, hg = 3.2, hearts = r.mode === 'hard' ? Math.max(LIVES, r.lives) : 0;
+  const n = Math.max(FLAMES[r.act], r.flames), gap = 3.4, hg = 3.8, hearts = r.mode === 'hard' ? Math.max(LIVES, r.lives) : 0;
   const w = n * gap + (hearts ? 2 + hearts * hg : 0), x0 = 100 - w / 2 + gap / 2, by = 24.8;
   ctx.fillStyle = 'rgba(8,5,3,.55)'; ctx.beginPath(); ctx.roundRect(100 - w / 2 - 1.5, by - 7.6, w + 3, 8.4, 2.5); ctx.fill();
   const flick = 1 + Math.sin(G.t * 11) * 0.04;
   for (let i = 0; i < n; i++) drawIcon(i < r.flames ? 'torchOn' : 'torchOff', x0 + i * gap, by, 6.8 * (i < r.flames ? flick : 1));
-  for (let i = 0; i < hearts; i++) drawIcon(i < r.lives ? 'soulOn' : 'soulOff', x0 + n * gap + 2 + i * hg, by - 0.6, 5.0);
+  for (let i = 0; i < hearts; i++) drawIcon(i < r.lives ? 'lifeOn' : 'lifeOff', x0 + n * gap + 2 + i * hg, by - 1.0, 4.0);
 }
 function drawHud(){
   const hud = (f, right) => {
