@@ -49,6 +49,8 @@ button{font:inherit; color:inherit}
 .stages{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin-top:8px}
 .stage{position:relative; display:flex; flex-direction:column; align-items:center; gap:1px; padding:4px 2px 5px; border-radius:10px; border:1px solid var(--border); background:var(--surface); cursor:pointer; font-size:11px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden}
 .stage img{height:40px; object-fit:contain}
+.stages.five{grid-template-columns:repeat(5,minmax(0,1fr))}
+#freeTier button{padding:6px 10px}
 .stage.done::after{content:"✓"; position:absolute; top:2px; right:6px; color:#4ade80; font-size:13px}
 .stage.boss{border-color:rgba(239,68,68,.55)}
 .stage.lock{opacity:.32; cursor:default}
@@ -140,8 +142,11 @@ input[type=range]{width:160px; accent-color:var(--gold)}
       </div>
       <div>
         <p class="label">Ellenfél</p>
-        <div class="seg" id="mode"><button data-v="ai">Kihívások</button><button data-v="duo">Barát</button></div>
+        <div class="seg" id="mode"><button data-v="ai">Kihívások</button><button data-v="free">Szabad harc</button><button data-v="duo">Barát</button></div>
         <div id="stagesWrap"><div class="stages" id="stages"></div><p class="note" id="stageNote"></p></div>
+        <div id="freeWrap"><div class="stages five" id="freeFoes"></div>
+          <div class="row" style="margin-top:8px"><span style="font-size:13px; color:var(--muted)">Gépi szint</span><div class="seg" id="freeTier"></div></div>
+          <p class="note" id="freeNote"></p></div>
         <p class="note" id="modeNote"></p>
       </div>
       <div>
@@ -235,35 +240,35 @@ const ZONE = { R: [118, 190], L: [10, 82] };
 // cy: a találati pont helye a kép magasságának arányában; sz: rajzolási méret szorzó
 const HEROES = {
   warrior: {
-    name: 'Árnyőr', img: 'warrior', weaponLeft: true, cy: 0.5, sz: 1, color: '#fb7185', glow: 'rgba(251,113,133,', hp: 110, atk: 10, speed: 1.0,
+    name: 'Árnyőr', img: 'warrior', facing: 1, cy: 0.5, sz: 1, color: '#fb7185', glow: 'rgba(251,113,133,', hp: 110, atk: 10, speed: 1.0,
     desc: 'Gyors és szívós. Kést dob, fizikai pajzzsal véd.',
     basic: { name: 'Késdobás', cd: 0.42, speed: 150, r: 2.0, mult: 1.0, kind: 'knife' },
     shield: { name: 'Pengepajzs', type: 'physical', dur: 1.3, cd: 7, block: 1.0, slow: 0.55, tip: 'mindent megfog, de lassít' },
     sup: { name: 'Pengelegyező', cd: 14, kind: 'fan', n: 7, spread: 0.85, speed: 125, r: 2.6, mult: 1.15, tip: '7 penge legyezőben' }
   },
   lich: {
-    name: 'Lidércpap', img: 'lich', weaponLeft: false, cy: 0.5, sz: 1, color: '#7dd3fc', glow: 'rgba(125,211,252,', hp: 95, atk: 11, speed: 0.9,
+    name: 'Lidércpap', img: 'lich', facing: -1, cy: 0.5, sz: 1, color: '#7dd3fc', glow: 'rgba(125,211,252,', hp: 95, atk: 11, speed: 0.9,
     desc: 'Lassabb, de erős energialöketet küld, erőpajzzsal véd.',
     basic: { name: 'Energialöket', cd: 0.66, speed: 96, r: 3.4, mult: 1.25, kind: 'orb' },
     shield: { name: 'Erőpajzs', type: 'force', dur: 2.2, cd: 8, block: 0.7, slow: 0, tip: '70%-ot fog meg, nem lassít' },
     sup: { name: 'Rúnavihar', cd: 15, kind: 'wave', h: 44, w: 7, speed: 58, mult: 2.6, tip: 'magas rúnafal' }
   },
   skel: {
-    name: 'Csontlovag', img: 'skel', weaponLeft: true, cy: 0.47, sz: 1, color: '#e7c98a', glow: 'rgba(231,201,138,', hp: 135, atk: 9, speed: 0.85,
+    name: 'Csontlovag', img: 'skel', facing: 1, cy: 0.47, sz: 1, color: '#e7c98a', glow: 'rgba(231,201,138,', hp: 135, atk: 9, speed: 0.85,
     desc: 'Nehézpáncélos közelharcos. Kardhulláma csak közelre ér el.',
     basic: { name: 'Kardhullám', cd: 0.55, speed: 110, r: 3.0, mult: 1.2, kind: 'slash', range: 100 },
     shield: { name: 'Toronypajzs', type: 'physical', dur: 1.8, cd: 6, block: 1.0, slow: 0.6, tip: 'hosszan tart, de lassít' },
     sup: { name: 'Csontzápor', cd: 13, kind: 'burst', n: 5, gap: 0.16, speed: 135, r: 2.4, mult: 0.8, tip: '5 célzott csontdárda' }
   },
   smoke: {
-    name: 'Füstdémon', img: 'smoke', weaponLeft: false, cy: 0.47, sz: 1.04, color: '#fb923c', glow: 'rgba(251,146,60,', hp: 85, atk: 10, speed: 1.15,
+    name: 'Füstdémon', img: 'smoke', facing: 0, cy: 0.47, sz: 1.04, color: '#fb923c', glow: 'rgba(251,146,60,', hp: 85, atk: 10, speed: 1.15,
     desc: 'A leggyorsabb, de törékeny. Parázsnyilakat szór, füstté válva kitér.',
     basic: { name: 'Parázsnyíl', cd: 0.3, speed: 165, r: 1.6, mult: 0.7, kind: 'ember' },
     shield: { name: 'Füstfátyol', type: 'phase', dur: 0.9, cd: 6, block: 1.0, slow: 0, tip: 'rövid ideig mindenen átsuhan' },
     sup: { name: 'Füstkoponya', cd: 13, kind: 'skull', speed: 78, r: 4, mult: 1.0, n: 8, spread: 1.5, sub: 0.6, tip: 'félúton 8 parázsra robban' }
   },
   warlord: {
-    name: 'Vérúr', img: 'warlord', weaponLeft: false, cy: 0.45, sz: 1.08, color: '#ef4444', glow: 'rgba(239,68,68,', hp: 125, atk: 12, speed: 0.8,
+    name: 'Vérúr', img: 'warlord', facing: 0, cy: 0.45, sz: 1.08, color: '#ef4444', glow: 'rgba(239,68,68,', hp: 125, atk: 12, speed: 0.8,
     desc: 'Lassú zsarnok. Tüskepáncélja visszaveri a lövéseket.',
     basic: { name: 'Vérkarom', cd: 0.6, speed: 120, r: 1.9, mult: 0.62, kind: 'claw' },
     shield: { name: 'Tüskepáncél', type: 'reflect', dur: 1.2, cd: 8, block: 0.6, slow: 0.2, tip: '60%-ot fog meg és visszaver' },
@@ -311,7 +316,7 @@ const fmtMul = m => '×' + m.toFixed(1).replace('.', ',');
 // ===== Beállítások és mentés =====
 // =====================================================================
 const S = {
-  hero: store.get('hero', 'warrior'), mode: store.get('mode', 'ai'), stage: store.get('stage', 0), prog: store.get('prog', 0),
+  hero: store.get('hero', 'warrior'), mode: store.get('mode', 'ai'), freeFoe: store.get('freeFoe', 'skel'), freeTier: store.get('freeTier', 0), stage: store.get('stage', 0), prog: store.get('prog', 0),
   unlocked: store.get('unlocked', START_HEROES.slice()),
   ctrl: store.get('ctrl', 'gyro'), sens: store.get('sens', 1), invY: store.get('invY', false), showHB: store.get('showHB', true),
   tp: store.get('tp', 0), inv: store.get('inv', {}), equip: store.get('equip', [])
@@ -320,7 +325,7 @@ START_HEROES.forEach(h => { if (!S.unlocked.includes(h)) S.unlocked.push(h); });
 if (!HEROES[S.hero] || !S.unlocked.includes(S.hero)) S.hero = 'warrior';
 S.prog = clamp(S.prog, 0, LADDER.length); S.stage = clamp(S.stage, 0, Math.min(S.prog, LADDER.length - 1));
 S.equip = S.equip.filter(k => ITEMS[k] && S.inv[k] > 0).slice(0, 2);
-const save = () => { for (const k of ['hero','mode','stage','prog','unlocked','ctrl','sens','invY','showHB','tp','inv','equip']) store.set(k, S[k]); };
+const save = () => { for (const k of ['hero','mode','freeFoe','freeTier','stage','prog','unlocked','ctrl','sens','invY','showHB','tp','inv','equip']) store.set(k, S[k]); };
 const noMods = () => ({ hp: 0, atkMul: 1, shMul: 1, suMul: 1, shDur: 1, tpMul: 1 });
 function modsOf(list){ const m = noMods(); (list || []).forEach(k => ITEMS[k] && ITEMS[k].apply(m)); return m; }
 const myMods = () => modsOf(S.equip);
@@ -362,6 +367,13 @@ function renderMenu(){
   });
   setSeg('#mode', S.mode); setSeg('#ctrlMode', S.ctrl);
   $('#stagesWrap').hidden = S.mode !== 'ai';
+  $('#freeWrap').hidden = S.mode !== 'free';
+  $('#freeFoes').innerHTML = Object.entries(HEROES).map(([id, hh]) => `<button class="stage" data-f="${id}" aria-pressed="${id === S.freeFoe}"><img src="${IMG[hh.img].src}" alt="">${hh.name}</button>`).join('');
+  $('#freeFoes').querySelectorAll('.stage').forEach(b => b.onclick = () => { S.freeFoe = b.dataset.f; save(); renderMenu(); });
+  $('#freeTier').innerHTML = AI_LV.map((_, i) => `<button data-v="${i}" aria-pressed="${i === S.freeTier}">${i + 1}</button>`).join('');
+  $('#freeTier').querySelectorAll('button').forEach(b => b.onclick = () => { S.freeTier = +b.dataset.v; save(); renderMenu(); });
+  const fs = freeStage();
+  $('#freeNote').innerHTML = `Bármelyik hős ellen, tárgyak nélkül, a választott gépi szinten (1 = kezdő, 8 = a legerősebb). Jutalom: ${fs.tp} TP + bónusz, zsákmány esély ${Math.round(dropChance(fs) * 100)}%. Kihívás-jutalom és új hős itt nem jár.`;
   $('#stages').innerHTML = LADDER.map((s, i) => {
     const open = i <= S.prog, done = i < S.prog, hh = HEROES[s.hero];
     return `<button class="stage${open ? '' : ' lock'}${done ? ' done' : ''}${s.boss ? ' boss' : ''}" data-s="${i}" aria-pressed="${i === S.stage}"><img src="${IMG[hh.img].src}" alt="">${i + 1}. ${hh.name}</button>`;
@@ -377,7 +389,8 @@ function renderMenu(){
     ? (gyro.seen ? 'Döntsd a telefont abba az irányba, amerre a hősnek mennie kell. Harc előtt a kezdő tartás lesz az alaphelyzet.' : 'Döntéssel mozogsz. Ha a böngésző engedélyt kér a mozgásérzékelőhöz, engedélyezd.')
     : 'A képernyő bal felén húzd az ujjad: ott jelenik meg a botkormány.';
 }
-const dropChance = sg => Math.min(1, 0.35 + sg.tier * 0.09);
+const dropChance = sg => Math.min(1, 0.35 + sg.tier * 0.09) * (sg.free ? 0.5 : 1);
+const freeStage = () => ({ hero: S.freeFoe, tier: S.freeTier, title: 'szint ' + (S.freeTier + 1), tp: 10 + S.freeTier * 6, free: 1 });
 $('#mode').querySelectorAll('button').forEach(b => b.onclick = () => { S.mode = b.dataset.v; save(); renderMenu(); });
 $('#ctrlMode').querySelectorAll('button').forEach(b => b.onclick = () => { S.ctrl = b.dataset.v; save(); renderMenu(); if (S.ctrl === 'gyro') askGyro(); });
 $('#sens').oninput = () => { S.sens = +$('#sens').value; save(); };
@@ -732,7 +745,7 @@ function stepProjs(dt){
       p.dead = true;
       const dmg = applyHit(tgt, p);
       if (G.net) netSend({ t: 'hit', id: p.id, dmg, hp: G.me.hp, bl: G.me.shieldT > 0 ? 1 : 0 });
-      if (tgt.hp <= 0) endFight(tgt === G.me ? 'L' : 'R');
+      if (tgt.hp <= 0) endFight(tgt === G.me ? 'R' : 'L');
     }
   }
   G.projs = G.projs.filter(p => !p.dead).concat(add);
@@ -826,7 +839,7 @@ function showResult(win){
 }
 $('#againBtn').onclick = () => {
   if (G.net){ if (D.role === 'host' && D.connected) netStart(); return; }
-  startStage(S.stage);
+  if (G.stage && G.stage.free) startFree(); else startStage(S.stage);
 };
 $('#menuBtn').onclick = toMenu;
 function toMenu(){
@@ -848,6 +861,10 @@ $('#calibBtn').onclick = () => { calibrate(); $('#pause').hidden = true; G.pause
 $('#quitBtn').onclick = () => { if (G.net){ netSend({ t: 'dead' }); } toMenu(); };
 document.addEventListener('visibilitychange', () => { if (document.hidden && G.on && !G.net && !G.over) pauseGame(); });
 
+function startFree(){
+  G.net = false; G.stage = freeStage();
+  startFight(statsOf(S.freeFoe, noMods()));
+}
 function startStage(i){
   const sg = LADDER[i];
   const st = statsOf(sg.hero, modsOf(sg.items));
@@ -858,6 +875,7 @@ function startStage(i){
 $('#goBtn').onclick = async () => {
   if (S.ctrl === 'gyro') await askGyro();
   if (S.mode === 'ai') startStage(S.stage);
+  else if (S.mode === 'free') startFree();
   else openDuo();
 };
 
@@ -920,7 +938,8 @@ function drawFighter(f){
   const im = imgs[f.h.img], meta = IMG[f.h.img];
   const h = CH * f.h.sz * (f.cast > 0 ? 1.03 : 1), w = h * meta.w / meta.h;
   const bob = Math.sin(G.t * 3 + (f.side === 'R' ? 0 : 2)) * 0.6;
-  const flip = (f.side === 'R') !== f.h.weaponLeft;   // a fegyver mindig a középvonal felé nézzen
+  // a két figura egymás felé néz: a jobb oldali balra, a bal oldali jobbra
+  const want = f.side === 'R' ? -1 : 1, flip = f.h.facing !== 0 && f.h.facing !== want;
   const phase = f.shieldT > 0 && f.h.shield.type === 'phase';
   ctx.save();
   ctx.translate(f.x, f.y + bob);
@@ -1020,7 +1039,7 @@ function drawHud(){
   const hud = (f, right) => {
     const x0 = right ? 112 : 4, w = 84;
     ctx.font = '800 3.4px system-ui,sans-serif'; ctx.textAlign = right ? 'right' : 'left'; ctx.fillStyle = f.h.color;
-    const who = f === G.me ? 'Te · ' : (G.net ? 'Barátod · ' : (G.stage ? `${LADDER.indexOf(G.stage) + 1}. ` : 'Gép · '));
+    const who = f === G.me ? 'Te · ' : (G.net ? 'Barátod · ' : (G.stage && !G.stage.free ? `${LADDER.indexOf(G.stage) + 1}. ` : 'Gép · '));
     ctx.fillText(who + f.h.name + (f !== G.me && !G.net && G.stage ? ' – ' + G.stage.title : ''), right ? x0 + w : x0, 4.6);
     ctx.textAlign = right ? 'left' : 'right'; ctx.fillStyle = '#e2e8f0';
     ctx.fillText(`${Math.ceil(f.hp)} / ${f.maxhp}`, right ? x0 : x0 + w, 4.6);
