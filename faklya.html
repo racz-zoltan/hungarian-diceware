@@ -144,9 +144,9 @@ button{font:inherit; color:inherit}
 @keyframes cpulse{0%,100%{box-shadow:0 0 10px 3px rgba(251,191,36,.55), 0 0 0 2px rgba(253,224,71,.5)} 50%{box-shadow:0 0 30px 11px rgba(251,191,36,.95), 0 0 0 4px rgba(253,224,71,.9)}}
 .nlbl{position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:2px; white-space:nowrap; font:700 11px var(--ff); color:#f7e4b9; text-shadow:0 0 3px #000, 0 1px 3px #000; text-align:center; pointer-events:none; display:flex; flex-direction:column; align-items:center; gap:1px}
 .nlbl small{font:600 9.5px var(--f); color:#d8c6a5}
-.mnode.side .nlbl{white-space:normal; width:max-content; max-width:104px; font-size:10px; line-height:1.1}
+.mnode.side .nlbl{white-space:normal; width:max-content; max-width:150px; font-size:12px; line-height:1.15}
 .nlbl .nid{color:#fde68a; margin-right:2px}
-.mnode.la .nlbl{top:auto; bottom:100%; margin:0 0 2px}
+
 .mnode.main, .mnode.surface, .mnode.endgame{z-index:2}
 .mnode.main .nlbl, .mnode.surface .nlbl, .mnode.endgame .nlbl{background:rgba(12,9,6,.75); border:1px solid rgba(176,141,87,.6); border-radius:8px; padding:1px 7px; margin-top:-2px}
 .mstars{display:inline-flex; gap:1px} .mstars img{width:13px; height:13px}
@@ -1979,16 +1979,16 @@ function nodeState(n){
 }
 const starsHtml = (n, cls) => `<span class="${cls || 'mstars'}">${[0, 1, 2].map(i => `<img src="${IMG[i < n ? 'star_on' : 'star_off'].src}" alt="">`).join('')}</span>`;
 function renderMap(scrollTo){
-  const s = Math.max(innerHeight * 1.3, 480) / 1800, inner = $('#mapInner');
+  const s = Math.max(innerHeight * 2.6, 960) / 1800, inner = $('#mapInner');
   inner.style.width = 3600 * s + 'px'; inner.style.height = 1800 * s + 'px';
   $('#mapBg').src = IMG.map_bg.src;
-  const size = n => Math.max(34, (n.type === 'main' ? 215 : n.type === 'endgame' ? 230 : n.type === 'surface' ? 225 : 170) * s);
+  const size = n => Math.max(34, (n.type === 'main' ? 185 : n.type === 'endgame' ? 200 : n.type === 'surface' ? 195 : 140) * s);
   // az éppen aktív állomás: a futó expedícióé, különben a következő nyitott fő állomás
   const curAct = S.run ? S.run.act : (S.normalDone ? -1 : (S.maxAct || 0));
   $('#mapNodes').innerHTML = MAPN.map(n => {
     const st = nodeState(n), sz = size(n), m = MISS[n.id];
-    const label = n.type === 'side' ? `<b class="nid">${n.id}</b> ${m.name}` : n.name;
-    const sub = n.type === 'side' ? (st === 'lock' ? 'zárva' : m.type) : n.type === 'endgame' && S.wellBest ? `rekord: ${S.wellBest}. hullám` : '';
+    const label = n.type === 'side' ? m.name : n.name.replace(/^[IV]+ · /, '');
+    const sub = n.type === 'endgame' && S.wellBest ? `rekord: ${S.wellBest}. hullám` : '';
     const img = `<img class="nimg" src="${IMG[n.img].src}" alt="">`;
     const badge = st === 'lock' ? `<img class="nst" src="${IMG.st_lock.src}" alt="">` : st === 'done' && n.type === 'main' ? `<img class="nst" src="${IMG.st_done.src}" alt="">` : '';
     const cur = n.type === 'main' && n.act === curAct;
