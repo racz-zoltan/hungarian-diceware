@@ -240,6 +240,16 @@ input[type=range]{width:160px; accent-color:var(--gold)}
         <p class="note" id="ctrlNote"></p>
       </div>
       <div>
+        <p class="label">Hang és rezgés</p>
+        <div class="row">
+          <label class="chk"><input type="checkbox" id="sndOn"> Hang</label>
+          <span style="font-size:13px; color:var(--muted)">Effektek</span><input type="range" id="sfxVol" min="0" max="1" step="0.05">
+          <span id="musWrap" style="display:contents"><span style="font-size:13px; color:var(--muted)">Zene</span><input type="range" id="musVol" min="0" max="1" step="0.05"></span>
+          <label class="chk"><input type="checkbox" id="hapOn"> Rezgés</label>
+        </div>
+        <p class="note" id="hapNote"></p>
+      </div>
+      <div>
         <label class="chk"><input type="checkbox" id="showHB"> A találati pont (hitbox) látszik</label>
       </div>
     </div>
@@ -261,7 +271,7 @@ input[type=range]{width:160px; accent-color:var(--gold)}
 <div class="dlg" id="pause" hidden><div class="card">
   <h2>Szünet</h2>
   <p id="pauseTxt">Tartsd a telefont kényelmes szögben, majd kalibrálj: ez lesz az alaphelyzet.</p>
-  <div class="row"><button class="btn primary" id="resumeBtn">Folytatás</button><button class="btn" id="calibBtn">Kalibrálás</button><button class="btn" id="exitBtn">Kilépés</button><button class="btn ghost" id="quitBtn">Feladás</button></div>
+  <div class="row"><button class="btn primary" id="resumeBtn">Folytatás</button><button class="btn" id="calibBtn">Kalibrálás</button><button class="btn" id="sndBtn">Hang: be</button><button class="btn" id="exitBtn">Kilépés</button><button class="btn ghost" id="quitBtn">Feladás</button></div>
 </div></div>
 
 <div class="dlg" id="result" hidden><div class="card">
@@ -290,6 +300,7 @@ input[type=range]{width:160px; accent-color:var(--gold)}
     <li>A jelzett csapások (a Mágus villáma, a Kőgólem földrengése, a Pap napsugara) előbb kirajzolják a helyüket: lépj ki belőle.</li>
     <li>A méreg néhány másodpercig sebez, a pókháló lelassít.</li>
     <li>A Mélység Ura előtt a Sötét vezér áll az utadba. Őt a Csontkorona és a Hajnal oltára megtörése gyengíti.</li>
+    <li><b>Hang:</b> a menüben némítható, a hangerő állítható; a szünetben is ki-be kapcsolható.</li>
     <li>Billentyűzeten: nyilak vagy WASD mozgás, J vagy szóköz támadás, K pajzs, L szuper.</li>
   </ul>
   <div class="row"><button class="btn primary" id="helpClose">Értem</button></div>
@@ -553,6 +564,7 @@ const S = {
   unlocked: store.get('unlocked', START_HEROES.slice()),
   ctrl: store.get('ctrl', 'gyro'), sens: store.get('sens', 1), invY: store.get('invY', false), showHB: store.get('showHB', true),
   tp: store.get('tp', 0), inv: store.get('inv', {}), equip: store.get('equip', []),
+  sound: store.get('sound', true), sfxVol: store.get('sfxVol', 0.8), musVol: store.get('musVol', 0.5), haptic: store.get('haptic', true),
   // expedíció (a fáklyás hadjárat) és kihívások
   run: store.get('run', null), runMode: store.get('runMode', 'normal'), normalDone: store.get('normalDone', false), hardDone: store.get('hardDone', false),
   badges: store.get('badges', []), badge: store.get('badge', null), wonWith: store.get('wonWith', [])
@@ -566,7 +578,7 @@ if (S.run && !(S.run.idx >= 0 && S.run.idx < LADDER.length)) S.run = null;
 const slots = () => 2 + ((S.skills.rogue || 0) >= 3 ? 1 : 0);
 S.equip = S.equip.filter(k => ITEMS[k] && S.inv[k] > 0).slice(0, slots());
 const save = () => {
-  for (const k of ['hero','mode','freeFoe','freeTier','skills','flipFix','unlocked','ctrl','sens','invY','showHB','tp','inv','equip','run','runMode','normalDone','hardDone','badges','badge','wonWith']) store.set(k, S[k]);
+  for (const k of ['hero','mode','freeFoe','freeTier','skills','flipFix','unlocked','ctrl','sens','invY','showHB','tp','inv','equip','run','runMode','normalDone','hardDone','badges','badge','wonWith','sound','sfxVol','musVol','haptic']) store.set(k, S[k]);
 };
 const noMods = () => ({ hp: 0, atkMul: 1, shMul: 1, suMul: 1, shDur: 1, tpMul: 1, cdMul: 1, spd: 1, dropMul: 1,
   lifesteal: 0, slowIn: 1, blockAdd: 0, pierce: 0, regen: 0, supMul: 1, lowHp: 0, nearBoost: 0, lastStand: 0, darkBoost: 0, shieldHeal: 0, basicBoost: 0, bossBoost: 0,
@@ -603,7 +615,7 @@ function startAct(r, a){
 }
 function newRun(mode, restarts){ const r = { mode, broken: [], restarts: restarts || 0, inFight: false }; startAct(r, 0); return r; }
 const canRest = r => r && !r.inFight && r.hpFrac < 0.995 && r.flames >= 2;
-function rest(){ const r = S.run; if (!canRest(r)) return; r.flames--; r.hpFrac = 1; save(); }
+function rest(){ const r = S.run; if (!canRest(r)) return; r.flames--; r.hpFrac = 1; save(); sfx('rest'); }
 function grantBadge(id){
   if (S.badges.includes(id)) return '';
   S.badges.push(id); if (!S.badge) S.badge = id;
@@ -694,7 +706,7 @@ function renderMenu(){
   $('#skills').querySelectorAll('.skill').forEach(b => b.onclick = () => {
     const i = +b.dataset.k, cur = S.skills[S.hero] || 0;
     if (i !== cur || S.tp < SKILL_COST[i]) return;
-    S.tp -= SKILL_COST[i]; S.skills[S.hero] = cur + 1; save(); renderMenu();
+    S.tp -= SKILL_COST[i]; S.skills[S.hero] = cur + 1; save(); renderMenu(); sfx('learn');
   });
   $('#slotLbl').textContent = `(legfeljebb ${slots()} lehet felszerelve, koppints rá)`;
   $('#bag').innerHTML = Object.entries(ITEMS).map(([id, it]) => {
@@ -731,6 +743,7 @@ const restIc = () => `<img class="restic" src="${IMG.ui_rest.src}" alt="">`;
 function renderRun(){
   const r = S.run, box = $('#runBox');
   setGo(S.mode === 'ai' && r && r.inFight && r.snap);
+  renderSound(); musicPlay('music_menu');
   document.documentElement.style.setProperty('--bgimg', `url(${IMG[r ? ['arena1', 'arena2', 'arena'][r.act] : 'arena1'].src})`);
   let h = '';
   if (abandonNote) h += `<p class="note" style="color:var(--gold)">${abandonNote}</p>`;
@@ -788,9 +801,178 @@ $('#ctrlMode').querySelectorAll('button').forEach(b => b.onclick = () => { S.ctr
 $('#sens').oninput = () => { S.sens = +$('#sens').value; save(); };
 $('#invY').onchange = () => { S.invY = $('#invY').checked; save(); };
 $('#showHB').onchange = () => { S.showHB = $('#showHB').checked; save(); };
+function renderSound(){
+  $('#sndOn').checked = S.sound; $('#sfxVol').value = S.sfxVol; $('#musVol').value = S.musVol; $('#hapOn').checked = S.haptic;
+  $('#musWrap').hidden = !hasMusic(); $('#musWrap').style.display = hasMusic() ? 'contents' : 'none';
+  $('#hapNote').textContent = navigator.vibrate ? 'A saját hősöd találatai, a szuper és a csata vége rezegtet.'
+    : IOS ? 'iPhone-on a böngésző nem enged rezgetést; iOS 18-tól egy rövid tapintható koppintással jelzünk (kísérleti).' : 'Ez az eszköz nem támogatja a rezgést.';
+  $('#sndBtn').textContent = S.sound ? 'Hang: be' : 'Hang: ki';
+}
+$('#sndOn').onchange = () => { S.sound = $('#sndOn').checked; save(); auInit(); auVolumes(); renderSound(); sfx('click'); };
+$('#sfxVol').oninput = () => { S.sfxVol = +$('#sfxVol').value; save(); auVolumes(); };
+$('#sfxVol').onchange = () => sfx('hit');
+$('#musVol').oninput = () => { S.musVol = +$('#musVol').value; save(); auVolumes(); };
+$('#hapOn').onchange = () => { S.haptic = $('#hapOn').checked; save(); vib(40); };
+// gombnyomás hangja a menüben
+document.addEventListener('click', e => { if (e.target.closest('.btn, .seg button, .hero, .item, .badge, .linkbtn, .cb')) sfx('click', { gap: 0.02 }); }, true);
 $('#helpBtn').onclick = () => { $('#help').hidden = false; };
 $('#helpClose').onclick = () => { $('#help').hidden = true; };
 $('#menu').addEventListener('click', () => { if (abandonNote){ abandonNote = ''; } }, true);
+// =====================================================================
+// ===== Hang és rezgés =====
+// =====================================================================
+// Saját hangfájlok: a SFX_FILES-ban azonos névvel szereplő hang (base64 MP3/WAV) kiváltja a szintetizáltat.
+// Nevek: shoot_blade, shoot_magic, shoot_heavy, shoot_poison, coin, hit, hit_big, shield_up, block, super, warn, boom,
+// poison, slow, tick, go, ko, win, lose, loot, shatter, spring, flame, burnout, life_lost, life_up, rest, click, learn, badge, act,
+// music_menu, music_fight (zene, ismétlődik)
+const SFX_FILES = {};
+const AU = { ctx: null, master: null, sfx: null, mus: null, noise: null, bufs: {}, last: {}, music: null, musicId: null };
+const SHOOT_SND = { knife: 'shoot_blade', dagger: 'shoot_blade', slash: 'shoot_blade', shadowblade: 'shoot_blade', claw: 'shoot_blade', spear: 'shoot_blade', crescent: 'shoot_blade',
+  orb: 'shoot_magic', light: 'shoot_magic', bolt: 'shoot_magic', shard: 'shoot_magic', axe: 'shoot_heavy', rock: 'shoot_heavy', spit: 'shoot_poison', ember: 'shoot_poison', coin: 'coin' };
+function auInit(){
+  if (AU.ctx || window.__SIM) { if (AU.ctx && AU.ctx.state === 'suspended') AU.ctx.resume().catch(() => {}); return; }
+  const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+  try{
+    const c = AU.ctx = new AC();
+    AU.master = c.createGain(); AU.master.connect(c.destination);
+    // enyhe kompresszor, hogy az egymásra szóló hangok ne torzuljanak
+    const comp = c.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4; comp.connect(AU.master);
+    AU.sfx = c.createGain(); AU.sfx.connect(comp);
+    AU.mus = c.createGain(); AU.mus.connect(AU.master);
+    const len = c.sampleRate, nb = c.createBuffer(1, len, c.sampleRate), d = nb.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    AU.noise = nb;
+    auVolumes();
+    // a saját hangfájlok előkészítése
+    Object.entries(SFX_FILES).forEach(([id, b64]) => {
+      try{
+        const bin = atob(b64.split(',').pop()), u8 = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+        c.decodeAudioData(u8.buffer, b => { AU.bufs[id] = b; if (id === AU.musicId) musicPlay(id, true); }, () => {});
+      }catch(e){}
+    });
+  }catch(e){ AU.ctx = null; }
+}
+['pointerdown', 'keydown', 'touchend'].forEach(ev => window.addEventListener(ev, auInit, { capture: true, passive: true }));
+function auVolumes(){
+  if (!AU.ctx) return;
+  AU.master.gain.value = S.sound ? 1 : 0;
+  AU.sfx.gain.value = S.sfxVol;
+  AU.mus.gain.value = S.musVol * 0.6;
+}
+// ---- szintetizáló építőkockák ----
+// felfutás, majd természetes (exponenciálisan lecsengő) elhalás; a receptek hangerejét itt egységesen erősítjük
+const SYN_GAIN = 3.2;
+function env(g, t, a, peak, dec){ peak *= SYN_GAIN; g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(peak, t + a); g.gain.setTargetAtTime(0.0001, t + a, dec / 3.5); }
+function tone(o){   // { type, f0, f1, dur, vol, at, a, lp }
+  const c = AU.ctx, t = c.currentTime + (o.at || 0), os = c.createOscillator(), g = c.createGain();
+  os.type = o.type || 'sine'; os.frequency.setValueAtTime(o.f0, t);
+  if (o.f1) os.frequency.exponentialRampToValueAtTime(Math.max(20, o.f1), t + o.dur);
+  let node = os;
+  if (o.lp){ const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = o.lp; os.connect(f); node = f; }
+  node.connect(g); g.connect(o.out || AU.sfx);
+  env(g, t, o.a || 0.005, o.vol, o.dur);
+  os.start(t); os.stop(t + (o.a || 0.005) + o.dur * 1.4 + 0.05);
+}
+function noise(o){   // { ft, f0, f1, q, dur, vol, at, a }
+  const c = AU.ctx, t = c.currentTime + (o.at || 0), s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+  s.buffer = AU.noise; s.loop = true;
+  f.type = o.ft || 'bandpass'; f.Q.value = o.q || 1; f.frequency.setValueAtTime(o.f0, t);
+  if (o.f1) f.frequency.exponentialRampToValueAtTime(Math.max(30, o.f1), t + o.dur);
+  s.connect(f); f.connect(g); g.connect(o.out || AU.sfx);
+  env(g, t, o.a || 0.004, o.vol, o.dur);
+  s.start(t, Math.random()); s.stop(t + (o.a || 0.004) + o.dur * 1.4 + 0.05);
+}
+const rnd = (a, b) => a + Math.random() * (b - a);
+// ---- a hangok receptjei (p = hangmagasság-szorzó, v = hangerő-szorzó) ----
+const SYN = {
+  shoot_blade: (p, v) => { noise({ ft: 'bandpass', f0: 3800 * p, f1: 1300 * p, q: 1.2, dur: 0.13, vol: 0.55 * v }); },
+  shoot_magic: (p, v) => { tone({ type: 'triangle', f0: 950 * p, f1: 320 * p, dur: 0.16, vol: 0.22 * v }); noise({ ft: 'highpass', f0: 4000, dur: 0.08, vol: 0.06 * v }); },
+  shoot_heavy: (p, v) => { noise({ ft: 'lowpass', f0: 900 * p, f1: 200, q: 0.7, dur: 0.22, vol: 0.4 * v, a: 0.02 }); tone({ f0: 140 * p, f1: 60, dur: 0.18, vol: 0.25 * v }); },
+  shoot_poison: (p, v) => { for (let i = 0; i < 3; i++) tone({ f0: rnd(380, 640) * p, f1: rnd(700, 950) * p, dur: 0.06, vol: 0.13 * v, at: i * 0.035 }); },
+  coin: (p, v) => { tone({ f0: 1760 * p, dur: 0.09, vol: 0.14 * v }); tone({ f0: 2350 * p, dur: 0.16, vol: 0.12 * v, at: 0.05 }); },
+  hit: (p, v) => { noise({ ft: 'lowpass', f0: 2200 * p, f1: 500, dur: 0.08, vol: 0.38 * v }); tone({ f0: 190 * p, f1: 70, dur: 0.12, vol: 0.32 * v }); },
+  hit_big: (p, v) => { noise({ ft: 'lowpass', f0: 2600 * p, f1: 300, dur: 0.16, vol: 0.55 * v }); tone({ type: 'square', f0: 110 * p, f1: 40, dur: 0.22, vol: 0.2 * v, lp: 700 }); tone({ f0: 70, f1: 35, dur: 0.3, vol: 0.35 * v }); },
+  shield_up: (p, v) => { tone({ f0: 320 * p, f1: 980 * p, dur: 0.26, vol: 0.18 * v, a: 0.03 }); tone({ type: 'triangle', f0: 640 * p, f1: 1960 * p, dur: 0.22, vol: 0.07 * v, a: 0.03 }); },
+  block: (p, v) => { noise({ ft: 'highpass', f0: 3000, dur: 0.03, vol: 0.2 * v }); tone({ f0: 1250 * p, dur: 0.28, vol: 0.14 * v }); tone({ f0: 1870 * p, dur: 0.2, vol: 0.1 * v }); },
+  super: (p, v) => { tone({ type: 'sawtooth', f0: 140 * p, f1: 820 * p, dur: 0.42, vol: 0.18 * v, a: 0.04, lp: 2200 }); noise({ ft: 'bandpass', f0: 400, f1: 3000, q: 0.8, dur: 0.4, vol: 0.18 * v, a: 0.08 }); },
+  warn: (p, v) => { tone({ type: 'triangle', f0: 220 * p, f1: 440 * p, dur: 0.35, vol: 0.12 * v, a: 0.1, lp: 1500 }); },
+  boom: (p, v) => { noise({ ft: 'lowpass', f0: 1100 * p, f1: 90, q: 0.6, dur: 0.55, vol: 0.6 * v }); tone({ f0: 85 * p, f1: 30, dur: 0.5, vol: 0.45 * v }); },
+  poison: (p, v) => { for (let i = 0; i < 4; i++) tone({ f0: rnd(300, 520) * p, f1: rnd(600, 800) * p, dur: 0.07, vol: 0.1 * v, at: i * 0.06 }); },
+  slow: (p, v) => { tone({ type: 'triangle', f0: 620 * p, f1: 180 * p, dur: 0.35, vol: 0.22 * v }); noise({ ft: 'bandpass', f0: 1500, f1: 400, q: 3, dur: 0.3, vol: 0.08 * v }); },
+  tick: (p, v) => { tone({ f0: 660, dur: 0.12, vol: 0.35 * v }); },
+  go: (p, v) => { tone({ type: 'triangle', f0: 990, dur: 0.3, vol: 0.2 * v }); tone({ type: 'triangle', f0: 1320, dur: 0.3, vol: 0.14 * v, at: 0.02 }); noise({ ft: 'lowpass', f0: 600, f1: 100, dur: 0.4, vol: 0.25 * v }); },
+  ko: (p, v) => { noise({ ft: 'lowpass', f0: 1500, f1: 80, dur: 0.7, vol: 0.55 * v }); tone({ f0: 120, f1: 30, dur: 0.7, vol: 0.4 * v }); },
+  win: (p, v) => { [523, 659, 784, 1047].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: i === 3 ? 0.6 : 0.16, vol: 0.2 * v, at: i * 0.12 })); },
+  lose: (p, v) => { [392, 330, 262].forEach((f, i) => tone({ type: 'sawtooth', f0: f, f1: f * 0.97, dur: i === 2 ? 0.7 : 0.25, vol: 0.13 * v, at: i * 0.22, lp: 1200 })); },
+  loot: (p, v) => { tone({ f0: 1568, dur: 0.1, vol: 0.14 * v }); tone({ f0: 2093, dur: 0.25, vol: 0.14 * v, at: 0.08 }); },
+  shatter: (p, v) => { noise({ ft: 'highpass', f0: 2500, dur: 0.45, vol: 0.35 * v }); for (let i = 0; i < 6; i++) tone({ f0: rnd(2000, 4500), dur: rnd(0.08, 0.25), vol: 0.06 * v, at: rnd(0, 0.15) }); tone({ f0: 160, f1: 50, dur: 0.4, vol: 0.3 * v }); },
+  spring: (p, v) => { for (let i = 0; i < 6; i++) tone({ f0: rnd(500, 900), f1: rnd(1000, 1500), dur: 0.08, vol: 0.08 * v, at: i * 0.07 }); [523, 784, 1047].forEach((f, i) => tone({ f0: f, dur: 0.7, vol: 0.07 * v, at: 0.1 + i * 0.05, a: 0.08 })); },
+  flame: (p, v) => { noise({ ft: 'lowpass', f0: 300, f1: 2500, q: 0.7, dur: 0.5, vol: 0.35 * v, a: 0.15 }); },
+  burnout: (p, v) => { noise({ ft: 'lowpass', f0: 1500, f1: 150, dur: 1.1, vol: 0.35 * v, a: 0.02 }); tone({ f0: 220, f1: 55, dur: 1, vol: 0.2 * v }); },
+  life_lost: (p, v) => { noise({ ft: 'highpass', f0: 1800, dur: 0.06, vol: 0.35 * v }); tone({ f0: 330, f1: 90, dur: 0.6, vol: 0.25 * v }); },
+  life_up: (p, v) => { [659, 880, 1175].forEach((f, i) => tone({ f0: f, dur: 0.3, vol: 0.13 * v, at: i * 0.09 })); },
+  rest: (p, v) => { for (let i = 0; i < 8; i++) noise({ ft: 'bandpass', f0: rnd(1500, 4000), q: 4, dur: 0.03, vol: rnd(0.08, 0.2) * v, at: rnd(0, 0.6) }); noise({ ft: 'lowpass', f0: 400, dur: 0.7, vol: 0.12 * v, a: 0.1 }); },
+  click: (p, v) => { tone({ f0: 1200 * p, f1: 900 * p, dur: 0.04, vol: 0.14 * v }); },
+  learn: (p, v) => { [523, 659, 784].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: 0.25, vol: 0.15 * v, at: i * 0.08 })); },
+  badge: (p, v) => { [784, 988, 1175, 1568].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: i === 3 ? 0.7 : 0.14, vol: 0.16 * v, at: i * 0.1 })); },
+  act: (p, v) => { tone({ f0: 98, dur: 2.2, vol: 0.3 * v, a: 0.02 }); tone({ f0: 196.5, dur: 1.6, vol: 0.12 * v, a: 0.02 }); tone({ f0: 293, dur: 1.2, vol: 0.06 * v, a: 0.02 }); noise({ ft: 'lowpass', f0: 500, dur: 0.5, vol: 0.2 * v }); }
+};
+// hang lejátszása; o.v hangerő, o.p hangmagasság, o.gap a legkisebb szünet ugyanazon hang két lejátszása között
+function sfx(id, o){
+  o = o || {};
+  if (!AU.ctx || !S.sound || window.__SIM) return;
+  const now = AU.ctx.currentTime, gap = o.gap == null ? 0.035 : o.gap;
+  if (AU.last[id] && now - AU.last[id] < gap) return;
+  AU.last[id] = now;
+  const v = o.v == null ? 1 : o.v, p = (o.p || 1) * rnd(0.95, 1.05);
+  try{
+    const b = AU.bufs[id];
+    if (b){
+      const s = AU.ctx.createBufferSource(), g = AU.ctx.createGain();
+      s.buffer = b; s.playbackRate.value = p; g.gain.value = v; s.connect(g); g.connect(AU.sfx); s.start();
+    } else if (SYN[id]) SYN[id](p, v);
+  }catch(e){}
+}
+const sfxLater = (id, ms, o) => setTimeout(() => sfx(id, o), ms);
+// zene: csak ha van saját zenefájl
+function musicPlay(id, force){
+  if (!AU.ctx) { AU.musicId = id; return; }
+  if (AU.musicId === id && AU.music && !force) return;
+  AU.musicId = id;
+  if (AU.music){ try{ AU.music.stop(); }catch(e){} AU.music = null; }
+  const b = AU.bufs[id]; if (!b) return;
+  const s = AU.ctx.createBufferSource(); s.buffer = b; s.loop = true; s.connect(AU.mus); s.start(); AU.music = s;
+}
+const hasMusic = () => Object.keys(SFX_FILES).some(k => k.startsWith('music_'));
+// ---- rezgés: Androidon a Vibration API; iPhone-on (iOS 18+) a kapcsoló stílusú jelölőnégyzet tapintható jelzése, kísérleti ----
+const IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+let hapEl = null, hapLast = 0;
+function iosTap(){
+  const t = performance.now(); if (t - hapLast < 70) return; hapLast = t;
+  try{
+    if (!hapEl){
+      const lb = document.createElement('label'), inp = document.createElement('input');
+      inp.type = 'checkbox'; inp.setAttribute('switch', ''); inp.id = 'hapsw';
+      lb.htmlFor = 'hapsw'; lb.setAttribute('aria-hidden', 'true');
+      lb.style.cssText = inp.style.cssText = 'position:fixed; left:-100px; top:0; width:1px; height:1px; opacity:0; pointer-events:none';
+      document.body.append(inp, lb); hapEl = lb;
+    }
+    hapEl.click();
+  }catch(e){}
+}
+function vib(pat){
+  if (!S.haptic || window.__SIM) return;
+  try{
+    if (navigator.vibrate){ navigator.vibrate(pat); return; }
+    if (IOS){
+      // a mintából annyi koppintás, ahány rezgő szakasz van (legfeljebb 3)
+      const arr = Array.isArray(pat) ? pat : [pat]; let at = 0;
+      arr.forEach((d, i) => { if (i % 2 === 0 && i < 6) setTimeout(iosTap, at); at += d; });
+    }
+  }catch(e){}
+}
+
 // =====================================================================
 // ===== Bemenet: giroszkóp, érintés, billentyűzet =====
 // =====================================================================
@@ -901,6 +1083,7 @@ function startFight(foeStats){
   $('#ctrl').hidden = false; $('#pauseBtn').hidden = false;
   $('#supName').textContent = G.me.h.sup.name; $('#shdName').textContent = G.me.h.shield.name;
   G.on = true; G.t = 0;
+  musicPlay('music_fight');
   enterFull();
   countdown();
 }
@@ -912,6 +1095,7 @@ function countdown(){
   const tick = () => {
     if (!G.on) { el.hidden = true; return; }
     el.textContent = steps[k];
+    sfx(k < 3 ? 'tick' : 'go');
     if (k === 2) calibrate();
     k++;
     if (k < steps.length) setTimeout(tick, 650);
@@ -974,6 +1158,7 @@ function shoot(f, err, lead){
   if (f.cdB > 0) return;
   const b = f.h.basic, a = aimAt(f, foeOf(f), err, lead, b.speed), dm = dmgMul(f, false);
   f.cdB = b.cd * (f.fx.cdMul || 1) * (f.buffT > 0 ? 0.6 : 1); f.cast = 0.15;
+  sfx(SHOOT_SND[b.kind] || 'shoot_blade', { v: f === G.me ? 0.8 : 0.5, gap: 0.05 });
   const mk = (y, ang) => ({ owner: f.side, kind: b.kind, x: a.sx, y, vx: Math.cos(ang) * b.speed, vy: Math.sin(ang) * b.speed, r: b.r, dmg: f.atk * b.mult * dm, fx: f.x, range: b.range, poison: b.poison, pierce: f.fx.pierce || undefined });
   if (b.kind === 'claw'){ spawn(mk(a.sy - 4.5, a.ang), f === G.me); spawn(mk(a.sy + 4.5, a.ang), f === G.me); }
   else spawn(mk(a.sy, a.ang), f === G.me);
@@ -1015,6 +1200,7 @@ function useSuper(f, err, lead){
     if (local && G.net) netSend({ t: 'bf', d: u.dur });
   }
   burst(f.x, f.y, f.h.color, 18, 40);
+  sfx('super', { v: f === G.me ? 1 : 0.75 });
   if (f === G.me) vib(30);
 }
 // a Csontzápor dárdái egyenként, mindig a célpont aktuális helyére indulnak
@@ -1036,9 +1222,9 @@ function useShield(f){
   if (!G.on || G.paused || G.counting || G.over || f.cdS > 0 || f.shieldT > 0) return;
   f.shieldT = f.sDur; f.cdS = f.sCd;
   if (isLocal(f)) heal(f, (f.h.shield.heal || 0) + (f.fx.shieldHeal || 0));
-  if (f === G.me && G.net) netSend({ t: 'sh' });
+  sfx('shield_up', { v: f === G.me ? 0.9 : 0.6 });
+  if (f === G.me){ vib(15); if (G.net) netSend({ t: 'sh' }); }
 }
-const vib = ms => { try{ navigator.vibrate && navigator.vibrate(ms); }catch(e){} };
 
 // ---- Mozgás ----
 function moveF(f, ix, iy, dt){
@@ -1172,6 +1358,9 @@ function applyHit(f, p){
     spawn({ owner: f.side, kind: ['moon', 'skull', 'web'].includes(p.kind) ? 'orb' : p.kind, x: f.x + dir * 8, y: p.y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
       r: Math.min(p.r || 3, 4), dmg: p.dmg * 0.5, fx: f.x, refl: 1 }, f === G.me);
   }
+  if (sh && dmg < p.dmg * dm * 0.5) sfx('block', { v: f === G.me ? 1 : 0.7 }); else sfx(dmg >= 12 || p.big ? 'hit_big' : 'hit', { v: f === G.me ? 1 : 0.7, gap: 0.05 });
+  if (p.poison && dmg > 0) sfx('poison', { gap: 0.3 });
+  if (p.web) sfx('slow');
   if (f === G.me){ vib(dmg >= 15 ? 60 : 25); if (dmg >= 12) G.shake = 0.25; }
   return dmg;
 }
@@ -1200,6 +1389,10 @@ function stepProjs(dt){
       }
       burst(p.x, p.y, '#fb923c', 20, 35);
       continue;
+    }
+    if ((p.kind === 'strike' || p.kind === 'beam') && p.delay){
+      if (!p.warned){ p.warned = 1; sfx('warn', { gap: 0.15 }); }
+      if (!p.boomed && p.age >= p.delay){ p.boomed = 1; sfx(p.kind === 'beam' ? 'super' : 'boom', { gap: 0.12 }); }
     }
     if (p.hitDone) continue;
     // találatot a célpont gépe dönti el: hálózaton csak a saját hősünket ellenőrizzük
@@ -1274,6 +1467,7 @@ function endFight(loserSide){
   const loser = win ? G.foe : G.me;
   burst(loser.x, loser.y, loser.h.color, 60, 70);
   G.shake = 0.4; vib(win ? [40, 40, 90] : 200);
+  sfx('ko');
   setTimeout(() => showResult(win), 1100);
 }
 const itemCard = k => `<div class="lootit"><img src="${IMG[ITEMS[k].img].src}" alt=""><span><b>${ITEMS[k].relic ? '✦ ' : ''}${ITEMS[k].name}</b><small>${ITEMS[k].eff}${S.inv[k] > 1 ? ` · ${S.inv[k]} db` : ''}</small></span></div>`;
@@ -1299,6 +1493,7 @@ function relicBox(sg){
   box.innerHTML = `<img src="${IMG[it.img].src}" alt=""><div><b>✦ ${it.name}</b><small>${sg.takeOnly ? 'Ezt az ereklyét nem lehet megtörni, csak megszerezni.' : `Ha megtöröd, A Mélység Ura −${Math.round(BREAK_HP * 100)}% életerővel és −${Math.round(BREAK_ATK * 100)}% támadóerővel száll harcba${sg.relic !== 'ring' ? ', és a Sötét vezér is gyengül' : ''}. ${owned ? 'Már a tiéd, a megszerzés nem ad újat.' : `Ha megszerzed, felszerelheted: ${it.eff.charAt(0).toLowerCase() + it.eff.slice(1)}`}`}</small>
     <div class="row" style="justify-content:flex-start; margin-top:6px">${sg.takeOnly ? '' : '<button class="btn primary" data-r="break">Megtöröm</button>'}<button class="btn${sg.takeOnly ? ' primary' : ''}" data-r="take">Megszerzem</button></div></div>`;
   box.querySelectorAll('button').forEach(b => b.onclick = () => {
+    sfx(b.dataset.r === 'break' ? 'shatter' : 'loot');
     if (b.dataset.r === 'break'){
       if (!r.broken.includes(sg.relic)) r.broken.push(sg.relic);
       box.innerHTML = `<img src="${IMG[it.img].src}" alt="" style="filter:grayscale(1) brightness(.6)"><div><b>💥 ${it.name}: megtörted</b><small>A Mélység Ura gyengült. Megtört ereklyék ebben az expedícióban: ${r.broken.length}/3.</small></div>`;
@@ -1323,6 +1518,7 @@ function springBox(name){
   box.querySelectorAll('button').forEach(b => b.onclick = () => {
     const s = b.dataset.s;
     if (s === 'heal') r.hpFrac = 1; else if (s === 'flame') r.flames += plus; else r.lives = Math.min(LIVES_MAX, r.lives + 1);
+    sfx(s === 'heal' ? 'spring' : s === 'flame' ? 'flame' : 'life_up');
     box.innerHTML = `<div class="springic"></div><div><b>${name}</b><small>${s === 'heal' ? 'Teljesen felgyógyultál.' : s === 'flame' ? `A fáklya fellobbant: +${plus} láng.` : 'Egy élettel több: új szív lángolt fel.'}</small></div>`;
     pendDone();
   });
@@ -1411,6 +1607,11 @@ function showResult(win){
   lootEl.innerHTML = gained.map(itemCard).join('');
   boxes.forEach(b => lootEl.appendChild(b.box));
   lootEl.hidden = !gained.length && !boxes.length;
+  sfx(win ? 'win' : 'lose');
+  if (gained.length) sfxLater('loot', 700);
+  if (n.some(x => x.includes('Kihívás teljesítve'))) sfxLater('badge', 1100);
+  if (n.some(x => x.includes('kialudt'))) sfxLater('burnout', 500);
+  else if (n.some(x => x.includes('Elvesztettél egy életet'))) sfxLater('life_lost', 500);
   pending = boxes.filter(b => b.wait).length;
   $('#againBtn').textContent = G.net ? (D.role === 'host' ? 'Visszavágó' : 'Várom a visszavágót') : 'Újra';
   $('#againBtn').disabled = (G.net && D.role !== 'host') || pending > 0;
@@ -1444,6 +1645,7 @@ function pauseGame(){
 }
 $('#pauseBtn').onclick = pauseGame;
 $('#resumeBtn').onclick = () => { $('#pause').hidden = true; G.paused = false; last = performance.now(); };
+$('#sndBtn').onclick = () => { S.sound = !S.sound; save(); auInit(); auVolumes(); renderSound(); };
 $('#calibBtn').onclick = () => { calibrate(); $('#pause').hidden = true; G.paused = false; last = performance.now(); };
 // kilépés: hadjáratban elmenti az állást, nem vereség
 $('#exitBtn').onclick = () => {
@@ -1466,6 +1668,7 @@ function startFree(){
   startFight(statsOf(S.freeFoe, noMods()));
 }
 function showActCard(act, cb){
+  sfx('act');
   const el = $('#actCard'); $('#actImg').src = IMG['act' + act].src; el.style.setProperty('--actimg', `url(${IMG['act' + act].src})`); el.hidden = false;
   let done = false;
   const go = () => { if (done) return; done = true; el.hidden = true; cb(); };
@@ -1991,16 +2194,18 @@ function netMsg(m){
     const q = { id: p.id, owner: 'L', x: p.x, y: p.y, vx: p.vx, vy: p.vy, fx: p.fx };
     PFIELDS.forEach(k => { if (p[k] !== undefined) q[k] = p[k]; });
     spawn(q, false);
+    sfx(p.big ? 'super' : (SHOOT_SND[p.kind] || 'shoot_blade'), { v: p.big ? 0.75 : 0.5, gap: 0.08 });
     f.cast = p.big ? 0.4 : 0.15;
     if (p.big) burst(f.x, f.y, f.h.color, 18, 40);
   } else if (m.t === 'bf'){
     f.buffT = m.d;
   } else if (m.t === 'sh'){
-    f.shieldT = f.sDur; f.cdS = f.sCd;
+    f.shieldT = f.sDur; f.cdS = f.sCd; sfx('shield_up', { v: 0.6 });
   } else if (m.t === 'hit'){
     const p = G.projs.find(q => q.id === m.id);
     if (p) p.dead = true;
     f.hp = m.hp; f.flash = m.dmg > 0 ? 0.18 : 0;
+    sfx(m.bl && !m.dmg ? 'block' : (m.dmg >= 12 ? 'hit_big' : 'hit'), { v: 0.7, gap: 0.05 });
     const dm = p ? distMult(Math.abs(p.fx - f.x)) : 1;
     num(f.x, f.y - 10, m.bl && !m.dmg ? 'VÉDVE' : String(m.dmg), m.bl ? '#93c5fd' : (dm >= 1.3 ? '#f5c76a' : '#eadbb8'), dm >= 1.3 || (p && p.big));
     burst(p ? p.x : f.x, p ? p.y : f.y, m.bl ? '#93c5fd' : G.me.h.color, 14, 30);
@@ -2123,6 +2328,7 @@ function duoRender(){
 renderMenu();
 requestAnimationFrame(frame);
 window.__G = G; window.__D = D;
+window.__au = { AU, SYN };
 })();
 </script>
 </body>
