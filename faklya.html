@@ -843,7 +843,7 @@ function renderHubBits(){
   $('#hubCont').hidden = !S.run;
   $('#misList').innerHTML = Object.entries(MISS).map(([id, m]) => {
     const open = missionUnlocked(id), n = MAPN.find(x => x.id === id);
-    return `<div class="misrow${open ? '' : ' lock'}"><img class="ic" src="${IMG[n.img].src}" alt=""><span style="flex:1"><b>${m.endless ? '' : id + ' · '}${m.name}</b>${m.type}</span>${m.endless ? `<span class="mono">${S.wellBest ? S.wellBest + '. hullám' : '–'}</span>` : starsHtml(S.mstars[id] || 0)}</div>`;
+    return `<div class="misrow${open ? '' : ' lock'}"><img class="ic" src="${IMG[n.img].src}" alt=""><span style="flex:1"><b>${m.name}</b></span>${m.endless ? `<span class="mono">${S.wellBest ? S.wellBest + '. hullám' : '–'}</span>` : starsHtml(S.mstars[id] || 0)}</div>`;
   }).join('');
 }
 function setGo(cont){ $('#goBtn').innerHTML = cont ? '<span class="vh">Harc folytatása</span><span class="gochip">folytatás</span>' : '<span class="vh">Harc!</span>'; }
@@ -1898,9 +1898,9 @@ const MAPN = [
 ];
 // mellékküldetések; star3 = a harmadik csillag feltétele; relief = a végleges könnyítés a fő úton
 const MISS = {
-  '1a': { act: 0, name: 'Sötét járatok', type: 'Sötétség', foe: 'ghost', tier: 2, tp: 40, dark: 1,
+  '1a': { act: 0, name: 'Sötét járatok', type: 'Sötétség', foe: 'ghost', tier: 3, hpMul: 1.4, tp: 40, dark: 1,
     rule: 'Csak a fáklyád fénykörében látni: a lövések a sötétből bukkannak elő. Közelebb menve jobban látod az ellenfelet, de nagyobbat is kapsz.',
-    star3: { txt: '60 mp alatt', ok: s => s.t <= 60 }, relief: '+1 láng az I. felvonás fáklyáján' },
+    star3: { txt: '45 mp alatt', ok: s => s.t <= 45 }, relief: '+1 láng az I. felvonás fáklyáján' },
   '1b': { act: 0, name: 'Szörnyek verme', type: 'Kesztyűpróba', foe: 'goblin', tier: 1, tp: 45, queue: [['spider', 1], ['orc', 2]],
     rule: 'Három szörny jön egymás után: Kincses kobold, Barlangi pók, Ork. Az életerőd közben nem töltődik vissza.',
     star3: { txt: 'pajzs használata nélkül', ok: s => !s.shield }, relief: 'A kazamata szörnyei 15%-kal kevesebb életerővel kezdenek' },
@@ -2032,7 +2032,7 @@ function openMission(id){
     h += `<p class="note">Rekord: <b>${S.wellBest ? S.wellBest + '. hullám' : 'még nincs'}</b>.</p>`;
   } else {
     const foes = m.queue ? [m.foe].concat(m.queue.map(q => q[0])).map(k => HEROES[k].name).join(' → ') : (m.foe === 'mirror' ? `a saját hősöd (${foe.name})` : foe.name);
-    h += `<p class="note">Ellenfél: <b>${foes}</b> · gépi szint ${m.tier + 1}/8${m.hpMul ? ` · ${m.hpMul}× életerő` : ''}</p>`;
+    h += `<p class="note">Ellenfél: <b>${foes}</b> · gépi szint ${m.tier + 1}/8${m.hpMul ? ` · ${String(m.hpMul).replace('.', ',')}× életerő` : ''}</p>`;
     h += `<div class="crit"><b>Csillagok</b><span>${'★'} teljesítve</span><span>${'★'} legalább 60% életerővel</span><span>${'★'} ${m.star3.txt}</span></div>`;
     h += `<p class="note">${done ? '✓ ' : ''}<b>Könnyítés a fő úton${done ? ' (megszerezve)' : ' az első teljesítésért'}:</b> ${m.relief}.<br>Jutalom: ${done ? Math.round(m.tp * 0.4) : m.tp} TP${done ? ' (ismétlés)' : ''} és esély zsákmányra.</p>`;
   }
@@ -2231,8 +2231,8 @@ function missionDrawOver(){
     ctx.save(); ctx.translate(x, y); glowDot(7, 'rgba(255,240,200,.7)', 'rgba(239,68,68,.35)'); ctx.drawImage(imgs.crystal, -w / 2, -h / 2, w, h); ctx.restore();
   }
   if (ms.m.dark){
-    const g = ctx.createRadialGradient(me.x, me.y, 16, me.x, me.y, 48);
-    g.addColorStop(0, 'rgba(3,2,6,0)'); g.addColorStop(0.7, 'rgba(3,2,6,.75)'); g.addColorStop(1, 'rgba(3,2,6,.96)');
+    const g = ctx.createRadialGradient(me.x, me.y, 12, me.x, me.y, 40);
+    g.addColorStop(0, 'rgba(3,2,6,0)'); g.addColorStop(0.6, 'rgba(3,2,6,.85)'); g.addColorStop(1, 'rgba(3,2,6,.985)');
     ctx.fillStyle = g; ctx.fillRect(-250, -120, W + 500, H + 240);
   }
 }
