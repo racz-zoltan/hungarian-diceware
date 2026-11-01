@@ -2339,7 +2339,7 @@ function mapClick(id){
   const n = MAPN.find(x => x.id === id), st = nodeState(n);
   if (n.type === 'surface'){ if (deepView() && S.run && S.run.act === 2){ closePanels(); $('#pn-gate').hidden = false; return; } return showHub(); }
   if (st === 'lock'){
-    if (n.type === 'main') return toast(`Előbb teljesítsd ${ACT_ART[n.act - 1]} felvonást.`);
+    if (n.type === 'main') return toast(`Előbb teljesítsd ${ACT_ART[nodeAct(n) - 1]} felvonást${deepView() ? ' A Mélység hadjáratában' : ''}.`);
     if (n.type === 'endgame') return toast('A Mélység kútja A Mélység Urának első legyőzése után nyílik meg.');
     if (!S.run) return toast(`A mellékutak egy expedíció részei: előbb indíts expedíciót ${deepView() ? 'a trónteremnél vagy az ereklyék csarnokánál' : 'a kazamata bejáratánál'}.`);
     return toast(`A mellékút akkor nyílik meg, amikor az expedíció eléri ${ACT_ART[MISS[misId(n)].act]} felvonást.`);
