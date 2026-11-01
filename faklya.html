@@ -703,7 +703,7 @@ const VEZ_BREAK = 0.10, VEZ_KEEP = 0.03;
 // fogadalmak: az expedíció indításakor felvehető nehezítések; mindegyik +15% TP-t ad abban az expedícióban
 const VOWS = {
   csonka:    { name: 'Csonka fáklya', eff: 'Felvonásonként 2 lánggal kevesebb.' },
-  kiapadt:   { name: 'Kiapadt források', eff: 'Nincs rejtett forrás.' },
+  kiapadt:   { name: 'Kiapadt források', eff: 'Csak a felvonásonkénti biztos forrás marad, és ott is csak egyet választhatsz: gyógyulás vagy láng. Nincs rejtett forrás és a fogoly forrása sem.' },
   edzett:    { name: 'Edzett sereg', eff: 'Minden ellenfél egy gépi szinttel erősebb, a mellékutakon is.' },
   atok:      { name: 'Ereklyék átka', eff: 'A megtört és a megtartott ereklye csak feleannyira gyengíti a Sötét vezért és A Mélység Urát.' },
   csupasz:   { name: 'Csupasz kéz', eff: 'Az expedíció csatáiban nem viselhetsz tárgyat.' },
@@ -832,7 +832,7 @@ const checkVadasz = () => RELICS.every(k => S.inv[k]) ? grantBadge('vadasz') : '
 let abandonNote = '';
 if (S.run && S.run.inFight) abandonNote = 'Félbehagyott csatád van: a Harc folytatása gombbal ott folytatod, ahol abbahagytad.';
 // a csata pillanatnyi állása (a repülő lövedékek nélkül)
-const SNAP_F = ['hp', 'x', 'y', 'cdB', 'cdS', 'cdU', 'shieldT', 'buffT', 'slowT', 'poisonT', 'poisonDps', 'lsUsed'];
+const SNAP_F = ['hp', 'x', 'y', 'cdB', 'cdS', 'cdU', 'shieldT', 'buffT', 'slowT', 'poisonT', 'poisonDps', 'lsUsed', 'udUsed', 'revived'];
 function saveSnap(){
   const r = S.run;
   if (!r || !r.inFight || !G.on || G.over || G.net || !G.stage || G.stage.free || LADDER.indexOf(G.stage) !== r.idx) return;
@@ -914,7 +914,7 @@ function renderMenu(){
     if (i !== cur || S.tp < skCost(S.hero, i)) return;
     S.tp -= skCost(S.hero, i); S.skills[S.hero] = cur + 1; save(); renderMenu(); sfx('learn');
   });
-  $('#slotLbl').textContent = `(legfeljebb ${slots()} lehet felszerelve, koppints rá)`;
+  $('#slotLbl').textContent = vowOn('csupasz') ? '(Csupasz kéz fogadalom: ebben az expedícióban a tárgyak a csatákban nem hatnak)' : `(legfeljebb ${slots()} lehet felszerelve, koppints rá)`;
   $('#bag').innerHTML = Object.entries(ITEMS).map(([id, it]) => {
     const n = S.inv[id] || 0, on = S.equip.includes(id);
     return `<button class="item${on ? ' on' : ''}${n ? '' : ' none'}" data-i="${id}"><img src="${IMG[it.img].src}" alt=""><span><b>${it.relic ? '✦ ' : ''}${it.name}</b><small>${n ? it.eff : (it.relic ? 'Ereklye: az expedíció II. felvonásában szerezheted meg' : 'Ebben az expedícióban még nem szerezted meg')}</small>${n ? `<span class="cnt">${n} db${on ? ' · felszerelve' : ''}</span>` : ''}</span></button>`;
@@ -1830,7 +1830,7 @@ function springBox(name){
   box.innerHTML = `<div class="springic"></div><div><b>${name}</b><small>${name === 'Rejtett forrás' ? 'Szép győzelem: rejtett forrásra bukkantál. ' : ''}${onlyFlame ? 'A fáklya kialvóban van, csak táplálni tudod a forrással.' : 'Egyet választhatsz.'}</small>
     <div class="row" style="justify-content:flex-start; margin-top:6px">${onlyFlame ? '' : `<button class="btn" data-s="heal"${r.hpFrac >= 0.995 ? ' disabled' : ''}>Iszom belőle (gyógyulás ${Math.round(r.hpFrac * 100)}% → 100%)</button>`}
     <button class="btn primary" data-s="flame">Táplálom a fáklyát (+${plus} láng)</button>
-    ${!onlyFlame && r.act === 1 && name === 'Gyógyforrás' && relOn(r) && S.mdone['2d'] ? `<button class="btn primary" data-s="both">Iszom és táplálom (gyógyulás és +${plus} láng)</button>` : ''}
+    ${!onlyFlame && r.act === 1 && name === 'Gyógyforrás' && relOn(r) && S.mdone['2d'] && !vowOn('kiapadt') ? `<button class="btn primary" data-s="both">Iszom és táplálom (gyógyulás és +${plus} láng)</button>` : ''}
     ${r.mode === 'hard' && !onlyFlame ? `<button class="btn" data-s="life"${r.lives >= LIVES_MAX ? ' disabled' : ''}>Megáldom a lelkem (+1 élet)</button>` : ''}</div></div>`;
   box.querySelectorAll('button').forEach(b => b.onclick = () => {
     const s = b.dataset.s;
@@ -1892,7 +1892,7 @@ function campaignAfter(win, sg, notes, boxes){
       notes.push(`<b>${ACTS[a]}</b> teljesítve! Kezdődik: <b>${ACTS[a + 1]}</b>. A fáklya újra lobban (${r.flames} láng), és felgyógyulsz.`);
       return;
     }
-    if (sg.vez && relOn(r) && S.mdone['3b']){ boxes.push({ box: springBox('A fogoly forrása'), wait: true }); return; }
+    if (sg.vez && relOn(r) && S.mdone['3b'] && !vowOn('kiapadt')){ boxes.push({ box: springBox('A fogoly forrása'), wait: true }); return; }
     let sp = null;
     if (r.actWins === 2 && !r.sp.fixed){ r.sp.fixed = true; sp = 'Gyógyforrás'; }
     else if (r.hpFrac >= 0.75 && !r.sp.hidden && !vowOn('kiapadt')){ r.sp.hidden = true; sp = 'Rejtett forrás'; }
@@ -2234,7 +2234,7 @@ function openMission(id){
 
 // ---- küldetés indítása ----
 function missionFoe(m, heroId, tier, hpMul){
-  const st = heroId === 'mirror' ? statsOf(S.hero, myMods()) : statsOf(heroId, noMods());
+  const st = heroId === 'mirror' ? statsOf(S.hero, vowOn('csupasz') ? modsOf([], S.hero) : myMods()) : statsOf(heroId, noMods());
   if (heroId === 'mirror') st.hero = S.hero;
   if (hpMul) st.hp = Math.round(st.hp * hpMul);
   return st;
