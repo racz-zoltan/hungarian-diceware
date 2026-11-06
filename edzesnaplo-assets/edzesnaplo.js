@@ -391,11 +391,17 @@ const hasMeas=b=>!!b&&(b.weight!=null||b.fat!=null||b.waist!=null);
 /* Lépések átvétele vágólapról. Soronként: dátum + lépésszám, tetszőleges elválasztóval.
    Elfogadott dátum: 2026-11-06, 2026. 11. 06., 2026/11/06. Szám: 8432, 8 432, 8.432, 8,432, 8432,0 */
 function parseStepNum(t){t=t.replace(/[\s  ']/g,'').replace(/[^\d.,]+$/,'');if(!/^\d/.test(t))return null;if(/^\d{1,3}([.,]\d{3})+$/.test(t))t=t.replace(/[.,]/g,'');else t=t.replace(',','.');const v=parseFloat(t);return isFinite(v)?Math.round(v):null}
+const MONTHS={jan:1,febr:2,feb:2,'márc':3,marc:3,mar:3,'ápr':4,apr:4,'máj':5,maj:5,may:5,'jún':6,jun:6,'júl':7,jul:7,aug:8,szept:9,szep:9,sep:9,sept:9,okt:10,oct:10,nov:11,dec:12};
+function monthNum(t){t=t.toLowerCase().replace(/\.$/,'');if(/^\d+$/.test(t))return +t;for(const k of Object.keys(MONTHS).sort((a,b)=>b.length-a.length))if(t.startsWith(k))return MONTHS[k];return null}
+/* Dátum: 2026-11-06 | 2026. 11. 06. | 2026/11/06 | 2026. nov. 6. | 2026-11-06T00:00:00+01:00 | 2026. nov. 6. 0:00
+   Utána elválasztó (; , tab |), majd a lépésszám. */
+const STEP_LINE=/(\d{4})\s*[-./]\s*([0-9]{1,2}|[A-Za-zÁÉÍÓÖŐÚÜŰáéíóöőúüű]{3,10}\.?)\s*[-./]?\s*(\d{1,2})\.?(?:[T\s]+\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?\s*(?:Z|[+-]\d{2}:?\d{2})?)?\s*[;,\t|]\s*(.+)$/;
 function parseSteps(text){
   const out={};
   for(const line of String(text||'').split(/\r?\n/)){
-    const m=/(\d{4})\s*[-./]\s*(\d{1,2})\s*[-./]\s*(\d{1,2})\.?\s*[;,\t|: ]\s*(.+)$/.exec(line.trim());if(!m)continue;
-    const d=`${m[1]}-${z2(+m[2])}-${z2(+m[3])}`,dt=pYmd(d);if(!DATE_RE.test(d)||dt.getMonth()!==+m[2]-1||dt>new Date())continue;
+    const m=STEP_LINE.exec(line.trim());if(!m)continue;
+    const mo=monthNum(m[2]);if(!mo||mo>12)continue;
+    const d=`${m[1]}-${z2(mo)}-${z2(+m[3])}`,dt=pYmd(d);if(!DATE_RE.test(d)||dt.getMonth()!==mo-1||dt>new Date())continue;
     const v=parseStepNum(m[4]);if(v==null||v<0||v>200000)continue;out[d]=(out[d]||0)+v; // ugyanaz a nap többször: összeadjuk
   }
   return out;
@@ -418,21 +424,23 @@ async function pasteSteps(){
 }
 function stepsHelp(){
   openModal(`<h2>${I('footprints','sm')} Lépések átvétele iPhone-ról</h2>
-  <p class="small">Egyszer kell összerakni a <b>Parancsok</b> appban. Futtatáskor az utolsó 30 nap napi lépésszámát a vágólapra teszi, utána itt a <b>Beillesztés</b> gomb átveszi. Az adat nem hagyja el a telefont.</p>
+  <p class="small">Egyszer kell összerakni a <b>Parancsok</b> appban. A kész parancs 4 műveletből áll:</p>
+  <div class="stat small mono" style="line-height:1.7;margin-bottom:12px">1. Egészségügyi minták keresése<br>2. Ismétlés mindegyikkel<br>&nbsp;&nbsp;&nbsp;↳ Szöveg<br>&nbsp;&nbsp;&nbsp;Ismétlés vége<br>3. Szöveg egyesítése<br>4. Másolás a vágólapra</div>
+  <p class="small"><b>Új művelet hozzáadása:</b> a szerkesztő alján lévő <b>keresőmezőbe</b> („Keresés a műveletek között”) írd be a nevét, majd koppints rá. A parancs <b>végére</b> kerül. Áthelyezni úgy lehet, hogy a művelet <b>nevét</b> nyomva tartod, és odahúzod.</p>
   <ol class="small" style="padding-left:20px;line-height:1.6">
-  <li><b>Parancsok</b> app → <b>+</b> (új parancs), neve pl. <i>Lépések az Edzésnaplóba</i>.</li>
-  <li>Művelet: <b>Egészségügyi minták keresése</b> (Find Health Samples)<br>– Típus: <b>Lépések</b><br>– Szűrő: <b>Kezdés dátuma</b> az utolsó <b>30 nap</b>ban<br>– <b>Csoportosítás: Nap</b> (Group By: Day)<br>– Rendezés: Kezdés dátuma, legrégebbi elöl</li>
-  <li>Művelet: <b>Ismétlés mindegyikkel</b> (Repeat with Each) az egészségügyi mintákon. A cikluson belül:
+  <li><b>Egészségügyi minták keresése</b>: ez már megvan. Típus: <b>Lépések</b>, Kezdés dátuma az utolsó <b>30 nap</b>ban, <b>Csoportosítás: Nap</b>.</li>
+  <li>Keresés: <i>ismétlés</i> → <b>Ismétlés mindegyikkel</b>. Ellenőrizd, hogy az „Egészségügyi minták” mindegyikén ismétel. Két blokk jelenik meg: <i>Ismétlés mindegyikkel</i> és <i>Ismétlés vége</i>.</li>
+  <li>Keresés: <i>szöveg</i> → <b>Szöveg</b>. Húzd a két ismétlés-blokk <b>közé</b>. A szövegmezőbe:
     <ol type="a" style="padding-left:18px">
-    <li><b>Egészségügyi minta részleteinek lekérése</b> → <b>Kezdés dátuma</b> (az Ismétlési elemből)</li>
-    <li><b>Dátum formázása</b> → Formátum: <b>Egyéni</b>, minta: <code class="mono">yyyy-MM-dd</code></li>
-    <li><b>Egészségügyi minta részleteinek lekérése</b> → <b>Érték</b> (az Ismétlési elemből)</li>
-    <li><b>Szöveg</b>: <code class="mono">[Formázott dátum];[Érték]</code></li></ol></li>
-  <li>A ciklus után: <b>Szöveg egyesítése</b> (Combine Text), elválasztó: <b>Új sor</b></li>
-  <li><b>Másolás a vágólapra</b> (Copy to Clipboard)</li>
-  <li>Opcionális: <b>Értesítés megjelenítése</b>, pl. „Lépések a vágólapon”.</li></ol>
-  <p class="small">Első futtatáskor a Parancsok engedélyt kér az Egészség adatokhoz. A parancsot kiteheted widgetként vagy ikonként a főképernyőre. Futtatás után nyisd meg az Edzésnaplót → Test → <b>Beillesztés</b>; az iOS egy „Beillesztés” buborékkal kér megerősítést.</p>
-  <p class="hint">A műveletek pontos neve iOS-verziótól és nyelvtől függően kicsit eltérhet. Az app a „2026. 11. 06.;8 432” és hasonló formátumokat is felismeri, így a szám- és dátumformázás nem kritikus. Ha a vágólapról nem sikerül, a Beillesztés ablakba kézzel is bemásolhatod.</p>
+    <li>Koppints a mezőbe. A billentyűzet fölötti sávban válaszd az <b>Ismétlési elem</b> változót.</li>
+    <li>Koppints a beszúrt <b>Ismétlési elem</b> címkére, és válaszd a <b>Kezdés dátuma</b> (Start Date) tulajdonságot.</li>
+    <li>Írj utána egy pontosvesszőt: <code class="mono">;</code></li>
+    <li>Szúrd be újra az <b>Ismétlési elem</b>et, koppints rá, és válaszd az <b>Érték</b> (Value) tulajdonságot.</li></ol>
+    Eredmény: <code class="mono">Kezdés dátuma ; Érték</code>. A dátum formátuma mindegy, az app felismeri.</li>
+  <li>Keresés: <i>egyesít</i> → <b>Szöveg egyesítése</b>. Az <b>Ismétlés vége</b> alá kerüljön. Bemenet: <b>Ismétlés eredményei</b>, elválasztó: <b>Új sor</b>.</li>
+  <li>Keresés: <i>vágólap</i> → <b>Másolás a vágólapra</b>.</li></ol>
+  <p class="small">Futtasd a jobb alsó ▶ gombbal. Első alkalommal engedélyt kér az Egészség adatokhoz. Utána nyisd meg az Edzésnaplót → Test → <b>Beillesztés</b>. Kényelmes, ha a parancsot widgetként kiteszed a főképernyőre.</p>
+  <p class="hint">Próba közben a 4. lépés helyett ideiglenesen betehetsz egy <b>Eredmény megjelenítése</b> műveletet, hogy lásd, mit ad ki a parancs. Ha a vágólapról nem sikerül a beolvasás, a Beillesztés ablakba kézzel is bemásolhatod.</p>
   <div class="row end"><button class="btn p" data-click="closeModal()">Rendben</button></div>`);
 }
 
