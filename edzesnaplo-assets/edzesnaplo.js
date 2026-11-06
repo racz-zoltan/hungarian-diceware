@@ -45,7 +45,7 @@ function addDefaults(st){
   for(const[name,items]of DEF_TPL)if(!st.templates.some(t=>t.name===name)&&(st.v===0||name.startsWith('Kettlebell')))
     st.templates.push({id:uid(),name,items:items.filter(([n])=>f(n)).map(([n,s])=>({exId:f(n),sets:s}))});
 }
-function defaults(){const st={v:0,exercises:[],templates:[],workouts:[],body:[],active:null,settings:{rest:90,theme:null,sound:3,wakeLock:true}};addDefaults(st);st.v=2;return st}
+function defaults(){const st={v:0,exercises:[],templates:[],workouts:[],body:[],active:null,settings:{rest:90,theme:null,sound:3,wakeLock:true,stepGoal:0}};addDefaults(st);st.v=2;return st}
 const KEY='edzesnaplo.v1';
 let S; // a betöltés a fájl végén történik (a validáló függvények után)
 function load(){try{const raw=localStorage.getItem(KEY);if(raw){const s=sanitizeState(JSON.parse(raw));if(s.v<2){addDefaults(s);s.v=2}return s}}catch(e){console.warn('Betöltési hiba',e)}return defaults()}
@@ -82,7 +82,9 @@ function dlgClose(v){$('#dlg').classList.remove('on');const r=dlgResolve;dlgReso
 function ask(msg,{title='Megerősítés',ok='Rendben',cancel='Mégse',danger=false}={}){
   return dlg(`<h2>${esc(title)}</h2><p>${msg}</p><div class="row end"><button class="btn" data-click="dlgClose(false)">${cancel}</button><button class="btn ${danger?'danger':'p'}" data-click="dlgClose(true)">${ok}</button></div>`,false)}
 function form(title,fields,{ok='Mentés',intro=''}={}){
-  const f=fields.map((x,i)=>`<label for="ff${i}">${esc(x.label)}</label>`+(x.type==='select'
+  const f=fields.map((x,i)=>`<label for="ff${i}">${esc(x.label)}</label>`+(x.type==='textarea'
+    ?`<textarea id="ff${i}" data-f="${x.id}" rows="${x.rows||6}" placeholder="${esc(x.placeholder||'')}" ${i===0?'autofocus':''} autocomplete="off" spellcheck="false">${esc(x.value??'')}</textarea>`
+    :x.type==='select'
     ?`<select id="ff${i}" data-f="${x.id}">${x.options.map(o=>`<option value="${esc(o[0])}" ${o[0]==x.value?'selected':''}>${esc(o[1])}</option>`).join('')}</select>`
     :`<input id="ff${i}" data-f="${x.id}" type="${x.type||'text'}" value="${esc(x.value??'')}" placeholder="${esc(x.placeholder||'')}" ${x.list?`list="dl${i}"`:''} ${x.min!=null?`min="${x.min}"`:''} ${x.step?`step="${x.step}"`:''} ${x.type==='number'?'inputmode="numeric"':''} ${i===0?'autofocus':''} autocomplete="off">`
       +(x.list?`<datalist id="dl${i}">${x.list.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>`:''))
@@ -95,7 +97,7 @@ document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#dlg').
 /* ===== Eseménykezelés (CSP: nincs inline handler, nincs eval) =====
    A sablonokban data-click/input/change/submit="fn(arg,...)" áll; az argumentum csak
    literál lehet (szám, 'szöveg', null, true/false), illetve this / this.value. */
-const ACT=new Set(["addSet", "adjRest", "bodyFromCal", "calNav", "chooseEx", "closeModal", "delBody", "delEx", "delTemplate", "delWorkout", "demoData", "discardWorkout", "dlgBackdrop", "dlgClose", "editBodyRow", "editEx", "editTemplate", "exportCSV", "exportData", "finishWorkout", "formSubmit", "go", "goToday", "importData", "modalBg", "moveEx", "newExFromList", "newExercise", "openImport", "pickForActive", "pickForTpl", "renderPick", "repeatWorkout", "resetAll", "rmEx", "rmSet", "saveAsTemplate", "saveAsTplFromSummary", "saveBody", "saveTpl", "selDay", "setBodyDate", "setDefRest", "setExRest", "setRange", "setSound", "setStrEx", "setStrMetric", "setTheme", "setTplName", "setTplSets", "setVal", "setWName", "setWake", "showStr", "startWorkout", "stopRest", "testSound", "toggleSet", "toggleTheme", "tplMove", "tplRemove", "updateTplFrom"]);
+const ACT=new Set(["addSet", "adjRest", "bodyFromCal", "calNav", "chooseEx", "closeModal", "delBody", "delEx", "delTemplate", "delWorkout", "demoData", "discardWorkout", "dlgBackdrop", "dlgClose", "editBodyRow", "editEx", "editTemplate", "exportCSV", "exportData", "finishWorkout", "formSubmit", "go", "goToday", "importData", "modalBg", "moveEx", "newExFromList", "newExercise", "openImport", "pasteSteps", "pickForActive", "pickForTpl", "renderPick", "repeatWorkout", "resetAll", "rmEx", "rmSet", "saveAsTemplate", "saveAsTplFromSummary", "saveBody", "saveTpl", "selDay", "setBodyDate", "setDefRest", "setExRest", "setRange", "setSound", "setStepGoal", "setStrEx", "setStrMetric", "setTheme", "setTplName", "setTplSets", "setVal", "setWName", "setWake", "showStr", "startWorkout", "stepsHelp", "stopRest", "testSound", "toggleSet", "toggleTheme", "tplMove", "tplRemove", "updateTplFrom"]);
 function splitArgs(s){const out=[];let cur='',q=false;for(const ch of s){if(ch==="'")q=!q;if(ch===','&&!q){out.push(cur.trim());cur=''}else cur+=ch}if(cur.trim())out.push(cur.trim());return out}
 function parseArg(a,el){if(a==='this')return el;if(a==='this.value')return el.value;if(/^'[^'"\\]*'$/.test(a))return a.slice(1,-1);if(/^-?\d+(\.\d+)?$/.test(a))return +a;if(a==='null')return null;if(a==='true')return true;if(a==='false')return false;throw new Error('arg')}
 function runAct(src,el){const m=/^([A-Za-z_]\w*)\((.*)\)$/.exec((src||'').trim());if(!m||!ACT.has(m[1])||typeof window[m[1]]!=='function'){console.warn('Ismeretlen művelet:',src);return}
@@ -135,14 +137,14 @@ const str=(v,n=120)=>String(v??'').slice(0,n);
 function sanitizeState(d){
   if(!d||typeof d!=='object'||!Array.isArray(d.exercises)||!Array.isArray(d.workouts))throw new Error('format');
   const map={},fix=id=>{const k=String(id);if(!map[k])map[k]=ID_RE.test(k)?k:uid();return map[k]};
-  const o={v:num(d.v,1,99)||2,settings:{rest:num(d.settings?.rest,0,1800)??90,sound:num(d.settings?.sound,0,3)??3,wakeLock:d.settings?.wakeLock!==false,theme:['light','dark'].includes(d.settings?.theme)?d.settings.theme:null,lastBackup:num(d.settings?.lastBackup,0,9e15)||undefined}};
+  const o={v:num(d.v,1,99)||2,settings:{rest:num(d.settings?.rest,0,1800)??90,sound:num(d.settings?.sound,0,3)??3,stepGoal:num(d.settings?.stepGoal,0,100000)??0,wakeLock:d.settings?.wakeLock!==false,theme:['light','dark'].includes(d.settings?.theme)?d.settings.theme:null,lastBackup:num(d.settings?.lastBackup,0,9e15)||undefined}};
   o.exercises=d.exercises.filter(e=>e&&e.name).map(e=>{const x={id:fix(e.id),name:str(e.name,100),cat:str(e.cat||'Egyéb',40)};const r=num(e.rest,0,1800);if(r!=null&&e.rest!==''&&e.rest!=null)x.rest=r;return x});
   const sets=a=>(Array.isArray(a)?a:[]).map(s=>({w:num(s?.w,0,2000)??0,r:num(s?.r,0,10000)??0}));
   o.templates=(Array.isArray(d.templates)?d.templates:[]).filter(t=>t&&t.name).map(t=>({id:fix(t.id),name:str(t.name,100),items:(Array.isArray(t.items)?t.items:[]).map(i=>({exId:fix(i?.exId),sets:num(i?.sets,1,30)||3}))}));
   o.workouts=d.workouts.filter(w=>w&&num(w.start,0,9e15)).map(w=>({id:fix(w.id),name:str(w.name||'Edzés',100),start:+w.start,end:num(w.end,0,9e15)||+w.start,tplId:w.tplId?fix(w.tplId):null,
     exercises:(Array.isArray(w.exercises)?w.exercises:[]).map(e=>({exId:fix(e?.exId),sets:sets(e?.sets)})),
     prs:(Array.isArray(w.prs)?w.prs:[]).filter(p=>p&&['w','e','r','v'].includes(p.type)).map(p=>({exId:fix(p.exId),type:p.type,val:num(p.val,0,1e7)||0}))}));
-  o.body=(Array.isArray(d.body)?d.body:[]).filter(b=>b&&DATE_RE.test(b.date)).map(b=>{const x={date:b.date};const w=num(b.weight,20,400),f=num(b.fat,2,70),wa=num(b.waist,30,250);if(w!=null)x.weight=w;if(f!=null)x.fat=f;if(wa!=null)x.waist=wa;return x});
+  o.body=(Array.isArray(d.body)?d.body:[]).filter(b=>b&&DATE_RE.test(b.date)).map(b=>{const x={date:b.date};const w=num(b.weight,20,400),f=num(b.fat,2,70),wa=num(b.waist,30,250),st=num(b.steps,0,200000);if(w!=null)x.weight=w;if(f!=null)x.fat=f;if(wa!=null)x.waist=wa;if(st!=null)x.steps=Math.round(st);return x}).filter(b=>Object.keys(b).length>1);
   const a=d.active;
   o.active=a&&num(a.start,0,9e15)?{id:fix(a.id),name:str(a.name,100),start:+a.start,tplId:a.tplId?fix(a.tplId):null,exercises:(Array.isArray(a.exercises)?a.exercises:[]).map(e=>({exId:fix(e?.exId),sets:(Array.isArray(e?.sets)?e.sets:[]).map(s=>({w:s?.w===''?'':num(s?.w,0,2000)??'',r:s?.r===''?'':num(s?.r,0,10000)??'',done:!!s?.done}))}))}:null;
   return o;
@@ -301,6 +303,7 @@ function syncWake(){if(S.active&&S.settings.wakeLock!==false)wakeOn();else if(WL
 function updWakeUI(){const el=$('#wakeInd');if(el)el.hidden=!WL}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncWake()});
 document.addEventListener('pointerdown',()=>{if(S.active&&!WL)syncWake()},{passive:true});
+function setStepGoal(v){S.settings.stepGoal=Math.max(0,Math.min(100000,parseInt(v)||0));save();toast('Mentve')}
 function setWake(v){S.settings.wakeLock=v;save();render()}
 function setSound(v){S.settings.sound=v;save();render();if(v)chime(v)}
 function testSound(){unlockAudio();chime()}
@@ -366,23 +369,73 @@ function vHistory(){
   const bMap={};for(const b of S.body)bMap[b.date]=b;
   let cells=['H','K','SZE','CS','P','SZO','V'].map(d=>`<div class="h">${d}</div>`).join('');
   for(let i=0;i<cellsN;i++){const d=new Date(y,m,1-off+i),k=ymd(d);
-    cells+=`<div class="d ${d.getMonth()!==m?'o':''} ${k===today()?'t':''} ${k===calSel?'sel':''}" data-click="selDay('${k}')">${d.getDate()}<div class="dots">${wDay[k]?`<i class="dot" style="background:${C.green}"></i>`:''}${bMap[k]?`<i class="dot" style="background:${C.gold}"></i>`:''}</div></div>`}
+    cells+=`<div class="d ${d.getMonth()!==m?'o':''} ${k===today()?'t':''} ${k===calSel?'sel':''}" data-click="selDay('${k}')">${d.getDate()}<div class="dots">${wDay[k]?`<i class="dot" style="background:${C.green}"></i>`:''}${hasMeas(bMap[k])?`<i class="dot" style="background:${C.gold}"></i>`:''}${bMap[k]?.steps!=null?`<i class="dot" style="background:${C.violet}"></i>`:''}</div></div>`}
   const mW=S.workouts.filter(w=>{const d=new Date(w.start);return d.getFullYear()===y&&d.getMonth()===m});
   const mB=S.body.filter(b=>{const d=pYmd(b.date);return d.getFullYear()===y&&d.getMonth()===m&&b.weight!=null}).sort((a,b)=>a.date<b.date?-1:1);
   const mDelta=mB.length>1?mB[mB.length-1].weight-mB[0].weight:null;
   let h=`<div class="card"><div class="row" style="margin-bottom:12px;flex-wrap:nowrap"><button class="iconbtn" data-click="calNav(-1)" aria-label="Előző hónap">${I('chevron-left')}</button><h2 style="flex:1;text-align:center;margin:0;text-transform:capitalize">${first.toLocaleDateString('hu-HU',{year:'numeric',month:'long'})}</h2><button class="iconbtn" data-click="calNav(1)" aria-label="Következő hónap">${I('chevron-right')}</button></div>
   <div class="cal">${cells}</div>
-  <div class="legend" style="margin-top:12px"><span><i style="background:${C.green}"></i>Edzés</span><span><i style="background:${C.gold}"></i>Testmérés</span><span class="sp"></span><button class="btn sm" data-click="goToday()">Ma</button></div></div>
+  <div class="legend" style="margin-top:12px"><span><i style="background:${C.green}"></i>Edzés</span><span><i style="background:${C.gold}"></i>Testmérés</span><span><i style="background:${C.violet}"></i>Lépés</span><span class="sp"></span><button class="btn sm" data-click="goToday()">Ma</button></div></div>
   <div class="grid3" style="margin-bottom:12px">${stat('Edzés a hónapban',mW.length)}${stat('Volumen',mW.length?fmtShort(mW.reduce((a,w)=>a+wVolume(w),0))+' kg':null)}${stat('Súlyváltozás',mDelta==null?null:sgn(mDelta)+' kg')}</div>`;
   const dw=(wDay[calSel]||[]).sort((a,b)=>a.start-b.start),db=bMap[calSel];
   h+=`<h3 style="margin:8px 2px 10px">${pYmd(calSel).toLocaleDateString('hu-HU',{year:'numeric',month:'long',day:'numeric',weekday:'long'})}</h3>`;
   h+=`<div class="card"><div class="row"><h2 style="flex:1;margin:0;font-size:16.5px">${I('scale','sm')} Testadatok</h2><button class="btn sm" data-click="bodyFromCal('${calSel}')">${db?I('pencil','sm')+' Szerkesztés':I('plus','sm')+' Rögzítés'}</button></div>
-  ${db?`<div class="grid3" style="margin-top:12px">${stat('Súly',db.weight!=null?fmt(db.weight)+' kg':null)}${stat('Testzsír',db.fat!=null?fmt(db.fat)+' %':null)}${stat('Derék',db.waist!=null?fmt(db.waist)+' cm':null)}</div>`:'<div class="mut small" style="margin-top:6px">Nincs mérés erre a napra.</div>'}</div>`;
+  ${db?`<div class="grid3" style="margin-top:12px">${stat('Súly',db.weight!=null?fmt(db.weight)+' kg':null)}${stat('Testzsír',db.fat!=null?fmt(db.fat)+' %':null)}${stat('Derék',db.waist!=null?fmt(db.waist)+' cm':null)}</div>
+  ${db.steps!=null?`<div class="stat" style="margin-top:8px"><b>${I('footprints','sm')} ${fmt(db.steps,0)}</b><span>Lépés${S.settings.stepGoal?` · cél: ${fmt(S.settings.stepGoal,0)} (${Math.round(db.steps/S.settings.stepGoal*100)}%)`:''}</span></div>`:''}`:'<div class="mut small" style="margin-top:6px">Nincs mérés erre a napra.</div>'}</div>`;
   h+=dw.length?dw.map(w=>workoutCard(w)).join(''):`<div class="card mut small">Nincs edzés erre a napra.</div>`;
   return h;
 }
 
 /* ===== Testadatok ===== */
+const hasMeas=b=>!!b&&(b.weight!=null||b.fat!=null||b.waist!=null);
+/* Lépések átvétele vágólapról. Soronként: dátum + lépésszám, tetszőleges elválasztóval.
+   Elfogadott dátum: 2026-11-06, 2026. 11. 06., 2026/11/06. Szám: 8432, 8 432, 8.432, 8,432, 8432,0 */
+function parseStepNum(t){t=t.replace(/[\s  ']/g,'').replace(/[^\d.,]+$/,'');if(!/^\d/.test(t))return null;if(/^\d{1,3}([.,]\d{3})+$/.test(t))t=t.replace(/[.,]/g,'');else t=t.replace(',','.');const v=parseFloat(t);return isFinite(v)?Math.round(v):null}
+function parseSteps(text){
+  const out={};
+  for(const line of String(text||'').split(/\r?\n/)){
+    const m=/(\d{4})\s*[-./]\s*(\d{1,2})\s*[-./]\s*(\d{1,2})\.?\s*[;,\t|: ]\s*(.+)$/.exec(line.trim());if(!m)continue;
+    const d=`${m[1]}-${z2(+m[2])}-${z2(+m[3])}`,dt=pYmd(d);if(!DATE_RE.test(d)||dt.getMonth()!==+m[2]-1||dt>new Date())continue;
+    const v=parseStepNum(m[4]);if(v==null||v<0||v>200000)continue;out[d]=(out[d]||0)+v; // ugyanaz a nap többször: összeadjuk
+  }
+  return out;
+}
+async function pasteSteps(){
+  let text=null;
+  try{if(navigator.clipboard&&navigator.clipboard.readText)text=await navigator.clipboard.readText()}catch(e){text=null}
+  let data=parseSteps(text);
+  if(!Object.keys(data).length){ // nincs vágólap-hozzáférés vagy nem felismerhető: kézi beillesztés
+    const r=await form('Lépések beillesztése',[{id:'t',label:'Parancs kimenete',type:'textarea',placeholder:'2026-11-05;9120\n2026-11-06;4312',hint:'Nyomd hosszan a mezőt, majd Beillesztés. Soronként egy nap: dátum;lépésszám.'}],{ok:'Feldolgozás',intro:text?'A vágólap tartalmában nem találtam lépésadatot.':''});
+    if(!r)return;data=parseSteps(r.t);
+    if(!Object.keys(data).length){toast('Nem találtam felismerhető sort (dátum;lépésszám)');return}
+  }
+  const days=Object.keys(data).sort(),chg=days.filter(d=>S.body.find(b=>b.date===d)?.steps!==data[d]);
+  const isNew=days.filter(d=>S.body.find(b=>b.date===d)?.steps==null).length;
+  if(!chg.length){toast(`${days.length} nap – nincs változás`);return}
+  if(!await ask(`<b>${days.length}</b> nap lépésszáma (${fmtDate(days[0])} – ${fmtDate(days[days.length-1])}).<br>${isNew} új, ${chg.length-isNew} frissített nap. A súly- és egyéb mérések nem változnak.`,{title:'Lépések átvétele',ok:'Mentés'}))return;
+  for(const d of chg){let b=S.body.find(x=>x.date===d);if(!b){b={date:d};S.body.push(b)}b.steps=data[d]}
+  save();render();toast(`${chg.length} nap mentve`);
+}
+function stepsHelp(){
+  openModal(`<h2>${I('footprints','sm')} Lépések átvétele iPhone-ról</h2>
+  <p class="small">Egyszer kell összerakni a <b>Parancsok</b> appban. Futtatáskor az utolsó 30 nap napi lépésszámát a vágólapra teszi, utána itt a <b>Beillesztés</b> gomb átveszi. Az adat nem hagyja el a telefont.</p>
+  <ol class="small" style="padding-left:20px;line-height:1.6">
+  <li><b>Parancsok</b> app → <b>+</b> (új parancs), neve pl. <i>Lépések az Edzésnaplóba</i>.</li>
+  <li>Művelet: <b>Egészségügyi minták keresése</b> (Find Health Samples)<br>– Típus: <b>Lépések</b><br>– Szűrő: <b>Kezdés dátuma</b> az utolsó <b>30 nap</b>ban<br>– <b>Csoportosítás: Nap</b> (Group By: Day)<br>– Rendezés: Kezdés dátuma, legrégebbi elöl</li>
+  <li>Művelet: <b>Ismétlés mindegyikkel</b> (Repeat with Each) az egészségügyi mintákon. A cikluson belül:
+    <ol type="a" style="padding-left:18px">
+    <li><b>Egészségügyi minta részleteinek lekérése</b> → <b>Kezdés dátuma</b> (az Ismétlési elemből)</li>
+    <li><b>Dátum formázása</b> → Formátum: <b>Egyéni</b>, minta: <code class="mono">yyyy-MM-dd</code></li>
+    <li><b>Egészségügyi minta részleteinek lekérése</b> → <b>Érték</b> (az Ismétlési elemből)</li>
+    <li><b>Szöveg</b>: <code class="mono">[Formázott dátum];[Érték]</code></li></ol></li>
+  <li>A ciklus után: <b>Szöveg egyesítése</b> (Combine Text), elválasztó: <b>Új sor</b></li>
+  <li><b>Másolás a vágólapra</b> (Copy to Clipboard)</li>
+  <li>Opcionális: <b>Értesítés megjelenítése</b>, pl. „Lépések a vágólapon”.</li></ol>
+  <p class="small">Első futtatáskor a Parancsok engedélyt kér az Egészség adatokhoz. A parancsot kiteheted widgetként vagy ikonként a főképernyőre. Futtatás után nyisd meg az Edzésnaplót → Test → <b>Beillesztés</b>; az iOS egy „Beillesztés” buborékkal kér megerősítést.</p>
+  <p class="hint">A műveletek pontos neve iOS-verziótól és nyelvtől függően kicsit eltérhet. Az app a „2026. 11. 06.;8 432” és hasonló formátumokat is felismeri, így a szám- és dátumformázás nem kritikus. Ha a vágólapról nem sikerül, a Beillesztés ablakba kézzel is bemásolhatod.</p>
+  <div class="row end"><button class="btn p" data-click="closeModal()">Rendben</button></div>`);
+}
+
 const bodySorted=()=>[...S.body].sort((a,b)=>a.date<b.date?-1:1);
 function series(k){return bodySorted().filter(b=>b[k]!=null).map(b=>({x:pYmd(b.date).getTime(),y:b[k]}))}
 function deltaN(s,n){if(s.length<2)return null;const l=s[s.length-1],t=l.x-n*DAY;let p=null;for(const q of s)if(q.x<=t)p=q;return p?l.y-p.y:null}
@@ -400,7 +453,11 @@ function vBody(){
   <div class="grid3"><div><label for="bw">Súly (kg)</label><input id="bw" type="number" step="0.1" inputmode="decimal" value="${e.weight??''}" placeholder="${lastW?lastW.weight:''}"></div>
   <div><label for="bf">Testzsír (%)</label><input id="bf" type="number" step="0.1" inputmode="decimal" value="${e.fat??''}" placeholder="${lastF?lastF.fat:''}"></div>
   <div><label for="bwa">Derék (cm)</label><input id="bwa" type="number" step="0.5" inputmode="decimal" value="${e.waist??''}"></div></div>
+  <label for="bst">Lépésszám</label><input id="bst" type="number" step="1" min="0" inputmode="numeric" value="${e.steps??''}" placeholder="pl. 8500">
   <div class="row" style="margin-top:14px">${e.date?`<button class="btn d" data-click="delBody('${e.date}')">${I('trash-2','sm')} Törlés</button>`:''}<span class="sp"></span><button class="btn p" data-click="saveBody()">${I('save','sm')} ${e.date?'Frissítés':'Mentés'}</button></div></div>
+  <div class="card"><div class="row" style="flex-wrap:nowrap"><h2 style="flex:1;margin:0">${I('footprints','sm')} Lépések</h2><button class="btn sm ico" data-click="stepsHelp()" aria-label="Súgó: lépések átvétele">${I('circle-help','sm')}</button><button class="btn sm p" data-click="pasteSteps()">${I('clipboard-paste','sm')} Beillesztés</button></div>
+  <div class="hint" style="margin:6px 0 10px">Az iPhone Egészség appjából a Parancsok appal másolhatod át (a ? gomb alatt a leírás), vagy írd be kézzel fent.</div>
+  <div class="grid3">${(()=>{const ss=series('steps'),t=S.body.find(b=>b.date===today())?.steps;return stat('Ma',t!=null?fmt(t,0):null)+stat('7 napos átlag',ss.length?fmt(avgLast(ss,7),0):null)+stat('30 napos átlag',ss.length?fmt(avgLast(ss,30),0):null)})()}</div></div>
   <h3 style="margin:16px 2px 10px">Testsúly</h3>
   <div class="grid3" style="margin-bottom:8px">${stat('Utolsó súly',lastW?fmt(lastW.weight)+' kg':null)}${stat('7 napos átlag',ws.length?fmt(avgLast(ws,7))+' kg':null)}${stat('Δ 30 nap',d30==null?null:sgn(d30)+' kg',dcls(d30))}</div>
   <div class="grid3" style="margin-bottom:12px">${trendStat('Trend 14 nap',lastDays(ws,14),'kg/hét')}${trendStat('Trend 30 nap',lastDays(ws,30),'kg/hét')}${trendStat('Trend 90 nap',lastDays(ws,90),'kg/hét')}</div>
@@ -408,19 +465,20 @@ function vBody(){
   <div class="grid3" style="margin-bottom:12px">${stat('Utolsó testzsír',lastF?fmt(lastF.fat)+' %':null)}${trendStat('Trend 30 nap',lastDays(fs,30),'%p/hét')}${trendStat('Trend 90 nap',lastDays(fs,90),'%p/hét')}</div>
   <div class="hint" style="margin:-4px 2px 14px">A trend a mérésekre illesztett lineáris regresszió meredeksége heti változásra vetítve – kevésbé érzékeny a napi ingadozásra, mint két mérés különbsége.</div>`;
   const rows=[];let pw=null;for(const b of sorted){rows.push({b,d:b.weight!=null&&pw!=null?b.weight-pw:null});if(b.weight!=null)pw=b.weight}
-  h+=`<div class="card"><h2>Előzmények</h2>${rows.length?`<table class="tbl"><tr><th>Dátum</th><th>Súly</th><th>Δ</th><th>Zsír %</th><th>Derék</th></tr>
-  ${rows.reverse().slice(0,90).map(({b,d})=>`<tr class="click" data-click="editBodyRow('${b.date}')"><td>${fmtDate(b.date)}</td><td>${fmt(b.weight)}</td><td class="mut">${d==null?'':sgn(d)}</td><td>${fmt(b.fat)}</td><td>${fmt(b.waist)}</td></tr>`).join('')}</table>`:'<div class="empty">Még nincs mérés.</div>'}</div>`;
+  h+=`<div class="card"><h2>Előzmények</h2>${rows.length?`<table class="tbl"><tr><th>Dátum</th><th>Súly</th><th>Δ</th><th>Zsír</th><th>Derék</th><th>Lépés</th></tr>
+  ${rows.reverse().slice(0,90).map(({b,d})=>`<tr class="click" data-click="editBodyRow('${b.date}')"><td>${fmtDate(b.date)}</td><td>${fmt(b.weight)}</td><td class="mut">${d==null?'':sgn(d)}</td><td>${fmt(b.fat)}</td><td>${fmt(b.waist)}</td><td>${b.steps!=null?fmtShort(b.steps):'–'}</td></tr>`).join('')}</table>`:'<div class="empty">Még nincs mérés.</div>'}</div>`;
   return h;
 }
 function saveBody(){
   const d=$('#bd').value;if(!d)return;
   const num=id=>{const v=$(id).value.replace(',','.');return v===''?null:+v};
-  const w=num('#bw'),f=num('#bf'),wa=num('#bwa');
-  if(w==null&&f==null&&wa==null){toast('Adj meg legalább egy értéket');return}
+  const w=num('#bw'),f=num('#bf'),wa=num('#bwa'),st=num('#bst');
+  if(w==null&&f==null&&wa==null&&st==null){toast('Adj meg legalább egy értéket');return}
+  if(st!=null&&!(st>=0&&st<=200000)){toast('A lépésszám 0–200 000 között legyen');return}
   if(w!=null&&!(w>=20&&w<=400)){toast('A súly 20–400 kg között legyen');return}
   if(f!=null&&!(f>=2&&f<=70)){toast('A testzsír 2–70% között legyen');return}
   if(wa!=null&&!(wa>=30&&wa<=250)){toast('A derékkerület 30–250 cm között legyen');return}
-  S.body=S.body.filter(b=>b.date!==d);const e={date:d};if(w!=null)e.weight=w;if(f!=null)e.fat=f;if(wa!=null)e.waist=wa;S.body.push(e);save();toast('Mentve');render();
+  S.body=S.body.filter(b=>b.date!==d);const e={date:d};if(w!=null)e.weight=w;if(f!=null)e.fat=f;if(wa!=null)e.waist=wa;if(st!=null)e.steps=Math.round(st);S.body.push(e);save();toast('Mentve');render();
 }
 async function delBody(d){if(!await ask(`Törlöd a(z) ${fmtDate(d)} mérést?`,{title:'Mérés törlése',ok:'Törlés',danger:true}))return;S.body=S.body.filter(b=>b.date!==d);save();render()}
 
@@ -441,6 +499,14 @@ function vStats(){
   <div class="grid3" style="margin-top:12px">${stat('Jelenlegi',f.length?fmt(f[f.length-1].y)+' %':null)}${stat('Δ 30 nap',f30==null?null:sgn(f30)+' %p',dcls(f30))}${stat('Trend (%p/hét)',fsl==null?null:sgn(fsl,2),dcls(fsl))}</div></div>
   <div class="card"><h2>Derékkerület</h2>${lineChart([{name:'Derék',color:C.green,points:wa.filter(inR),dots:true}],{unit:' cm',h:190})}
   <div class="grid3" style="margin-top:12px">${stat('Jelenlegi',wa.length?fmt(wa[wa.length-1].y)+' cm':null)}${stat('Δ 30 nap',w30==null?null:sgn(w30)+' cm',dcls(w30))}${stat('Δ 90 nap',w90==null?null:sgn(w90)+' cm',dcls(w90))}</div></div>`;
+  {const ssAll=series('steps'),goal=S.settings.stepGoal||0,sr=ssAll.filter(inR),ma7=movAvg(ssAll).filter(inR);
+   const last30=[...Array(30)].map((_,i)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-29+i);return ymd(d)});
+   const bm={};for(const b of S.body)if(b.steps!=null)bm[b.date]=b.steps;
+   const avg=sr.length?sr.reduce((a,p)=>a+p.y,0)/sr.length:null,best=sr.length?sr.reduce((a,p)=>p.y>a.y?p:a):null;
+   h+=`<div class="card"><h2>${I('footprints','sm')} Lépések</h2>
+   <h3>Utolsó 30 nap</h3>${barChart(last30.map(d=>d.slice(5).replace('-','.')),last30.map(d=>bm[d]||0),{color:C.violet,goal,goalColor:C.green,empty:'Az elmúlt 30 napban nincs lépésadat'})}
+   ${sr.length>1?`<h3 style="margin-top:14px">7 napos átlag (időszak)</h3>${lineChart([{name:'7 napos átlag',color:C.violet,points:ma7,w:3}],{h:170})}`:''}
+   <div class="grid3" style="margin-top:12px">${stat('Átlag (időszak)',avg==null?null:fmt(avg,0))}${stat('Legjobb nap',best?fmt(best.y,0):null)}${goal?stat('Cél teljesítve',sr.length?Math.round(sr.filter(p=>p.y>=goal).length/sr.length*100)+' %':null):stat('Rögzített nap',sr.length)}</div></div>`;}
   const ws0=weekStart(Date.now()),weeks=[...Array(12)].map((_,i)=>{const d=new Date(ws0);d.setDate(d.getDate()-(11-i)*7);return d.getTime()}),cnt=weeks.map(()=>0),vol=weeks.map(()=>0);
   for(const x of S.workouts){const i=weeks.indexOf(weekStart(x.start));if(i>=0){cnt[i]++;vol[i]+=wVolume(x)}}
   const lbl=weeks.map(t=>{const d=new Date(t);return z2(d.getMonth()+1)+'.'+z2(d.getDate())});
@@ -486,7 +552,7 @@ function lineChart(series,o={}){
   const tk=niceTicks(y0,y1,4);y0=tk[0];y1=tk[tk.length-1];
   const sx=x=>pl+(x-x0)/(x1-x0)*(W-pl-pr),sy=y=>pt+(1-(y-y0)/(y1-y0))*(H-pt-pb);
   let g='';
-  tk.forEach(t=>g+=`<line x1="${pl}" x2="${W-pr}" y1="${sy(t)}" y2="${sy(t)}" class="gl"/><text x="${pl-8}" y="${sy(t)+5}" text-anchor="end" class="ax">${fmt(t,1)}</text>`);
+  tk.forEach(t=>g+=`<line x1="${pl}" x2="${W-pr}" y1="${sy(t)}" y2="${sy(t)}" class="gl"/><text x="${pl-8}" y="${sy(t)+5}" text-anchor="end" class="ax">${Math.abs(t)>=1000?fmtShort(t):fmt(t,1)}</text>`);
   for(let i=0;i<=4;i++){const x=x0+(x1-x0)*i/4;g+=`<text x="${sx(x)}" y="${H-8}" text-anchor="${i===0?'start':i===4?'end':'middle'}" class="ax">${xLbl(x,x1-x0)}</text>`}
   series.forEach(s=>{const d=s.points.map((p,i)=>(i?'L':'M')+sx(p.x).toFixed(1)+' '+sy(p.y).toFixed(1)).join('');
     g+=`<path d="${d}" style="fill:none;stroke:${s.color};stroke-width:${s.w||2.5};stroke-linejoin:round;stroke-linecap:round"/>`;
@@ -507,12 +573,14 @@ function attachCharts(){
 }
 function barChart(labels,vals,o={}){
   const W=600,H=o.h||180,pl=48,pr=8,pt=22,pb=28,max=Math.max(...vals,0);
-  if(!max)return '<div class="empty">Az elmúlt 12 hétben nincs edzés</div>';
-  const tk=niceTicks(0,max,3),top=tk[tk.length-1],bw=(W-pl-pr)/vals.length,ih=H-pt-pb;let g='';
+  if(!max)return `<div class="empty">${o.empty||'Az elmúlt 12 hétben nincs edzés'}</div>`;
+  const step=Math.max(2,Math.ceil(vals.length/6)),dense=vals.length>16;
+  const tk=niceTicks(0,Math.max(max,o.goal||0),3),top=tk[tk.length-1],bw=(W-pl-pr)/vals.length,ih=H-pt-pb;let g='';
   tk.forEach(t=>{const y=pt+(1-t/top)*ih;g+=`<line x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}" class="gl"/><text x="${pl-8}" y="${y+5}" text-anchor="end" class="ax">${fmtShort(t)}</text>`});
   vals.forEach((v,i)=>{const h=v/top*ih,x=pl+i*bw+bw*.18,cx=x+bw*.32;
-    if(v)g+=`<rect x="${x}" y="${H-pb-h}" width="${bw*.64}" height="${h}" rx="5" style="fill:${o.color}"/><text x="${cx}" y="${H-pb-h-6}" text-anchor="middle" class="bv">${fmtShort(v)}</text>`;
-    if((vals.length-1-i)%2===0)g+=`<text x="${cx}" y="${H-8}" text-anchor="middle" class="ax">${labels[i]}</text>`});
+    if(v)g+=`<rect x="${x}" y="${H-pb-h}" width="${bw*.64}" height="${h}" rx="${dense?3:5}" style="fill:${o.goal&&v>=o.goal?o.goalColor:o.color}"/>`+(dense?'':`<text x="${cx}" y="${H-pb-h-6}" text-anchor="middle" class="bv">${fmtShort(v)}</text>`);
+    if((vals.length-1-i)%step===0){const edge=cx+28>W-pr;g+=`<text x="${edge?W-pr:cx}" y="${H-8}" text-anchor="${edge?'end':'middle'}" class="ax">${labels[i]}</text>`}});
+  if(o.goal){const y=pt+(1-o.goal/top)*ih;g+=`<line x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}" style="stroke:${o.goalColor};stroke-width:2;stroke-dasharray:6 5"/><text x="${W-pr}" y="${y-6}" text-anchor="end" class="bv" style="fill:${o.goalColor}">cél ${fmtShort(o.goal)}</text>`}
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
 }
 
@@ -531,6 +599,9 @@ function vMore(){
   ${wakeSupported()?`<div class="chips" style="margin:0">${[[true,'Be'],[false,'Ki']].map(([v,l])=>`<button class="chip ${(S.settings.wakeLock!==false)===v?'on':''}" data-click="setWake(${v})">${l}</button>`).join('')}</div>
   <div class="hint">Futó edzés alatt a képernyő nem sötétül el és nem zár le, így a pihenő-visszaszámlálás és a hangjelzés is működik. Az edzés befejezésekor automatikusan kikapcsol. Több akkumulátort fogyaszt.</div>`
   :`<div class="hint">Ez a böngésző nem támogatja (iPhone-on iOS 16.4 vagy újabb kell).</div>`}
+  <label for="stepgoal">Napi lépéscél</label>
+  <input id="stepgoal" type="number" min="0" max="100000" step="500" inputmode="numeric" value="${S.settings.stepGoal||''}" placeholder="nincs cél" data-change="setStepGoal(this.value)">
+  <div class="hint">A statisztikában szaggatott vonal jelzi, a célt elérő napok zöldek. Üresen hagyva nincs cél.</div>
   <label>Megjelenés</label>
   <div class="chips" style="margin:0">${[[null,'Rendszer szerint'],['light','Világos'],['dark','Sötét']].map(([v,l])=>`<button class="chip ${S.settings.theme===v?'on':''}" data-click="setTheme(${v?`'${v}'`:'null'})">${l}</button>`).join('')}</div></div>
   <div class="card"><h2>Mentés</h2><div class="hint" style="margin:0 0 12px">Minden adat csak ezen az eszközön, a böngésző helyi tárhelyén van – semmi nem kerül szerverre. A <b>Mentés / megosztás</b> a telefon megosztás menüjét nyitja meg: innen menthetsz Google Drive-ra, a Fájlok appba vagy iCloud Drive-ra. Visszatöltés: <b>Import</b>, majd a fájl kiválasztása (a Drive is megjelenik a fájlválasztóban, ha telepítve van).</div>
@@ -560,7 +631,7 @@ async function exportData(){
   const now=Date.now(),snap=JSON.stringify(Object.assign({},S,{settings:Object.assign({},S.settings,{lastBackup:now})}));
   if(await shareOrDownload('edzesnaplo-'+today()+'.json',snap,'application/json','Edzésnapló mentés')){S.settings.lastBackup=now;save();if(tab==='more'||tab==='workout')render();toast('Mentés kész')}
 }
-function exportCSV(){const c=v=>v==null?'':String(v).replace('.',',');shareOrDownload('testadatok-'+today()+'.csv','﻿datum;suly_kg;testzsir_szazalek;derek_cm\n'+bodySorted().map(b=>[b.date,c(b.weight),c(b.fat),c(b.waist)].join(';')).join('\n'),'text/csv','Testadatok')}
+function exportCSV(){const c=v=>v==null?'':String(v).replace('.',',');shareOrDownload('testadatok-'+today()+'.csv','﻿datum;suly_kg;testzsir_szazalek;derek_cm;lepes\n'+bodySorted().map(b=>[b.date,c(b.weight),c(b.fat),c(b.waist),b.steps??''].join(';')).join('\n'),'text/csv','Testadatok')}
 async function importData(inp){const f=inp.files[0];inp.value='';if(!f)return;
   let d;try{if(f.size>20e6)throw 0;d=sanitizeState(JSON.parse(await f.text()))}catch(e){toast('Hibás vagy nem támogatott fájl');return}
   if(!await ask(`A fájlban ${d.workouts.length} edzés és ${d.body.length} mérés van. Felülírja a jelenlegi adatokat?`,{title:'Importálás',ok:'Felülírás',danger:true}))return;
@@ -576,6 +647,7 @@ async function demoData(){
   for(let i=120;i>=1;i--){const d=new Date(t0);d.setDate(d.getDate()-i);const key=ymd(d);
     wt+=-0.03+(Math.random()-.5)*.55;fat-=.018;waist-=.03;
     if(Math.random()<.8&&!S.body.some(b=>b.date===key)){const e={date:key,weight:+wt.toFixed(1)};if(d.getDay()===1){e.fat=+(fat+(Math.random()-.5)*.6).toFixed(1);e.waist=+(waist+(Math.random()-.5)).toFixed(1)}S.body.push(e)}
+    {let b=S.body.find(x=>x.date===key);if(!b){b={date:key};S.body.push(b)}if(b.steps==null)b.steps=Math.round(4500+Math.random()*9500)}
     if(tpls.length&&[1,2,4,6].includes(d.getDay())&&Math.random()<.85){const t=tpls[k++%tpls.length],prog=1+(120-i)*.0011;
       const st=new Date(d);st.setHours(17,30+Math.floor(Math.random()*40));
       const w={id:uid(),name:t.name,tplId:t.id,start:st.getTime(),end:st.getTime()+(45+Math.random()*30)*60000,exercises:t.items.map(it=>{const n=exName(it.exId),b=base[n]??20;

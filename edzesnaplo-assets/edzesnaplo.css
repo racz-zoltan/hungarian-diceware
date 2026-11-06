@@ -90,13 +90,14 @@ h3{font:700 11.5px var(--ui);margin:0 0 8px;color:var(--kj-muted);text-transform
 .mut{color:var(--kj-muted)}
 .small{font-size:13px}
 .mono{font-family:var(--mono)}
-input,select{background:var(--kj-field);color:var(--kj-text);border:1px solid var(--kj-border-strong);border-radius:10px;padding:9px 11px;font:500 16px var(--ui);width:100%;min-width:0}
+input,select,textarea{background:var(--kj-field);color:var(--kj-text);border:1px solid var(--kj-border-strong);border-radius:10px;padding:9px 11px;font:500 16px var(--ui);width:100%;min-width:0}
+textarea{font:500 16px/1.45 var(--mono);resize:vertical}
 /* iOS Safari: 16px alatti betűméretnél fókuszkor ránagyít és úgy marad – ezért minden mező legalább 16px */
 input[type=date]{-webkit-appearance:none;appearance:none;display:block;max-width:100%;min-height:44px;text-align:left}
 input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
 input[type=date]::-webkit-calendar-picker-indicator{opacity:.7}
 [data-theme="dark"] input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1)}
-input:focus,select:focus{outline:none;border-color:var(--kj-blue-line);box-shadow:0 0 0 3px var(--kj-focus)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--kj-blue-line);box-shadow:0 0 0 3px var(--kj-focus)}
 input::placeholder{color:var(--kj-muted);opacity:.75}
 input[type=number]{-moz-appearance:textfield;font-family:var(--mono)}
 input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
