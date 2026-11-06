@@ -402,7 +402,8 @@ function parseSteps(text){
     const m=STEP_LINE.exec(line.trim());if(!m)continue;
     const mo=monthNum(m[2]);if(!mo||mo>12)continue;
     const d=`${m[1]}-${z2(mo)}-${z2(+m[3])}`,dt=pYmd(d);if(!DATE_RE.test(d)||dt.getMonth()!==mo-1||dt>new Date())continue;
-    const v=parseStepNum(m[4]);if(v==null||v<0||v>200000)continue;out[d]=(out[d]||0)+v; // ugyanaz a nap többször: összeadjuk
+    const v=parseStepNum(m[4]);if(v==null||v<=0||v>200000)continue; // 0: kitöltött hiányzó nap – kihagyjuk
+   out[d]=(out[d]||0)+v; // ugyanaz a nap többször: összeadjuk
   }
   return out;
 }
@@ -424,23 +425,29 @@ async function pasteSteps(){
 }
 function stepsHelp(){
   openModal(`<h2>${I('footprints','sm')} Lépések átvétele iPhone-ról</h2>
-  <p class="small">Egyszer kell összerakni a <b>Parancsok</b> appban. A kész parancs 4 műveletből áll:</p>
-  <div class="stat small mono" style="line-height:1.7;margin-bottom:12px">1. Egészségügyi minták keresése<br>2. Ismétlés mindegyikkel<br>&nbsp;&nbsp;&nbsp;↳ Szöveg<br>&nbsp;&nbsp;&nbsp;Ismétlés vége<br>3. Szöveg egyesítése<br>4. Másolás a vágólapra</div>
-  <p class="small"><b>Új művelet hozzáadása:</b> a szerkesztő alján lévő <b>keresőmezőbe</b> („Keresés a műveletek között”) írd be a nevét, majd koppints rá. A parancs <b>végére</b> kerül. Áthelyezni úgy lehet, hogy a művelet <b>nevét</b> nyomva tartod, és odahúzod.</p>
+  <p class="small">Egyszer kell összerakni a <b>Parancsok</b> appban. A kész parancs így néz ki:</p>
+  <div class="stat small mono" style="line-height:1.7;margin-bottom:12px">Egészségügyi minták keresése<br>Megismétlés a(z) Egészségügyi minták minden elemével<br>&nbsp;&nbsp;&nbsp;↳ Szöveg: Kezdési dátum ; Elem ismétlése<br>Ismétlés vége<br>A(z) Ismétlési eredmények egyesítése<br>A(z) Egyesített szöveg másolása a vágólapra</div>
+  <p class="small"><b>Új művelet hozzáadása:</b> a szerkesztő alján lévő <b>Keresés</b> mezőbe írd be a művelet nevét, majd koppints rá. A parancs <b>végére</b> kerül. Áthelyezni úgy lehet, hogy a művelet <b>nevét</b> nyomva tartod, és a helyére húzod.</p>
   <ol class="small" style="padding-left:20px;line-height:1.6">
-  <li><b>Egészségügyi minták keresése</b>: ez már megvan. Típus: <b>Lépések</b>, Kezdés dátuma az utolsó <b>30 nap</b>ban, <b>Csoportosítás: Nap</b>.</li>
-  <li>Keresés: <i>ismétlés</i> → <b>Ismétlés mindegyikkel</b>. Ellenőrizd, hogy az „Egészségügyi minták” mindegyikén ismétel. Két blokk jelenik meg: <i>Ismétlés mindegyikkel</i> és <i>Ismétlés vége</i>.</li>
-  <li>Keresés: <i>szöveg</i> → <b>Szöveg</b>. Húzd a két ismétlés-blokk <b>közé</b>. A szövegmezőbe:
+  <li><b>Parancsok</b> app → <b>+</b> (új parancs). Keresés: <i>egészségügyi minták</i> → <b>Egészségügyi minták keresése</b>. Beállítások:
+    <br>– Típus a következő: <b>Steps</b> (Lépések)
+    <br>– Kezdési dátum <b>benne van ebben: előző 30 nap</b>
+    <br>– Mértékegység: <b>darabszám</b>
+    <br>– Csoportosítás szempontja: <b>Nap</b>
+    <br>– Rendezés módja: <b>Kezdési dátum</b>, Rendezés: <b>Legrégebbi elöl</b>
+    <br>– Korlát: <b>ki</b></li>
+  <li>Keresés: <i>ismétlés</i> → <b>Ismétlés mindegyikkel</b>. Így jelenik meg: <i>Megismétlés a(z) Egészségügyi minták minden elemével</i>, alatta pedig az <i>Ismétlés vége</i> blokk.</li>
+  <li>Keresés: <i>szöveg</i> → <b>Szöveg</b>. Húzd a <i>Megismétlés…</i> és az <i>Ismétlés vége</i> <b>közé</b> (beljebb kerül). A szövegmezőben:
     <ol type="a" style="padding-left:18px">
-    <li>Koppints a mezőbe. A billentyűzet fölötti sávban válaszd az <b>Ismétlési elem</b> változót.</li>
-    <li>Koppints a beszúrt <b>Ismétlési elem</b> címkére, és válaszd a <b>Kezdés dátuma</b> (Start Date) tulajdonságot.</li>
+    <li>Koppints a mezőbe. A billentyűzet fölötti sávban válaszd az <b>Elem ismétlése</b> változót.</li>
+    <li>Koppints a beszúrt címkére, és válaszd a <b>Kezdési dátum</b> tulajdonságot.</li>
     <li>Írj utána egy pontosvesszőt: <code class="mono">;</code></li>
-    <li>Szúrd be újra az <b>Ismétlési elem</b>et, koppints rá, és válaszd az <b>Érték</b> (Value) tulajdonságot.</li></ol>
-    Eredmény: <code class="mono">Kezdés dátuma ; Érték</code>. A dátum formátuma mindegy, az app felismeri.</li>
-  <li>Keresés: <i>egyesít</i> → <b>Szöveg egyesítése</b>. Az <b>Ismétlés vége</b> alá kerüljön. Bemenet: <b>Ismétlés eredményei</b>, elválasztó: <b>Új sor</b>.</li>
-  <li>Keresés: <i>vágólap</i> → <b>Másolás a vágólapra</b>.</li></ol>
-  <p class="small">Futtasd a jobb alsó ▶ gombbal. Első alkalommal engedélyt kér az Egészség adatokhoz. Utána nyisd meg az Edzésnaplót → Test → <b>Beillesztés</b>. Kényelmes, ha a parancsot widgetként kiteszed a főképernyőre.</p>
-  <p class="hint">Próba közben a 4. lépés helyett ideiglenesen betehetsz egy <b>Eredmény megjelenítése</b> műveletet, hogy lásd, mit ad ki a parancs. Ha a vágólapról nem sikerül a beolvasás, a Beillesztés ablakba kézzel is bemásolhatod.</p>
+    <li>Szúrd be újra az <b>Elem ismétlése</b> változót. Ez maga a lépésszám, nem kell tulajdonságot választani.</li></ol>
+    Eredmény: <code class="mono">Kezdési dátum ; Elem ismétlése</code></li>
+  <li>Keresés: <i>egyesít</i> → <b>Szöveg egyesítése</b>. Az <i>Ismétlés vége</i> alá kerüljön: <i>A(z) <b>Ismétlési eredmények</b> egyesítése <b>Új sorok</b> elválasztóval</i>.</li>
+  <li>Keresés: <i>vágólap</i> → <b>Másolás a vágólapra</b>: <i>A(z) Egyesített szöveg másolása a vágólapra</i>.</li></ol>
+  <p class="small">Futtasd a jobb alsó ▶ gombbal. Első alkalommal engedélyt kér az Egészség adatokhoz. Alul ilyen sorok jelennek meg: <code class="mono">2026. okt. 7. 16:53;10999</code>. Ezután nyisd meg az Edzésnaplót → Test → <b>Beillesztés</b>. A parancsot widgetként vagy ikonként is kiteheted a főképernyőre.</p>
+  <p class="hint">A dátum és az időpont formátuma mindegy, az app a dátumot veszi ki belőle. A 0 lépéses napokat (pl. bekapcsolt „Hiányzó kitöltése” esetén) kihagyja. Ha a vágólapról nem sikerül a beolvasás, a Beillesztés ablakba kézzel is bemásolhatod.</p>
   <div class="row end"><button class="btn p" data-click="closeModal()">Rendben</button></div>`);
 }
 
@@ -464,7 +471,7 @@ function vBody(){
   <label for="bst">Lépésszám</label><input id="bst" type="number" step="1" min="0" inputmode="numeric" value="${e.steps??''}" placeholder="pl. 8500">
   <div class="row" style="margin-top:14px">${e.date?`<button class="btn d" data-click="delBody('${e.date}')">${I('trash-2','sm')} Törlés</button>`:''}<span class="sp"></span><button class="btn p" data-click="saveBody()">${I('save','sm')} ${e.date?'Frissítés':'Mentés'}</button></div></div>
   <div class="card"><div class="row" style="flex-wrap:nowrap"><h2 style="flex:1;margin:0">${I('footprints','sm')} Lépések</h2><button class="btn sm ico" data-click="stepsHelp()" aria-label="Súgó: lépések átvétele">${I('circle-help','sm')}</button><button class="btn sm p" data-click="pasteSteps()">${I('clipboard-paste','sm')} Beillesztés</button></div>
-  <div class="hint" style="margin:6px 0 10px">Az iPhone Egészség appjából a Parancsok appal másolhatod át (a ? gomb alatt a leírás), vagy írd be kézzel fent.</div>
+  <div class="hint" style="margin:6px 0 10px">Az iPhone Egészség appjából a Parancsok appal másolhatod át (leírás a ? gomb alatt), vagy írd be kézzel fent.</div>
   <div class="grid3">${(()=>{const ss=series('steps'),t=S.body.find(b=>b.date===today())?.steps;return stat('Ma',t!=null?fmt(t,0):null)+stat('7 napos átlag',ss.length?fmt(avgLast(ss,7),0):null)+stat('30 napos átlag',ss.length?fmt(avgLast(ss,30),0):null)})()}</div></div>
   <h3 style="margin:16px 2px 10px">Testsúly</h3>
   <div class="grid3" style="margin-bottom:8px">${stat('Utolsó súly',lastW?fmt(lastW.weight)+' kg':null)}${stat('7 napos átlag',ws.length?fmt(avgLast(ws,7))+' kg':null)}${stat('Δ 30 nap',d30==null?null:sgn(d30)+' kg',dcls(d30))}</div>
