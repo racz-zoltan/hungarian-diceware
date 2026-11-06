@@ -11,7 +11,7 @@ const today=()=>ymd(new Date());
 const pYmd=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=(n,d=1)=>n==null||isNaN(n)?'–':(+n).toLocaleString('hu-HU',{maximumFractionDigits:d});
-const sgn=(n,d=1)=>n==null||isNaN(n)?'–':(n>0?'+':n<0?'−':'±')+fmt(Math.abs(n),d);
+const sgn=(n,d=1)=>{if(n==null||isNaN(n))return'–';const r=Math.round(n*10**d)/10**d;return(r>0?'+':r<0?'−':'±')+fmt(Math.abs(r),d)};
 const fmtShort=v=>v>=1e4?fmt(v/1000,0)+'k':v>=1000?fmt(v/1000,1)+'k':fmt(v,1);
 const e1rm=(w,r)=>!w||!r?0:(r===1?w:w*(1+r/30)); // Epley
 const dur=ms=>{const s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return(h?h+':'+z2(m):m)+':'+z2(s%60)};
@@ -45,7 +45,7 @@ function addDefaults(st){
   for(const[name,items]of DEF_TPL)if(!st.templates.some(t=>t.name===name)&&(st.v===0||name.startsWith('Kettlebell')))
     st.templates.push({id:uid(),name,items:items.filter(([n])=>f(n)).map(([n,s])=>({exId:f(n),sets:s}))});
 }
-function defaults(){const st={v:0,exercises:[],templates:[],workouts:[],body:[],active:null,settings:{rest:90,theme:null,sound:3,wakeLock:true,stepGoal:0}};addDefaults(st);st.v=2;return st}
+function defaults(){const st={v:0,exercises:[],templates:[],workouts:[],body:[],meals:[],profile:{pace:1},active:null,settings:{rest:90,theme:null,sound:3,wakeLock:true,stepGoal:0}};addDefaults(st);st.v=2;return st}
 const KEY='edzesnaplo.v1';
 let S; // a betöltés a fájl végén történik (a validáló függvények után)
 function load(){try{const raw=localStorage.getItem(KEY);if(raw){const s=sanitizeState(JSON.parse(raw));if(s.v<2){addDefaults(s);s.v=2}return s}}catch(e){console.warn('Betöltési hiba',e)}return defaults()}
@@ -86,7 +86,7 @@ function form(title,fields,{ok='Mentés',intro=''}={}){
     ?`<textarea id="ff${i}" data-f="${x.id}" rows="${x.rows||6}" placeholder="${esc(x.placeholder||'')}" ${i===0?'autofocus':''} autocomplete="off" spellcheck="false">${esc(x.value??'')}</textarea>`
     :x.type==='select'
     ?`<select id="ff${i}" data-f="${x.id}">${x.options.map(o=>`<option value="${esc(o[0])}" ${o[0]==x.value?'selected':''}>${esc(o[1])}</option>`).join('')}</select>`
-    :`<input id="ff${i}" data-f="${x.id}" type="${x.type||'text'}" value="${esc(x.value??'')}" placeholder="${esc(x.placeholder||'')}" ${x.list?`list="dl${i}"`:''} ${x.min!=null?`min="${x.min}"`:''} ${x.step?`step="${x.step}"`:''} ${x.type==='number'?'inputmode="numeric"':''} ${i===0?'autofocus':''} autocomplete="off">`
+    :`<input id="ff${i}" data-f="${x.id}" type="${x.type==='number'?'text':(x.type||'text')}" value="${esc(x.value??'')}" placeholder="${esc(x.placeholder||'')}" ${x.list?`list="dl${i}"`:''} ${x.min!=null?`min="${x.min}"`:''} ${x.step?`step="${x.step}"`:''} ${x.type==='number'?'inputmode="decimal" class="mono"':''} ${i===0?'autofocus':''} autocomplete="off">`
       +(x.list?`<datalist id="dl${i}">${x.list.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>`:''))
     +(x.hint?`<div class="hint">${x.hint}</div>`:'')).join('');
   return dlg(`<h2>${esc(title)}</h2>${intro?`<p class="mut small">${intro}</p>`:''}<form data-submit="formSubmit()">${f}<div class="row end"><button type="button" class="btn" data-click="dlgClose(null)">Mégse</button><button class="btn p" type="submit">${ok}</button></div></form>`,null)}
@@ -97,7 +97,7 @@ document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#dlg').
 /* ===== Eseménykezelés (CSP: nincs inline handler, nincs eval) =====
    A sablonokban data-click/input/change/submit="fn(arg,...)" áll; az argumentum csak
    literál lehet (szám, 'szöveg', null, true/false), illetve this / this.value. */
-const ACT=new Set(["addSet", "adjRest", "bodyFromCal", "calNav", "chooseEx", "closeModal", "delBody", "delEx", "delTemplate", "delWorkout", "demoData", "discardWorkout", "dlgBackdrop", "dlgClose", "editBodyRow", "editEx", "editTemplate", "exportCSV", "exportData", "finishWorkout", "formSubmit", "go", "goToday", "importData", "modalBg", "moveEx", "newExFromList", "newExercise", "openImport", "pasteSteps", "pickForActive", "pickForTpl", "renderPick", "repeatWorkout", "resetAll", "rmEx", "rmSet", "saveAsTemplate", "saveAsTplFromSummary", "saveBody", "saveTpl", "selDay", "setBodyDate", "setDefRest", "setExRest", "setRange", "setSound", "setStepGoal", "setStrEx", "setStrMetric", "setTheme", "setTplName", "setTplSets", "setVal", "setWName", "setWake", "showStr", "startWorkout", "stepsHelp", "stopRest", "testSound", "toggleSet", "toggleTheme", "tplMove", "tplRemove", "updateTplFrom"]);
+const ACT=new Set(["addMeal", "addSet", "adjRest", "bodyFromCal", "calNav", "chooseEx", "closeModal", "copyInstr", "copyMealToday", "delBody", "delEx", "delMeal", "delTemplate", "delWorkout", "demoData", "discardWorkout", "dlgBackdrop", "dlgClose", "editBodyRow", "editEx", "editMeal", "editTemplate", "exportCSV", "exportData", "finishWorkout", "foodFromCal", "foodHelp", "foodNav", "formSubmit", "go", "goToday", "importData", "modalBg", "moveEx", "newExFromList", "newExercise", "openImport", "pasteMeals", "pasteSteps", "pickForActive", "pickForTpl", "renderPick", "repeatWorkout", "resetAll", "rmEx", "rmSet", "saveAsTemplate", "saveAsTplFromSummary", "saveBody", "saveTpl", "selDay", "setBodyDate", "setDefRest", "setExRest", "setFoodDate", "setFoodRng", "setProf", "setRange", "setSound", "setStepGoal", "setStrEx", "setStrMetric", "setTheme", "setTplName", "setTplSets", "setVal", "setWName", "setWake", "showStr", "startWorkout", "stepsHelp", "stopRest", "testSound", "toggleSet", "toggleTheme", "tplMove", "tplRemove", "updateTplFrom"]);
 function splitArgs(s){const out=[];let cur='',q=false;for(const ch of s){if(ch==="'")q=!q;if(ch===','&&!q){out.push(cur.trim());cur=''}else cur+=ch}if(cur.trim())out.push(cur.trim());return out}
 function parseArg(a,el){if(a==='this')return el;if(a==='this.value')return el.value;if(/^'[^'"\\]*'$/.test(a))return a.slice(1,-1);if(/^-?\d+(\.\d+)?$/.test(a))return +a;if(a==='null')return null;if(a==='true')return true;if(a==='false')return false;throw new Error('arg')}
 function runAct(src,el){const m=/^([A-Za-z_]\w*)\((.*)\)$/.exec((src||'').trim());if(!m||!ACT.has(m[1])||typeof window[m[1]]!=='function'){console.warn('Ismeretlen művelet:',src);return}
@@ -145,6 +145,10 @@ function sanitizeState(d){
     exercises:(Array.isArray(w.exercises)?w.exercises:[]).map(e=>({exId:fix(e?.exId),sets:sets(e?.sets)})),
     prs:(Array.isArray(w.prs)?w.prs:[]).filter(p=>p&&['w','e','r','v'].includes(p.type)).map(p=>({exId:fix(p.exId),type:p.type,val:num(p.val,0,1e7)||0}))}));
   o.body=(Array.isArray(d.body)?d.body:[]).filter(b=>b&&DATE_RE.test(b.date)).map(b=>{const x={date:b.date};const w=num(b.weight,20,400),f=num(b.fat,2,70),wa=num(b.waist,30,250),st=num(b.steps,0,200000);if(w!=null)x.weight=w;if(f!=null)x.fat=f;if(wa!=null)x.waist=wa;if(st!=null)x.steps=Math.round(st);return x}).filter(b=>Object.keys(b).length>1);
+  o.meals=(Array.isArray(d.meals)?d.meals:[]).filter(m=>m&&DATE_RE.test(m.date)&&m.name).map(m=>({id:fix(m.id),date:m.date,meal:MEALS.some(x=>x[0]===m.meal)?m.meal:'nasi',name:str(m.name,100),kcal:Math.round(num(m.kcal,0,10000)??0),p:num(m.p,0,1000)??0,c:num(m.c,0,1000)??0,f:num(m.f,0,1000)??0}));
+  {const pr=d.profile||{};o.profile={sex:['m','f'].includes(pr.sex)?pr.sex:null,birthYear:num(pr.birthYear,1900,new Date().getFullYear())||null,height:num(pr.height,100,250)||null,
+    activity:ACT_LV.some(a=>a[0]===+pr.activity)?+pr.activity:null,goal:GOALS.some(g=>g[0]===pr.goal)?pr.goal:null,pace:[0,1,2].includes(+pr.pace)?+pr.pace:1,
+    targetWeight:num(pr.targetWeight,30,300)||null,kcalOverride:num(pr.kcalOverride,800,6000)||null}}
   const a=d.active;
   o.active=a&&num(a.start,0,9e15)?{id:fix(a.id),name:str(a.name,100),start:+a.start,tplId:a.tplId?fix(a.tplId):null,exercises:(Array.isArray(a.exercises)?a.exercises:[]).map(e=>({exId:fix(e?.exId),sets:(Array.isArray(e?.sets)?e.sets:[]).map(s=>({w:s?.w===''?'':num(s?.w,0,2000)??'',r:s?.r===''?'':num(s?.r,0,10000)??'',done:!!s?.done}))}))}:null;
   return o;
@@ -154,10 +158,10 @@ function sanitizeState(d){
 function go(t){document.activeElement&&document.activeElement.blur&&document.activeElement.blur();tab=t;render();scrollTo(0,0)}
 function render(){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
-  $('#title').textContent={workout:S.active?'Edzés folyamatban':'Edzés',history:'Naptár',body:'Testadatok',stats:'Statisztika',more:'Beállítások'}[tab];
+  $('#title').textContent={workout:S.active?'Edzés folyamatban':'Edzés',food:'Étkezés',history:'Naptár',body:'Testadatok',stats:'Statisztika',more:'Beállítások'}[tab];
   $('#hdr').innerHTML=S.active&&tab!=='workout'?`<button class="pill" data-click="go('workout')" aria-label="Edzés folytatása">${I('biceps-flexed','sm')}<span id="elapsed2"></span></button>`:'';
   for(const k in CH)delete CH[k];
-  $('main').innerHTML=({workout:S.active?vActive:vWorkout,history:vHistory,body:vBody,stats:vStats,more:vMore})[tab]();
+  $('main').innerHTML=({workout:S.active?vActive:vWorkout,food:vFood,history:vHistory,body:vBody,stats:vStats,more:vMore})[tab]();
   attachCharts();tick();updAvol();syncWake();updWakeUI();
 }
 function openModal(h){$('#sheet').innerHTML=h;$('#modal').classList.add('on')}
@@ -367,23 +371,262 @@ function vHistory(){
   const[y,m]=calMonth,first=new Date(y,m,1),off=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),cellsN=Math.ceil((off+days)/7)*7;
   const wDay={};for(const w of S.workouts){const k=ymd(new Date(w.start));(wDay[k]=wDay[k]||[]).push(w)}
   const bMap={};for(const b of S.body)bMap[b.date]=b;
+  const mDay=new Set(S.meals.map(m=>m.date));
   let cells=['H','K','SZE','CS','P','SZO','V'].map(d=>`<div class="h">${d}</div>`).join('');
   for(let i=0;i<cellsN;i++){const d=new Date(y,m,1-off+i),k=ymd(d);
-    cells+=`<div class="d ${d.getMonth()!==m?'o':''} ${k===today()?'t':''} ${k===calSel?'sel':''}" data-click="selDay('${k}')">${d.getDate()}<div class="dots">${wDay[k]?`<i class="dot" style="background:${C.green}"></i>`:''}${hasMeas(bMap[k])?`<i class="dot" style="background:${C.gold}"></i>`:''}${bMap[k]?.steps!=null?`<i class="dot" style="background:${C.violet}"></i>`:''}</div></div>`}
+    cells+=`<div class="d ${d.getMonth()!==m?'o':''} ${k===today()?'t':''} ${k===calSel?'sel':''}" data-click="selDay('${k}')">${d.getDate()}<div class="dots">${wDay[k]?`<i class="dot" style="background:${C.green}"></i>`:''}${hasMeas(bMap[k])?`<i class="dot" style="background:${C.gold}"></i>`:''}${bMap[k]?.steps!=null?`<i class="dot" style="background:${C.violet}"></i>`:''}${mDay.has(k)?`<i class="dot" style="background:${C.red}"></i>`:''}</div></div>`}
   const mW=S.workouts.filter(w=>{const d=new Date(w.start);return d.getFullYear()===y&&d.getMonth()===m});
   const mB=S.body.filter(b=>{const d=pYmd(b.date);return d.getFullYear()===y&&d.getMonth()===m&&b.weight!=null}).sort((a,b)=>a.date<b.date?-1:1);
   const mDelta=mB.length>1?mB[mB.length-1].weight-mB[0].weight:null;
   let h=`<div class="card"><div class="row" style="margin-bottom:12px;flex-wrap:nowrap"><button class="iconbtn" data-click="calNav(-1)" aria-label="Előző hónap">${I('chevron-left')}</button><h2 style="flex:1;text-align:center;margin:0;text-transform:capitalize">${first.toLocaleDateString('hu-HU',{year:'numeric',month:'long'})}</h2><button class="iconbtn" data-click="calNav(1)" aria-label="Következő hónap">${I('chevron-right')}</button></div>
   <div class="cal">${cells}</div>
-  <div class="legend" style="margin-top:12px"><span><i style="background:${C.green}"></i>Edzés</span><span><i style="background:${C.gold}"></i>Testmérés</span><span><i style="background:${C.violet}"></i>Lépés</span><span class="sp"></span><button class="btn sm" data-click="goToday()">Ma</button></div></div>
+  <div class="legend" style="margin-top:12px"><span><i style="background:${C.green}"></i>Edzés</span><span><i style="background:${C.gold}"></i>Testmérés</span><span><i style="background:${C.violet}"></i>Lépés</span><span><i style="background:${C.red}"></i>Étkezés</span><span class="sp"></span><button class="btn sm" data-click="goToday()">Ma</button></div></div>
   <div class="grid3" style="margin-bottom:12px">${stat('Edzés a hónapban',mW.length)}${stat('Volumen',mW.length?fmtShort(mW.reduce((a,w)=>a+wVolume(w),0))+' kg':null)}${stat('Súlyváltozás',mDelta==null?null:sgn(mDelta)+' kg')}</div>`;
   const dw=(wDay[calSel]||[]).sort((a,b)=>a.start-b.start),db=bMap[calSel];
   h+=`<h3 style="margin:8px 2px 10px">${pYmd(calSel).toLocaleDateString('hu-HU',{year:'numeric',month:'long',day:'numeric',weekday:'long'})}</h3>`;
   h+=`<div class="card"><div class="row"><h2 style="flex:1;margin:0;font-size:16.5px">${I('scale','sm')} Testadatok</h2><button class="btn sm" data-click="bodyFromCal('${calSel}')">${db?I('pencil','sm')+' Szerkesztés':I('plus','sm')+' Rögzítés'}</button></div>
   ${db?`<div class="grid3" style="margin-top:12px">${stat('Súly',db.weight!=null?fmt(db.weight)+' kg':null)}${stat('Testzsír',db.fat!=null?fmt(db.fat)+' %':null)}${stat('Derék',db.waist!=null?fmt(db.waist)+' cm':null)}</div>
   ${db.steps!=null?`<div class="stat" style="margin-top:8px"><b>${I('footprints','sm')} ${fmt(db.steps,0)}</b><span>Lépés${S.settings.stepGoal?` · cél: ${fmt(S.settings.stepGoal,0)} (${Math.round(db.steps/S.settings.stepGoal*100)}%)`:''}</span></div>`:''}`:'<div class="mut small" style="margin-top:6px">Nincs mérés erre a napra.</div>'}</div>`;
+  {const dm=dayMeals(calSel),s=sumMeals(dm),t=targets();
+   h+=`<div class="card"><div class="row"><h2 style="flex:1;margin:0;font-size:16.5px">${I('utensils','sm')} Étkezés</h2><button class="btn sm" data-click="foodFromCal('${calSel}')">${dm.length?'Megnyitás':I('plus','sm')+' Rögzítés'}</button></div>
+   ${dm.length?`<div class="grid4" style="margin-top:12px">${stat('kcal'+(t.kcal?' / '+fmt(t.kcal,0):''),fmt(s.kcal,0))}${stat('Fehérje',fmt(s.p,0)+' g')}${stat('Szénh.',fmt(s.c,0)+' g')}${stat('Zsír',fmt(s.f,0)+' g')}</div><div class="hint">${dm.length} tétel: ${dm.slice(0,4).map(m=>esc(m.name)).join(', ')}${dm.length>4?'…':''}</div>`:'<div class="mut small" style="margin-top:6px">Nincs rögzített étkezés.</div>'}</div>`;}
   h+=dw.length?dw.map(w=>workoutCard(w)).join(''):`<div class="card mut small">Nincs edzés erre a napra.</div>`;
   return h;
+}
+
+/* ===== Profil, célok, javasolt energia- és makrócél =====
+   BMR: Mifflin–St Jeor. TDEE = BMR × aktivitási szorzó. Cél = TDEE + célhoz tartozó korrekció.
+   Fehérje: g/ttkg a cél szerint (túlsúlynál BMI 27,5-höz tartozó referencia-testsúllyal), zsír: az energia 25–30%-a
+   (legalább 0,6 g/ttkg), szénhidrát: a maradék. Alsó határ: nő 1200, férfi 1500 kcal. */
+const ACT_LV=[[1.2,'Ülő – irodai munka, kevés mozgás'],[1.375,'Enyhén aktív – heti 1–3 edzés'],[1.55,'Mérsékelten aktív – heti 3–5 edzés'],[1.725,'Nagyon aktív – heti 6–7 edzés'],[1.9,'Extrém – fizikai munka + edzés']];
+const GOALS=[['lose','Fogyás'],['maintain','Szinten tartás'],['muscle','Izomépítés'],['gain','Hízás']];
+const ADJ={lose:[-300,-500,-750],maintain:[0,0,0],muscle:[150,250,400],gain:[300,500,700]};
+const PACE=['Enyhe','Közepes','Gyors'];
+const PPK={lose:2.0,maintain:1.6,muscle:1.9,gain:1.7},FATPCT={lose:.25,maintain:.30,muscle:.25,gain:.30};
+const lastWeight=()=>{const s=series('weight');return s.length?s[s.length-1].y:null};
+const r5=v=>Math.round(v/50)*50;
+function targets(){
+  const p=S.profile||{},w=lastWeight(),age=p.birthYear?new Date().getFullYear()-p.birthYear:null,goal=p.goal||'maintain';
+  const missing=[];if(!p.sex)missing.push('nem');if(!p.birthYear)missing.push('születési év');if(!p.height)missing.push('magasság');if(!p.activity)missing.push('aktivitás');if(!w)missing.push('testsúly (Test fül)');
+  const t={missing,goal,w,age,adult:age==null||age>=18};
+  if(!missing.length&&t.adult){
+    t.bmr=Math.round(10*w+6.25*p.height-5*age+(p.sex==='m'?5:-161));
+    t.tdee=Math.round(t.bmr*p.activity);
+    t.adj=ADJ[goal][p.pace??1];
+    t.suggested=r5(t.tdee+t.adj);t.floor=p.sex==='f'?1200:1500;
+    if(t.suggested<t.floor){t.suggested=t.floor;t.floored=true}
+  }
+  t.kcal=p.kcalOverride||t.suggested||null;t.custom=!!p.kcalOverride;
+  if(t.kcal){
+    const refW=w?(p.height?Math.min(w,27.5*(p.height/100)**2):w):null;
+    t.p=refW?Math.round(refW*PPK[goal]):Math.round(t.kcal*.25/4);
+    t.f=Math.round(t.kcal*FATPCT[goal]/9);if(w)t.f=Math.max(t.f,Math.round(.6*w));
+    t.c=Math.max(0,Math.round((t.kcal-t.p*4-t.f*9)/4));
+  }
+  return t;
+}
+function setProf(k,v){
+  const p=S.profile;
+  if(k==='sex')p.sex=['m','f'].includes(v)?v:null;
+  else if(k==='birthYear'){const y=parseInt(v);p.birthYear=y>=1900&&y<=new Date().getFullYear()?y:null}
+  else if(k==='height'){const h=parseFloat(String(v).replace(',','.'));p.height=h>=100&&h<=250?h:null}
+  else if(k==='activity'){const a=parseFloat(v);p.activity=ACT_LV.some(x=>x[0]===a)?a:null}
+  else if(k==='goal')p.goal=GOALS.some(g=>g[0]===v)?v:null;
+  else if(k==='pace')p.pace=[0,1,2].includes(+v)?+v:1;
+  else if(k==='targetWeight'){const t=parseFloat(String(v).replace(',','.'));p.targetWeight=t>=30&&t<=300?t:null}
+  else if(k==='kcalOverride'){const c=parseInt(v);p.kcalOverride=c>=800&&c<=6000?c:null;if(v!==''&&!p.kcalOverride)toast('800–6000 kcal között adható meg')}
+  save();render();
+}
+function vProfile(){
+  const p=S.profile,t=targets(),y=new Date().getFullYear();
+  const chip=(k,v,l,on)=>`<button class="chip ${on?'on':''}" data-click="setProf('${k}','${v}')">${l}</button>`;
+  let warn='';
+  if(p.targetWeight&&t.w){const d=t.w-p.targetWeight;
+    if(p.goal==='lose'&&d<=0)warn='A célsúly nem kisebb a jelenlegi súlynál, közben a cél fogyás.';
+    if(p.goal==='gain'&&d>=0)warn='A célsúly nem nagyobb a jelenlegi súlynál, közben a cél hízás.';}
+  let res='';
+  if(!t.adult)res=`<div class="hint">A javasolt érték felnőttekre (18+) vonatkozik.</div>`;
+  else if(t.missing.length&&!t.kcal)res=`<div class="hint">A javasolt célhoz hiányzik: ${t.missing.join(', ')}.</div>`;
+  else res=`<div class="grid3" style="margin-top:12px">${stat('Alapanyagcsere (BMR)',t.bmr?fmt(t.bmr,0)+' kcal':null)}${stat('Napi energiaigény',t.tdee?fmt(t.tdee,0)+' kcal':null)}${stat(t.custom?'Saját napi cél':'Javasolt napi cél',fmt(t.kcal,0)+' kcal','neg')}</div>
+    <div class="grid3" style="margin-top:8px">${stat('Fehérje',fmt(t.p,0)+' g')}${stat('Szénhidrát',fmt(t.c,0)+' g')}${stat('Zsír',fmt(t.f,0)+' g')}</div>
+    <div class="hint">${t.tdee?`Energiaigény: Mifflin–St Jeor × aktivitás. Korrekció a célhoz: ${t.adj>0?'+':''}${t.adj} kcal (${t.adj<0?'kb. '+fmt(-t.adj*7/7700,2)+' kg/hét fogyás':t.adj>0?'kb. '+fmt(t.adj*7/7700,2)+' kg/hét gyarapodás':'súlytartás'}).`:''}
+    ${t.floored?` A javaslat elérte az alsó határt (${t.floor} kcal), ennél kevesebbet nem javaslok.`:''}
+    Fehérje: ${PPK[t.goal]} g/ttkg${p.height&&t.w&&t.w>27.5*(p.height/100)**2?' (referencia-testsúlyra)':''}, zsír: az energia ${Math.round(FATPCT[t.goal]*100)}%-a, szénhidrát: a maradék. Tájékoztató becslés, nem orvosi tanács – egészségügyi állapot esetén egyeztesd szakemberrel.</div>`;
+  return `<div class="card"><h2>${I('target','sm')} Profil és célok</h2>
+  <label>Nem</label><div class="chips" style="margin:0">${chip('sex','m','Férfi',p.sex==='m')}${chip('sex','f','Nő',p.sex==='f')}</div>
+  <div class="grid3" style="align-items:end"><div><label for="pby">Születési év${p.birthYear?` · ${y-p.birthYear} év`:''}</label><input id="pby" type="number" inputmode="numeric" min="1900" max="${y}" value="${p.birthYear??''}" placeholder="pl. 1980" data-change="setProf('birthYear',this.value)"></div>
+  <div><label for="pht">Magasság (cm)</label><input id="pht" type="number" inputmode="decimal" value="${p.height??''}" placeholder="pl. 178" data-change="setProf('height',this.value)"></div>
+  <div><label for="ptw">Célsúly (kg)</label><input id="ptw" type="number" inputmode="decimal" step="0.5" value="${p.targetWeight??''}" placeholder="opcionális" data-change="setProf('targetWeight',this.value)"></div></div>
+  <label for="pact">Aktivitás</label><select id="pact" data-change="setProf('activity',this.value)"><option value="">– válassz –</option>${ACT_LV.map(([v,l])=>`<option value="${v}" ${p.activity===v?'selected':''}>${l}</option>`).join('')}</select>
+  <label>Cél</label><div class="chips" style="margin:0">${GOALS.map(([v,l])=>chip('goal',v,l,(p.goal||'maintain')===v)).join('')}</div>
+  ${p.goal&&p.goal!=='maintain'?`<label>Tempó</label><div class="chips" style="margin:0">${PACE.map((l,i)=>`<button class="chip ${(p.pace??1)===i?'on':''}" data-click="setProf('pace',${i})">${l} (${ADJ[p.goal][i]>0?'+':''}${ADJ[p.goal][i]} kcal)</button>`).join('')}</div>`:''}
+  <label for="pkc">Saját napi kalóriacél (kcal)</label><input id="pkc" type="number" inputmode="numeric" value="${p.kcalOverride??''}" placeholder="üresen: a javasolt érték" data-change="setProf('kcalOverride',this.value)">
+  ${warn?`<div class="hint" style="color:var(--kj-red)">${warn}</div>`:''}
+  ${res}</div>`;
+}
+
+/* ===== Étkezés ===== */
+const MEALS=[['reggeli','Reggeli'],['tizorai','Tízórai'],['ebed','Ebéd'],['uzsonna','Uzsonna'],['vacsora','Vacsora'],['nasi','Nasi / egyéb']];
+const mealLbl=k=>(MEALS.find(m=>m[0]===k)||MEALS[5])[1];
+const deacc=t=>String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function mealKey(t){t=deacc(t).trim();if(/^(regg|breakf)/.test(t))return'reggeli';if(/^(tiz|brunch)/.test(t))return'tizorai';if(/^(ebed|lunch)/.test(t))return'ebed';if(/^uzs/.test(t))return'uzsonna';if(/^(vacs|dinner|supper)/.test(t))return'vacsora';return'nasi'}
+function guessMeal(){const h=new Date().getHours();return h<10?'reggeli':h<12?'tizorai':h<15?'ebed':h<18?'uzsonna':h<22?'vacsora':'nasi'}
+let foodDate=today();
+const dayMeals=d=>S.meals.filter(m=>m.date===d);
+const sumMeals=l=>l.reduce((a,m)=>({kcal:a.kcal+m.kcal,p:a.p+m.p,c:a.c+m.c,f:a.f+m.f}),{kcal:0,p:0,c:0,f:0});
+const DATE_HEAD=/^(\d{4})\s*[-./]\s*([0-9]{1,2}|[A-Za-zÁÉÍÓÖŐÚÜŰáéíóöőúüű]{3,10}\.?)\s*[-./]?\s*(\d{1,2})\.?/;
+function parseDateStr(t){const m=DATE_HEAD.exec(String(t).trim());if(!m)return null;const mo=monthNum(m[2]);if(!mo||mo>12)return null;
+  const d=`${m[1]}-${z2(mo)}-${z2(+m[3])}`,dt=pYmd(d);return dt.getMonth()===mo-1&&dt<=new Date()?d:null}
+function parseMacro(t){t=String(t??'').replace(/[\s ]/g,'').replace(/^[^\d]+/,'').replace(/[^\d.,]+$/,'');if(!t)return null;if(/^\d{1,3}([.,]\d{3})+$/.test(t))t=t.replace(/[.,]/g,'');else t=t.replace(',','.');const v=parseFloat(t);return isFinite(v)?Math.round(v*10)/10:null}
+/* Formátum soronként: ÉÉÉÉ-HH-NN;étkezés;megnevezés;kcal;fehérje;szénhidrát;zsír  (a dátum elhagyható) */
+function parseMeals(text,defDate){
+  const out=[];
+  for(const raw of String(text||'').split(/\r?\n/)){
+    const line=raw.trim().replace(/^[-*•]\s*/,'');if(!line||!line.includes(';'))continue;
+    const parts=line.split(';').map(x=>x.trim());if(parts.length<6)continue;
+    let date=parseDateStr(parts[0]),i=0;
+    if(date)i=1;else if(parts.length===6)date=defDate;else continue;
+    const nums=parts.slice(-4).map(parseMacro);if(nums.some(n=>n==null))continue;
+    const[kcal,p,c,f]=nums,name=parts.slice(i+1,parts.length-4).join(' ').slice(0,100);
+    if(!name||kcal<0||kcal>10000||[p,c,f].some(x=>x<0||x>1000))continue;
+    out.push({date,meal:mealKey(parts[i]),name,kcal:Math.round(kcal),p,c,f});
+  }
+  return out;
+}
+async function pasteMeals(){
+  let text=null;
+  try{if(navigator.clipboard&&navigator.clipboard.readText)text=await navigator.clipboard.readText()}catch(e){text=null}
+  let items=parseMeals(text,foodDate);
+  if(!items.length){
+    const r=await form('Étkezés beillesztése',[{id:'t',label:'Claude válaszának kódblokkja',type:'textarea',placeholder:'2026-11-06;ebéd;Csirkemell 150 g;248;46;0;6',hint:'Nyomd hosszan a mezőt, majd Beillesztés. Soronként egy tétel: dátum;étkezés;megnevezés;kcal;fehérje;szénhidrát;zsír'}],{ok:'Feldolgozás',intro:text?'A vágólap tartalmában nem találtam étkezés-sort.':''});
+    if(!r)return;items=parseMeals(r.t,foodDate);
+    if(!items.length){toast('Nem találtam felismerhető sort');return}
+  }
+  const key=m=>[m.date,m.meal,deacc(m.name),m.kcal].join('|'),have=new Set(S.meals.map(key));
+  const fresh=items.filter(m=>!have.has(key(m))),dup=items.length-fresh.length;
+  if(!fresh.length){toast('Ezek a tételek már szerepelnek');return}
+  const sum=sumMeals(fresh);
+  const list=fresh.slice(0,12).map(m=>`<div class="exl"><span>${esc(m.name)}<br><span class="mut small">${fmtDate(m.date)} · ${mealLbl(m.meal)}</span></span><span>${m.kcal} kcal</span></div>`).join('')+(fresh.length>12?`<div class="mut small">… és még ${fresh.length-12} tétel</div>`:'');
+  if(!await ask(`${list}<div class="exl"><b>Összesen</b><span><b>${fmt(sum.kcal,0)} kcal</b> · F ${fmt(sum.p,0)} · Sz ${fmt(sum.c,0)} · Zs ${fmt(sum.f,0)} g</span></div>${dup?`<div class="hint">${dup} tétel már szerepelt, azt kihagyom.</div>`:''}`,{title:`${fresh.length} tétel mentése`,ok:'Mentés'}))return;
+  for(const m of fresh)S.meals.push(Object.assign({id:uid()},m));
+  foodDate=fresh[fresh.length-1].date;save();go('food');toast(`${fresh.length} tétel mentve`);
+}
+function mealFields(m={}){return[{id:'meal',label:'Étkezés',type:'select',value:m.meal||guessMeal(),options:MEALS},{id:'name',label:'Megnevezés',value:m.name||'',placeholder:'pl. Zabkása 60 g banánnal'},
+  {id:'kcal',label:'Energia (kcal)',type:'number',value:m.kcal??''},{id:'p',label:'Fehérje (g)',type:'number',value:m.p??''},{id:'c',label:'Szénhidrát (g)',type:'number',value:m.c??''},{id:'f',label:'Zsír (g)',type:'number',value:m.f??''}]}
+function readMeal(r){const n=k=>{const v=parseMacro(r[k]);return v==null?0:Math.min(k==='kcal'?10000:1000,v)};return{meal:MEALS.some(x=>x[0]===r.meal)?r.meal:'nasi',name:r.name.slice(0,100),kcal:Math.round(n('kcal')),p:n('p'),c:n('c'),f:n('f')}}
+async function addMeal(){const r=await form('Új tétel',mealFields(),{intro:fmtDate(foodDate)});if(!r||!r.name){if(r)toast('Adj meg megnevezést');return}
+  S.meals.push(Object.assign({id:uid(),date:foodDate},readMeal(r)));save();render()}
+async function editMeal(id){const m=S.meals.find(x=>x.id===id);if(!m)return;const r=await form('Tétel szerkesztése',mealFields(m),{intro:fmtDate(m.date)});if(!r||!r.name)return;Object.assign(m,readMeal(r));save();render()}
+async function delMeal(id){const m=S.meals.find(x=>x.id===id);if(!m)return;if(!await ask(`Törlöd: <b>${esc(m.name)}</b> (${m.kcal} kcal)?`,{title:'Tétel törlése',ok:'Törlés',danger:true}))return;S.meals=S.meals.filter(x=>x.id!==id);save();render()}
+function copyMealToday(id){const m=S.meals.find(x=>x.id===id);if(!m)return;S.meals.push(Object.assign({},m,{id:uid(),date:today()}));save();toast('Hozzáadva a mai naphoz')}
+function foodNav(d){const x=pYmd(foodDate);x.setDate(x.getDate()+d);const k=ymd(x);if(k>today())return;foodDate=k;render()}
+function setFoodDate(v){foodDate=DATE_RE.test(v)&&v<=today()?v:today();render()}
+function foodFromCal(d){foodDate=d;go('food')}
+function mbar(label,v,goal,unit,color){const pct=goal?Math.min(100,v/goal*100):0,over=goal&&v>goal*1.1;
+  return `<div class="mb"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span class="small">${label}</span><span class="small mono">${fmt(v,0)}${goal?' / '+fmt(goal,0):''} ${unit}</span></div><div class="bar"><i style="width:${goal?pct:(v?100:0)}%;background:${over?C.red:color};opacity:${goal?1:.35}"></i></div></div>`}
+function vFood(){
+  const t=targets(),items=dayMeals(foodDate),s=sumMeals(items),isToday=foodDate===today();
+  const left=t.kcal?t.kcal-s.kcal:null;
+  let h=`<div class="card"><div class="row" style="flex-wrap:nowrap"><button class="iconbtn" data-click="foodNav(-1)" aria-label="Előző nap">${I('chevron-left')}</button>
+  <input type="date" value="${foodDate}" max="${today()}" data-change="setFoodDate(this.value)" style="flex:1;text-align:center" aria-label="Nap">
+  <button class="iconbtn" data-click="foodNav(1)" aria-label="Következő nap" ${isToday?'disabled style="opacity:.35"':''}>${I('chevron-right')}</button></div>
+  ${gauge(s.kcal,t.kcal)}
+  <div style="text-align:center;margin-top:2px"><div class="mut small">${isToday?'Ma':pYmd(foodDate).toLocaleDateString('hu-HU',{weekday:'long'})}</div>
+  <b style="font:800 30px/1.1 var(--display)">${fmt(s.kcal,0)}</b> <span class="mut">${t.kcal?'/ '+fmt(t.kcal,0)+' kcal':'kcal'}</span>
+  ${left!=null?`<div class="mono" style="font-weight:700;margin-top:2px;color:${left>=0?'var(--kj-green)':'var(--kj-red)'}">${left>=0?'Hátra: '+fmt(left,0)+' kcal':'Túllépés: '+fmt(-left,0)+' kcal'}</div>`:''}</div>
+  ${mbar('Fehérje',s.p,t.p,'g',C.violet)}${mbar('Szénhidrát',s.c,t.c,'g',C.gold)}${mbar('Zsír',s.f,t.f,'g',C.green)}
+  ${!t.kcal?`<div class="hint">Napi célhoz töltsd ki a profilodat a Beállításokban.</div>`:''}</div>
+  <div class="row" style="margin-bottom:12px;flex-wrap:nowrap"><button class="btn p" style="flex:1" data-click="pasteMeals()">${I('clipboard-paste','sm')} Beillesztés Claude-ból</button><button class="btn" data-click="addMeal()">${I('plus','sm')} Kézi</button><button class="btn ico" data-click="foodHelp()" aria-label="Súgó: Claude-projekt">${I('circle-help','sm')}</button></div>`;
+  if(!items.length)h+=`<div class="card empty">Erre a napra még nincs étkezés.</div>`;
+  const trend=`<div class="card"><h2 style="font-size:16.5px">Utolsó 7 nap</h2>${foodTrend(7)}</div>`;
+  for(const[k,l]of MEALS){const g=items.filter(m=>m.meal===k);if(!g.length)continue;const gs=sumMeals(g);
+    h+=`<div class="card"><div class="row"><h2 style="flex:1;margin:0;font-size:16.5px">${l}</h2><span class="mono small mut">${fmt(gs.kcal,0)} kcal</span></div>
+    ${g.map(m=>`<div class="row li" style="flex-wrap:nowrap"><button class="exi" style="flex:1;margin:0;display:block;background:none;border:0;padding:4px 0" data-click="editMeal('${m.id}')"><span>${esc(m.name)}</span><br><span class="mut small mono">F ${fmt(m.p,0)} · Sz ${fmt(m.c,0)} · Zs ${fmt(m.f,0)} g</span></button><span class="mono small" style="white-space:nowrap">${m.kcal} kcal</span>${isToday?'':`<button class="btn sm ico" data-click="copyMealToday('${m.id}')" aria-label="Hozzáadás a mai naphoz">${I('copy','sm')}</button>`}<button class="btn sm ico d" data-click="delMeal('${m.id}')" aria-label="Törlés">${I('trash-2','sm')}</button></div>`).join('')}</div>`}
+  h+=trend;
+  return h;
+}
+
+/* Sebességmérő: 0 … cél×1,5 skála; a cél eléréséig zöld, túllépésnél piros; tű a mai bevitelnél. */
+function gauge(v,T){
+  const W=300,H=176,cx=150,cy=150,r=116,sw=22,max=T?T*1.5:Math.max(v,2000)*1.25;
+  const ang=f=>Math.PI*(1-Math.max(0,Math.min(1,f))),pt=(f,rr=r)=>[cx+rr*Math.cos(ang(f)),cy-rr*Math.sin(ang(f))];
+  const arc=(f0,f1,col,op=1)=>{if(f1<=f0)return'';const[a,b]=pt(f0),[c,d]=pt(f1);return `<path d="M${a.toFixed(1)} ${b.toFixed(1)} A${r} ${r} 0 0 1 ${c.toFixed(1)} ${d.toFixed(1)}" style="fill:none;stroke:${col};stroke-width:${sw};opacity:${op}"/>`};
+  const fv=Math.min(v/max,1),ft=T?T/max:null,over=T&&v>T;
+  let g=arc(0,1,'var(--kj-track)');
+  if(T)g+=arc(ft,1,C.red,.16);
+  g+=arc(0,fv,over?C.red:(T?C.green:C.blue));
+  if(T){const[a,b]=pt(ft,r-sw/2-5),[c,d]=pt(ft,r+sw/2+5),[lx,ly]=pt(ft,r+sw/2+18);
+    g+=`<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" style="stroke:var(--kj-text);stroke-width:3;stroke-linecap:round"/><text x="${lx}" y="${ly+4}" text-anchor="middle" class="bv">cél</text>`}
+  const[nx,ny]=pt(fv,r-sw/2-10);
+  g+=`<line x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" style="stroke:var(--kj-text);stroke-width:4;stroke-linecap:round"/><circle cx="${cx}" cy="${cy}" r="9" style="fill:var(--kj-text)"/><circle cx="${cx}" cy="${cy}" r="3.5" style="fill:var(--kj-sheet)"/>`;
+  g+=`<text x="${cx-r}" y="${cy+20}" text-anchor="middle" class="ax">0</text><text x="${cx+r}" y="${cy+20}" text-anchor="middle" class="ax">${fmtShort(max)}</text>`;
+  return `<svg class="gauge" viewBox="0 0 ${W} ${H}" role="img" aria-label="Napi energia: ${Math.round(v)} / ${T||'–'} kcal">${g}</svg>`;
+}
+/* 7 vagy 30 napos kcal-oszlopdiagram célvonallal; 30 napnál 7 napos mozgóátlag, 7 napnál eltérés a céltól. */
+function foodTrend(n){
+  const t=targets(),byDay={};for(const m of S.meals)(byDay[m.date]=byDay[m.date]||[]).push(m);
+  const days=[...Array(n)].map((_,i)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-(n-1)+i);return ymd(d)});
+  const kc=d=>byDay[d]?Math.round(sumMeals(byDay[d]).kcal):0,vals=days.map(kc),T=t.kcal||0;
+  const band=v=>!T?C.blue:v>T*1.1?C.red:v<T*.9?C.blue:C.green;
+  const logged=Object.keys(byDay).sort();
+  const ma=n>7?days.map(d=>{const e=pYmd(d).getTime(),w=logged.filter(x=>{const q=pYmd(x).getTime();return q<=e&&q>e-7*DAY});return w.length?w.reduce((a,x)=>a+kc(x),0)/w.length:null}):null;
+  const lbl=days.map(d=>n<=7?(s=>s.charAt(0).toUpperCase()+s.slice(1))(pYmd(d).toLocaleDateString('hu-HU',{weekday:'short'}).replace('.','')):d.slice(5).replace('-','.'));
+  const done=days.filter(d=>d!==today()&&byDay[d]).map(kc); // a mai, még tartó nap nem számít bele
+  const above=T?done.filter(v=>v>T*1.1).length:0,below=T?done.filter(v=>v<T*.9).length:0,avgDev=T&&done.length?done.reduce((a,v)=>a+v-T,0)/done.length:null;
+  const chart=barChart(lbl,vals,{color:C.blue,colorFn:band,goal:T,goalColor:C.green,goalLabel:false,avgLine:ma,avgColor:C.gold,h:n<=7?220:190,
+    sub:n<=7&&T?(v=>v?{text:sgn(v-T,0),color:band(v)}:null):null,empty:`Az elmúlt ${n} napban nincs rögzített étkezés`});
+  return chart+`<div class="legend" style="margin-top:6px">${T?`<span><i style="background:none;border-top:2px dashed ${C.green};height:0;border-radius:0;width:14px;vertical-align:3px"></i>cél: ${fmt(T,0)} kcal</span><span><i style="background:${C.green}"></i>±10%</span><span><i style="background:${C.blue}"></i>alatta</span><span><i style="background:${C.red}"></i>felette</span>`:''}${ma?`<span><i style="background:${C.gold}"></i>7 napos átlag</span>`:''}</div>
+  <div class="grid3" style="margin-top:8px">${stat('Átl. eltérés · kcal/nap',avgDev==null?null:sgn(avgDev,0),avgDev==null?'':Math.abs(avgDev)<=T*.1?'neg':'pos')}${stat('Cél alatt / felett',T&&done.length?`${below} / ${above} nap`:null)}${stat('Célon belül',T&&done.length?`${done.length-above-below} / ${done.length} nap`:null)}</div>`;
+}
+function setFoodRng(n){foodRng=n===7?7:30;render()}
+let foodRng=30;
+
+/* ===== Claude-projekt útmutató ===== */
+function claudeInstr(){
+  const t=targets(),g=GOALS.find(x=>x[0]===t.goal)?.[1]||'Szinten tartás';
+  return `Ez a projekt az étkezéseim naplózására szolgál az Edzésnapló appban.
+
+Amikor fotót küldök az ételről, vagy leírom/elmondom, mit ettem:
+1. Azonosítsd az ételeket, és becsüld meg az adagokat. Ha egy adag vagy az elkészítés (olaj, vaj, szósz, cukor) érdemben bizonytalan, előbb kérdezz vissza röviden, legfeljebb 2 kérdéssel. Ha grammban megadom, azzal számolj.
+2. Tételenként számold ki az energiát (kcal) és a makrókat grammban: fehérje, szénhidrát, zsír. Magyar/európai tápanyagértékekkel számolj, és vedd figyelembe, hogy nyers vagy főtt tömegről van-e szó.
+3. Írj egy 1–3 mondatos összefoglalót arról, mire alapoztad a becslést.
+4. A válasz VÉGÉN egyetlen kódblokkban add meg a tételeket, tételenként egy sorban, pontosan ebben a formátumban:
+ÉÉÉÉ-HH-NN;étkezés;megnevezés;kcal;fehérje;szénhidrát;zsír
+
+Szabályok a kódblokkhoz:
+- dátum: a mai nap (Magyarország, Europe/Budapest), kivéve, ha mást mondok (pl. „tegnap vacsorára”)
+- étkezés: reggeli, tízórai, ebéd, uzsonna, vacsora vagy nasi. Ha nem mondom meg, a napszak alapján válassz.
+- megnevezés: rövid, az adaggal együtt, pontosvessző nélkül (pl. Grillezett csirkemell 150 g)
+- a számok egész számok, mértékegység nélkül
+- a kódblokkban semmi más ne legyen
+
+Példa:
+2026-11-06;ebéd;Grillezett csirkemell 150 g;248;46;0;6
+2026-11-06;ebéd;Főtt jázmin rizs 180 g;234;5;51;1
+
+A célom: ${g}.${t.kcal?` Napi célértékeim (tájékoztató): ${t.kcal} kcal, ${t.p} g fehérje, ${t.c} g szénhidrát, ${t.f} g zsír. Ha ugyanebben a beszélgetésben több étkezést is küldök, kérésre összesítsd, mennyi fogyott és mennyi maradt.`:''}`;
+}
+async function copyInstr(){const ta=$('#instrText');try{await navigator.clipboard.writeText(ta.value);toast('Utasítás a vágólapon')}catch(e){ta.focus();ta.select();toast('Jelöld ki és másold ki kézzel')}}
+function foodHelp(){
+  openModal(`<h2>${I('utensils','sm')} Étkezésnapló Claude-dal</h2>
+  <p class="small">Lefényképezed vagy elmondod, mit ettél, Claude kiszámolja a kalóriát és a makrókat, és egy kódblokkban adja vissza. Ezt itt egy gombnyomással átveszed. Az Edzésnaplóba csak a számok kerülnek, a fotó csak a Claude-ba megy.</p>
+  <h3 style="margin-top:14px">1. A projekt létrehozása (egyszer)</h3>
+  <ol class="small" style="padding-left:20px;line-height:1.6">
+  <li>Nyisd meg a Claude-ot. A projektet legkényelmesebb a <b>claude.ai</b> weboldalon létrehozni, de a mobilappban is megy, ha ott is elérhető.</li>
+  <li>Bal oldali menü → <b>Projektek</b> → <b>Új projekt</b>. Név: pl. <i>Étkezésnapló</i>.</li>
+  <li>A projekt oldalán keresd az <b>Utasítások</b> (Instructions / „Projekt utasításainak beállítása”) részt, és illeszd be a lenti szöveget. A <b>Másolás</b> gomb a vágólapra teszi.</li>
+  <li>Mentsd. A projekt ezután a telefonos Claude appban is megjelenik a Projektek között.</li></ol>
+  <textarea id="instrText" rows="9" readonly style="font-size:13px">${esc(claudeInstr())}</textarea>
+  <div class="row end" style="margin-top:8px"><button class="btn p sm" data-click="copyInstr()">${I('copy','sm')} Másolás</button></div>
+  <div class="hint">Az utasítás tartalmazza a mostani napi célodat is. Ha a Beállításokban módosítod a profilodat, másold ki és illeszd be újra.</div>
+  <h3 style="margin-top:14px">2. Használat étkezésenként</h3>
+  <ol class="small" style="padding-left:20px;line-height:1.6">
+  <li>Claude app → <b>Projektek</b> → <b>Étkezésnapló</b> → új beszélgetés (vagy folytasd a napit).</li>
+  <li><b>Fotó:</b> a + vagy kamera ikonnal készíts képet a tányérról. <b>Szöveg vagy hang:</b> írd be vagy diktáld, pl. „reggelire 60 g zabpehely 2 dl tejjel és egy banán”.</li>
+  <li>Ha Claude visszakérdez az adagra, válaszolj. A válasz végén lévő kódblokk sarkában lévő <b>másolás</b> ikonnal másold ki.</li>
+  <li>Edzésnapló → <b>Étkezés</b> → <b>Beillesztés Claude-ból</b>. Mentés előtt megmutatja a tételeket, és a már rögzítetteket kihagyja.</li></ol>
+  <p class="hint">Tipp: grammban vagy darabban megadott adaggal sokkal pontosabb a becslés, mint fotóval. A rejtett olaj, a szósz és az adagméret miatt a fotós becslés könnyen 20–30%-ot téved. Ha a vágólapról nem sikerül a beolvasás, a Beillesztés ablakba kézzel is bemásolhatod.</p>
+  <div class="row end"><button class="btn p" data-click="closeModal()">Rendben</button></div>`);
 }
 
 /* ===== Testadatok ===== */
@@ -508,12 +751,31 @@ function vStats(){
   let h=`<div class="chips">${chips}</div>
   <div class="card"><h2>Testsúly</h2>${lineChart([{name:'Súly',color:C.blue,points:w,dots:true,w:1.6},{name:'7 napos átlag',color:C.gold,points:ma,w:3}],{unit:' kg'})}
   <div class="grid3" style="margin-top:12px">${stat('Jelenlegi',wAll.length?fmt(wAll[wAll.length-1].y)+' kg':null)}${stat('Δ 7 nap',d7==null?null:sgn(d7)+' kg',dcls(d7))}${stat('Δ 30 nap',d30==null?null:sgn(d30)+' kg',dcls(d30))}
-  ${stat('Δ 90 nap',d90==null?null:sgn(d90)+' kg',dcls(d90))}${stat('Trend (kg/hét)',sl==null?null:sgn(sl,2),dcls(sl))}${stat('Min – max (kg)',w.length?fmt(Math.min(...w.map(p=>p.y)),0)+'–'+fmt(Math.max(...w.map(p=>p.y)),0):null)}</div></div>`;
+  ${stat('Δ 90 nap',d90==null?null:sgn(d90)+' kg',dcls(d90))}${stat('Trend (kg/hét)',sl==null?null:sgn(sl,2),dcls(sl))}${stat('Min – max (kg)',w.length?fmt(Math.min(...w.map(p=>p.y)),0)+'–'+fmt(Math.max(...w.map(p=>p.y)),0):null)}</div>
+  ${(()=>{const tw=S.profile.targetWeight;if(!tw||!wAll.length)return '';const cur=wAll[wAll.length-1].y,rem=cur-tw,toward=sl!=null&&Math.abs(sl)>.01&&Math.sign(sl)===-Math.sign(rem);
+    return `<h3 style="margin-top:14px">${I('target','sm')} Célsúly</h3><div class="grid3">${stat('Célsúly',fmt(tw)+' kg')}${stat(rem>0?'Hátra (fogyás)':'Hátra (gyarapodás)',Math.abs(rem)<.05?'Elérted!':fmt(Math.abs(rem))+' kg')}${stat('Becsült idő (trend)',Math.abs(rem)<.05?'–':toward?'~'+Math.ceil(Math.abs(rem/sl))+' hét':'–')}</div>${!toward&&Math.abs(rem)>=.05?'<div class="hint">A becsült időhöz a kiválasztott időszak súlytrendjének a cél felé kell mutatnia.</div>':''}`})()}</div>`;
   const f=series('fat'),wa=series('waist'),fr=f.filter(inR),f30=deltaN(f,30),fsl=slopeWeek(fr),w30=deltaN(wa,30),w90=deltaN(wa,90);
   h+=`<div class="card"><h2>Testzsír %</h2>${lineChart([{name:'Testzsír',color:C.violet,points:fr,dots:true}],{unit:' %',h:190})}
   <div class="grid3" style="margin-top:12px">${stat('Jelenlegi',f.length?fmt(f[f.length-1].y)+' %':null)}${stat('Δ 30 nap',f30==null?null:sgn(f30)+' %p',dcls(f30))}${stat('Trend (%p/hét)',fsl==null?null:sgn(fsl,2),dcls(fsl))}</div></div>
   <div class="card"><h2>Derékkerület</h2>${lineChart([{name:'Derék',color:C.green,points:wa.filter(inR),dots:true}],{unit:' cm',h:190})}
   <div class="grid3" style="margin-top:12px">${stat('Jelenlegi',wa.length?fmt(wa[wa.length-1].y)+' cm':null)}${stat('Δ 30 nap',w30==null?null:sgn(w30)+' cm',dcls(w30))}${stat('Δ 90 nap',w90==null?null:sgn(w90)+' cm',dcls(w90))}</div></div>`;
+  {const t=targets(),days=[...new Set(S.meals.map(m=>m.date))].sort(),byDay={};for(const m of S.meals)(byDay[m.date]=byDay[m.date]||[]).push(m);
+   const last30=[...Array(30)].map((_,i)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-29+i);return ymd(d)});
+   const rd=days.filter(d=>pYmd(d).getTime()>=cut&&d!==today()),sums=rd.map(d=>sumMeals(byDay[d])); // a mai (még tartó) napot kihagyjuk az átlagból
+   const avg=k=>sums.length?sums.reduce((a,s)=>a+s[k],0)/sums.length:null;
+   const inBand=t.kcal&&sums.length?Math.round(sums.filter(s=>Math.abs(s.kcal-t.kcal)<=t.kcal*.1).length/sums.length*100):null;
+   const col=v=>!t.kcal?C.blue:v>t.kcal*1.1?C.red:v<t.kcal*.9?C.blue:C.green;
+   let bal='';
+   if(t.tdee&&sums.length>=7){const exp=(avg('kcal')-t.tdee)*7/7700,wsr=series('weight').filter(inR),act=slopeWeek(wsr);
+     bal=`<h3 style="margin-top:14px">Energiaegyenleg</h3><div class="grid3">${stat('Átl. egyenleg · kcal/nap',sgn(avg('kcal')-t.tdee,0))}${stat('Várható · kg/hét',sgn(exp,2))}${stat('Mért trend · kg/hét',act==null?null:sgn(act,2))}</div>
+     <div class="hint">A „várható” az átlagos bevitel és a becsült napi energiaigény (${fmt(t.tdee,0)} kcal) különbségéből számol (7700 kcal ≈ 1 kg). Ha nagyon eltér a mért trendtől, valószínűleg nem minden étkezés került rögzítésre, vagy az energiaigény becslése pontatlan.</div>`}
+   h+=`<div class="card"><h2>${I('utensils','sm')} Étkezés</h2>
+   <div class="row" style="margin-bottom:6px"><h3 style="margin:0;flex:1">Napi energia</h3><div class="chips" style="margin:0">${[7,30].map(n=>`<button class="chip ${foodRng===n?'on':''}" data-click="setFoodRng(${n})">${n} nap</button>`).join('')}</div></div>
+   ${foodTrend(foodRng)}
+   <h3 style="margin-top:14px">A kiválasztott időszak (${statRange?statRange+' nap':'mind'}) átlagai</h3>
+   <div class="grid3" style="margin-top:10px">${stat('Átlag kcal (időszak)',avg('kcal')==null?null:fmt(avg('kcal'),0))}${stat('Átlag fehérje',avg('p')==null?null:fmt(avg('p'),0)+' g')}${stat(t.kcal?'Célon belüli nap':'Rögzített nap',t.kcal?(inBand==null?null:inBand+' %'):rd.length)}</div>
+   <div class="grid3" style="margin-top:8px">${stat('Átlag szénhidrát',avg('c')==null?null:fmt(avg('c'),0)+' g')}${stat('Átlag zsír',avg('f')==null?null:fmt(avg('f'),0)+' g')}${stat('Rögzített nap (időszak)',rd.length)}</div>
+   ${bal}</div>`;}
   {const ssAll=series('steps'),goal=S.settings.stepGoal||0,sr=ssAll.filter(inR),ma7=movAvg(ssAll).filter(inR);
    const last30=[...Array(30)].map((_,i)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-29+i);return ymd(d)});
    const bm={};for(const b of S.body)if(b.steps!=null)bm[b.date]=b.steps;
@@ -587,15 +849,16 @@ function attachCharts(){
     svg.addEventListener('pointermove',show);svg.addEventListener('pointerdown',show);svg.addEventListener('pointerleave',()=>tt.innerHTML='')});
 }
 function barChart(labels,vals,o={}){
-  const W=600,H=o.h||180,pl=48,pr=8,pt=22,pb=28,max=Math.max(...vals,0);
+  const W=600,H=o.h||180,pl=48,pr=8,pt=o.sub?42:22,pb=28,max=Math.max(...vals,0,...(o.avgLine||[]).filter(x=>x!=null));
   if(!max)return `<div class="empty">${o.empty||'Az elmúlt 12 hétben nincs edzés'}</div>`;
-  const step=Math.max(2,Math.ceil(vals.length/6)),dense=vals.length>16;
-  const tk=niceTicks(0,Math.max(max,o.goal||0),3),top=tk[tk.length-1],bw=(W-pl-pr)/vals.length,ih=H-pt-pb;let g='';
+  const step=vals.length<=8?1:Math.max(2,Math.ceil(vals.length/6)),dense=vals.length>16;
+  const tk=niceTicks(0,Math.max(max,o.goal||0),3),top=tk[tk.length-1],bw=(W-pl-pr)/vals.length,ih=H-pt-pb;let g='',sb;
   tk.forEach(t=>{const y=pt+(1-t/top)*ih;g+=`<line x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}" class="gl"/><text x="${pl-8}" y="${y+5}" text-anchor="end" class="ax">${fmtShort(t)}</text>`});
+  if(o.goal){const y=pt+(1-o.goal/top)*ih;g+=`<line x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}" style="stroke:${o.goalColor};stroke-width:2;stroke-dasharray:6 5"/>${o.goalLabel===false?'':`<text x="${W-pr}" y="${y-6}" text-anchor="end" class="bv" style="fill:${o.goalColor}">cél ${fmtShort(o.goal)}</text>`}`}
   vals.forEach((v,i)=>{const h=v/top*ih,x=pl+i*bw+bw*.18,cx=x+bw*.32;
-    if(v)g+=`<rect x="${x}" y="${H-pb-h}" width="${bw*.64}" height="${h}" rx="${dense?3:5}" style="fill:${o.goal&&v>=o.goal?o.goalColor:o.color}"/>`+(dense?'':`<text x="${cx}" y="${H-pb-h-6}" text-anchor="middle" class="bv">${fmtShort(v)}</text>`);
+    if(v)g+=`<rect x="${x}" y="${H-pb-h}" width="${bw*.64}" height="${h}" rx="${dense?3:5}" style="fill:${o.colorFn?o.colorFn(v):(o.goal&&v>=o.goal?o.goalColor:o.color)}"/>`+(dense?'':`<text x="${cx}" y="${H-pb-h-6}" text-anchor="middle" class="bv">${fmtShort(v)}</text>`)+(o.sub&&!dense&&(sb=o.sub(v))?`<text x="${cx}" y="${H-pb-h-24}" text-anchor="middle" class="bv" style="fill:${sb.color};font-weight:700">${esc(sb.text)}</text>`:'');
     if((vals.length-1-i)%step===0){const edge=cx+28>W-pr;g+=`<text x="${edge?W-pr:cx}" y="${H-8}" text-anchor="${edge?'end':'middle'}" class="ax">${labels[i]}</text>`}});
-  if(o.goal){const y=pt+(1-o.goal/top)*ih;g+=`<line x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}" style="stroke:${o.goalColor};stroke-width:2;stroke-dasharray:6 5"/><text x="${W-pr}" y="${y-6}" text-anchor="end" class="bv" style="fill:${o.goalColor}">cél ${fmtShort(o.goal)}</text>`}
+  if(o.avgLine){let d='';o.avgLine.forEach((a,i)=>{if(a==null)return;const x=pl+i*bw+bw*.5,y=pt+(1-a/top)*ih;d+=(d?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)});if(d)g+=`<path d="${d}" style="fill:none;stroke:${o.avgColor};stroke-width:3;stroke-linejoin:round;stroke-linecap:round"/>`}
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
 }
 
@@ -603,7 +866,7 @@ function barChart(labels,vals,o={}){
 function vMore(){
   const cats=[...new Set(S.exercises.map(e=>e.cat))].sort(catSort);
   const usage={};for(const w of S.workouts)for(const e of w.exercises)usage[e.exId]=(usage[e.exId]||0)+1;
-  return `<div class="card"><h2>Beállítások</h2>
+  return vProfile()+`<div class="card"><h2>Beállítások</h2>
   <label for="defrest">Alapértelmezett pihenőidő (mp)</label>
   <input id="defrest" type="number" min="0" max="1800" step="15" value="${S.settings.rest??90}" data-change="setDefRest(this.value)">
   <div class="hint">Pipálás után indul. Gyakorlatonként felülírható (edzés közben a gyakorlat neve alatti időre koppintva, vagy lent a listában). 0 = kikapcsolva.</div>
@@ -668,6 +931,11 @@ async function demoData(){
       const w={id:uid(),name:t.name,tplId:t.id,start:st.getTime(),end:st.getTime()+(45+Math.random()*30)*60000,exercises:t.items.map(it=>{const n=exName(it.exId),b=base[n]??20;
         return{exId:it.exId,sets:Array.from({length:it.sets},(_,j)=>kb(n)?{w:b+(i<50?4:0),r:n.includes('get-up')?1:n.includes('halo')||n.includes('windmill')?5:10}:b?{w:Math.round(b*prog*(Math.random()<.15?1.03:1)/2.5)*2.5,r:Math.max(3,8-j-Math.floor(Math.random()*2))}:{w:0,r:Math.round(6+(120-i)/30+Math.random()*2-j)})}})};
       w.prs=detectPRs(w);S.workouts.push(w)}}
+  {const F=[['reggeli','Zabkása 60 g tejjel, banán',420,16,68,9],['reggeli','Rántotta 3 tojásból, kenyér',480,26,30,27],['tizorai','Görög joghurt 200 g',190,18,8,9],['ebed','Csirkemell 150 g, rizs 180 g',490,51,52,7],['ebed','Bolognai spagetti',680,34,82,22],['uzsonna','Alma, mandula 30 g',260,7,27,15],['vacsora','Lazac 150 g, zöldség',430,34,12,27],['vacsora','Túrós tészta',620,30,80,19],['nasi','Fehérjeszelet',210,20,22,7]];
+   const t0=new Date();t0.setHours(0,0,0,0);
+   for(let i=60;i>=1;i--){if(Math.random()<.15)continue;const d=new Date(t0);d.setDate(d.getDate()-i);const key=ymd(d);if(S.meals.some(m=>m.date===key))continue;
+     for(const mk of['reggeli','ebed','uzsonna','vacsora']){if(mk==='uzsonna'&&Math.random()<.4)continue;const o=F.filter(x=>x[0]===mk||(mk==='uzsonna'&&x[0]==='tizorai')),x=o[Math.floor(Math.random()*o.length)],k=.85+Math.random()*.3;
+       S.meals.push({id:uid(),date:key,meal:mk,name:x[1],kcal:Math.round(x[2]*k),p:Math.round(x[3]*k),c:Math.round(x[4]*k),f:Math.round(x[5]*k)})}}}
   save();toast('Mintaadatok betöltve');render();
 }
 
