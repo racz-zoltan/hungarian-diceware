@@ -1,0 +1,36 @@
+{
+  "id": "/edzesnaplo.html",
+  "name": "Edzésnapló",
+  "short_name": "Edzésnapló",
+  "lang": "hu",
+  "description": "Offline edzésnapló – sablonok, testadatok, statisztikák. Minden adat a készüléken marad.",
+  "start_url": "/edzesnaplo.html",
+  "scope": "/edzesnaplo.html",
+  "display": "standalone",
+  "background_color": "#060a17",
+  "theme_color": "#060a17",
+  "categories": [
+    "health",
+    "fitness"
+  ],
+  "icons": [
+    {
+      "src": "/edzesnaplo-assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/edzesnaplo-assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/edzesnaplo-assets/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
