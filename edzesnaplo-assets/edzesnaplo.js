@@ -33,7 +33,9 @@ const DEF_EX=[
 ['KB felhúzás','Kettlebell'],['KB front rack guggolás','Kettlebell'],['KB halo','Kettlebell'],['KB windmill','Kettlebell'],['KB thruster','Kettlebell'],['KB high pull','Kettlebell'],
 ['Fekvőtámasz','Saját testsúly'],['Pike fekvőtámasz','Saját testsúly'],['Ausztrál húzódzkodás','Saját testsúly'],['Guggolás (saját testsúly)','Saját testsúly'],
 ['Kitörés (saját testsúly)','Saját testsúly'],['Bolgár guggolás (saját testsúly)','Saját testsúly'],['Csípőemelés (saját testsúly)','Saját testsúly'],
-['Plank (mp)','Saját testsúly'],['Hegymászó','Saját testsúly'],['Burpee','Saját testsúly'],['Superman','Saját testsúly']];
+['Plank (mp)','Saját testsúly'],['Hegymászó','Saját testsúly'],['Burpee','Saját testsúly'],['Superman','Saját testsúly'],
+['Koncentrált bicepszhajlítás (kézisúlyzó)','Kar'],['Bolgár guggolás (kézisúlyzó)','Láb'],['Padlón nyomás (kézisúlyzó)','Mell'],
+['Román felhúzás (kézisúlyzó)','Láb'],['Goblet guggolás (kézisúlyzó)','Láb'],['Lábemelés fekve','Törzs'],['Dead bug','Törzs']];
 const DEF_TPL=[
  ['Push – mell, váll, tricepsz',[['Fekvenyomás (rúd)',3],['Ferde fekvenyomás (kézisúlyzó)',3],['Katonai nyomás (rúd)',3],['Oldalemelés (kézisúlyzó)',3],['Tricepsz letolás (kábel)',3]]],
  ['Pull – hát, bicepsz',[['Felhúzás (rúd)',3],['Evezés (rúd)',3],['Húzódzkodás',3],['Mellhez húzás (kábel)',3],['Bicepsz hajlítás (kézisúlyzó)',3]]],
@@ -43,9 +45,19 @@ const DEF_TPL=[
  ['Kettlebell – ballisztikus',[['KB swing (kétkezes)',5],['KB clean',4],['KB snatch',4],['KB front rack guggolás',3],['KB windmill',2]]],
  ['Saját testsúly – teljes test',[['Fekvőtámasz',3],['Guggolás (saját testsúly)',3],['Ausztrál húzódzkodás',3],['Kitörés (saját testsúly)',3],['Plank (mp)',3]]],
  ['Saját testsúly – felsőtest',[['Húzódzkodás',4],['Fekvőtámasz',4],['Tolódzkodás',3],['Pike fekvőtámasz',3],['Ausztrál húzódzkodás',3]]],
- ['Saját testsúly – láb és törzs',[['Bolgár guggolás (saját testsúly)',3],['Guggolás (saját testsúly)',3],['Csípőemelés (saját testsúly)',3],['Hegymászó',3],['Lábemelés függésben',3]]]];
-const TPL_VER=n=>n.startsWith('Saját testsúly')?3:n.startsWith('Kettlebell')?2:0; // melyik adatverzióban jelent meg
-const DATA_V=3;
+ ['Saját testsúly – láb és törzs',[['Bolgár guggolás (saját testsúly)',3],['Guggolás (saját testsúly)',3],['Csípőemelés (saját testsúly)',3],['Hegymászó',3],['Lábemelés függésben',3]]],
+ ['Kézisúlyzó A – húzó + láb',[['Húzódzkodás',4],['Evezés (kézisúlyzó)',4],['Koncentrált bicepszhajlítás (kézisúlyzó)',3],['Bolgár guggolás (kézisúlyzó)',3],['Lábemelés fekve',3]]],
+ ['Kézisúlyzó B – nyomó + láb',[['Padlón nyomás (kézisúlyzó)',4],['Oldalemelés (kézisúlyzó)',3],['Fekvőtámasz',3],['Román felhúzás (kézisúlyzó)',3],['Goblet guggolás (kézisúlyzó)',3],['Dead bug',3]]]];
+const TPL_VER=n=>n.startsWith('Kézisúlyzó')?4:n.startsWith('Saját testsúly')?3:n.startsWith('Kettlebell')?2:0; // melyik adatverzióban jelent meg
+const DATA_V=4;
+/* Eszköz szerinti címke: KB = kettlebell, ST = saját testsúly, ET = edzőterem (rúd, gép, kábel), KS = kézisúlyzó (otthon) */
+const BW_NAMES=['Húzódzkodás','Tolódzkodás','Hasprés','Lábemelés függésben','Hasgörgő','Lábemelés fekve','Dead bug'];
+function exEq(e){if(!e)return null;const n=e.name;if(e.cat==='Kettlebell'||/^KB /.test(n))return'KB';if(/\((rúd|gép|kábel)\)/.test(n))return'ET';
+  if(e.cat==='Saját testsúly'||BW_NAMES.includes(n))return'ST';if(/kézisúlyzó|Kalapács/i.test(n))return'KS';return null}
+const TAGS={KB:['kb','Kettlebell'],ST:['st','Saját testsúly'],ET:['et','Edzőterem'],KS:['ks','Kézisúlyzó (otthon)']};
+function tplTag(t){const eq=t.items.map(i=>exEq(exById(i.exId))).filter(Boolean);if(!eq.length)return '';
+  const k=eq.includes('ET')?'ET':eq.every(x=>x==='KB'||x==='ST')&&eq.includes('KB')?'KB':eq.every(x=>x==='ST')?'ST':eq.every(x=>x==='KS'||x==='ST')?'KS':'ET';
+  return `<span class="tag ${TAGS[k][0]}" title="${TAGS[k][1]}">${k}</span>`}
 const DEF_REST={'KB swing (egykezes)':45,'KB swing (kétkezes)':60,'KB snatch':60,'KB török felállás (get-up)':60};
 function addDefaults(st){
   for(const[name,cat]of DEF_EX)if(!st.exercises.some(e=>e.name===name)){const e={id:uid(),name,cat};if(DEF_REST[name])e.rest=DEF_REST[name];st.exercises.push(e)}
@@ -187,7 +199,7 @@ function backupNag(){
 function relDay(ts){const a=new Date(ts);a.setHours(0,0,0,0);const b=new Date();b.setHours(0,0,0,0);const n=Math.round((b-a)/DAY);
   return n<=0?'ma':n===1?'tegnap':n<7?n+' napja':n<30?Math.floor(n/7)+' hete':n<365?Math.floor(n/30)+' hónapja':Math.floor(n/365)+' éve'}
 function tplCard(t,last,uses){
-  const cats=t.items.map(it=>exById(it.exId)?.cat),tag=t.items.length&&cats.every(c=>c==='Kettlebell')?'<span class="tag">KB</span>':t.items.length&&cats.every(c=>c==='Saját testsúly')?'<span class="tag">TS</span>':'';
+  const tag=tplTag(t);
   return `<div class="card"><div class="row" style="flex-wrap:nowrap"><h2 style="flex:1;margin:0;font-size:17px">${esc(t.name)} ${tag}</h2><button class="btn sm ico" data-click="editTemplate('${t.id}')" aria-label="Sablon szerkesztése">${I('pencil','sm')}</button></div>
   <div class="mut small" style="margin:7px 0 12px">${t.items.map(it=>`<span class="mono">${it.sets}×</span> ${esc(exName(it.exId))}`).join(' · ')||'Üres sablon'}</div>
   <div class="row"><span class="mut small">${last?`Utoljára: <b style="color:var(--kj-text)">${relDay(last)}</b> · ${fmtDate(last)} · ${uses}×`:'Még nem használt'}</span><span class="sp"></span><button class="btn p sm" data-click="startWorkout('${t.id}')">${I('dumbbell','sm')} Indítás</button></div></div>`;
@@ -198,6 +210,7 @@ function vWorkout(){
   let h=backupNag()+`<div class="card"><button class="btn p block" data-click="startWorkout()">${I('plus')} Üres edzés indítása</button><div class="hint" style="text-align:center">Befejezés után a dátummal és időponttal elmentődik az Edzéseim közé – onnan átnevezhető, módosítható, törölhető.</div></div>`;
   if(used.length){h+=`<h3 style="margin:8px 2px 10px">Edzéseim</h3>`;used.forEach(t=>h+=tplCard(t,lastOf[t.id],uses[t.id]))}
   h+=`<div class="row" style="margin:${used.length?18:6}px 2px 10px"><h3 style="margin:0">Sablonok</h3><span class="sp"></span><button class="btn sm gold" data-click="editTemplate()">${I('plus','sm')} Új sablon</button></div>`;
+  h+=`<div class="legend" style="margin:-4px 2px 10px">${Object.entries(TAGS).map(([k,[c,l]])=>`<span><span class="tag ${c}">${k}</span> ${l}</span>`).join('')}</div>`;
   if(!fresh.length)h+=`<div class="card mut small">${S.templates.length?'Minden sablon használatban van – fent, az Edzéseim között találod őket.':'Még nincs sablon.'}</div>`;
   fresh.forEach(t=>h+=tplCard(t,0,0));
   const rec=wSorted().reverse().slice(0,3);

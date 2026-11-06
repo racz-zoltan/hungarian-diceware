@@ -127,7 +127,11 @@ tr.done .chk{background:var(--kj-green-fill);color:var(--kj-green-ink);border-co
 .exl{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:5px 0;border-top:1px solid var(--kj-border)}
 .exl span:last-child{text-align:right;font-family:var(--mono);font-size:12.5px;color:var(--kj-muted);padding-top:1px}
 .badge{display:inline-flex;align-items:center;gap:5px;background:var(--kj-gold-soft);color:var(--kj-gold);border:1px solid var(--kj-gold-line);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;margin:7px 6px 0 0}
-.tag{font:700 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:2px 6px;background:var(--kj-violet-soft);color:var(--kj-violet);vertical-align:2px}
+.tag{font:700 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:2px 6px;background:var(--kj-violet-soft);color:var(--kj-violet);vertical-align:2px;border:1px solid transparent}
+.tag.kb{background:var(--kj-violet-soft);color:var(--kj-violet);border-color:var(--kj-violet)}
+.tag.st{background:var(--kj-green-soft);color:var(--kj-green);border-color:var(--kj-green-line)}
+.tag.et{background:var(--kj-gold-soft);color:var(--kj-gold);border-color:var(--kj-gold-line)}
+.tag.ks{background:var(--kj-blue-soft);color:var(--kj-blue-line);border-color:var(--kj-blue-line)}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .chip{background:var(--kj-surface);border:1px solid var(--kj-border);color:var(--kj-text);border-radius:999px;padding:6px 13px;font:600 13px var(--ui);cursor:pointer}
 .chip:hover{border-color:var(--kj-blue-line)}
