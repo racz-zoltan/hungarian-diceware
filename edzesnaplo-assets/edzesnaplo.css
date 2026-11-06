@@ -90,7 +90,12 @@ h3{font:700 11.5px var(--ui);margin:0 0 8px;color:var(--kj-muted);text-transform
 .mut{color:var(--kj-muted)}
 .small{font-size:13px}
 .mono{font-family:var(--mono)}
-input,select{background:var(--kj-field);color:var(--kj-text);border:1px solid var(--kj-border-strong);border-radius:10px;padding:9px 11px;font:500 15px var(--ui);width:100%;min-width:0}
+input,select{background:var(--kj-field);color:var(--kj-text);border:1px solid var(--kj-border-strong);border-radius:10px;padding:9px 11px;font:500 16px var(--ui);width:100%;min-width:0}
+/* iOS Safari: 16px alatti betűméretnél fókuszkor ránagyít és úgy marad – ezért minden mező legalább 16px */
+input[type=date]{-webkit-appearance:none;appearance:none;display:block;max-width:100%;min-height:44px;text-align:left}
+input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+input[type=date]::-webkit-calendar-picker-indicator{opacity:.7}
+[data-theme="dark"] input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1)}
 input:focus,select:focus{outline:none;border-color:var(--kj-blue-line);box-shadow:0 0 0 3px var(--kj-focus)}
 input::placeholder{color:var(--kj-muted);opacity:.75}
 input[type=number]{-moz-appearance:textfield;font-family:var(--mono)}
@@ -109,7 +114,7 @@ label{display:block;font:700 11.5px var(--ui);text-transform:uppercase;letter-sp
 .sets td{padding:2px;text-align:center;font-family:var(--mono)}
 .sets td:first-child{border-radius:9px 0 0 9px}.sets td:last-child{border-radius:0 9px 9px 0}
 .sets td:nth-child(1){width:30px}.sets td:nth-child(2){width:22%;font-size:12.5px}.sets td:nth-child(5){width:46px}
-.sets input{text-align:center;padding:8px 2px;font-weight:500}
+.sets input{text-align:center;padding:8px 2px;font-weight:500;font-size:16px}
 .sets tr.done td{background:var(--kj-green-soft)}
 .sets tr.done input{border-color:transparent;background:transparent;color:var(--kj-green);font-weight:700}
 .chk{display:inline-grid;place-items:center;width:40px;height:36px;border-radius:9px;border:1px solid var(--kj-border-strong);background:var(--kj-surface);color:var(--kj-muted);cursor:pointer}

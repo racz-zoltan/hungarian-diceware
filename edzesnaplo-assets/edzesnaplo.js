@@ -149,7 +149,7 @@ function sanitizeState(d){
 }
 
 /* ===== Navigáció, keret ===== */
-function go(t){tab=t;render();scrollTo(0,0)}
+function go(t){document.activeElement&&document.activeElement.blur&&document.activeElement.blur();tab=t;render();scrollTo(0,0)}
 function render(){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
   $('#title').textContent={workout:S.active?'Edzés folyamatban':'Edzés',history:'Naptár',body:'Testadatok',stats:'Statisztika',more:'Beállítások'}[tab];
