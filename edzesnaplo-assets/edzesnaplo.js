@@ -45,7 +45,7 @@ function addDefaults(st){
   for(const[name,items]of DEF_TPL)if(!st.templates.some(t=>t.name===name)&&(st.v===0||name.startsWith('Kettlebell')))
     st.templates.push({id:uid(),name,items:items.filter(([n])=>f(n)).map(([n,s])=>({exId:f(n),sets:s}))});
 }
-function defaults(){const st={v:0,exercises:[],templates:[],workouts:[],body:[],active:null,settings:{rest:90,theme:null}};addDefaults(st);st.v=2;return st}
+function defaults(){const st={v:0,exercises:[],templates:[],workouts:[],body:[],active:null,settings:{rest:90,theme:null,sound:3,wakeLock:true}};addDefaults(st);st.v=2;return st}
 const KEY='edzesnaplo.v1';
 let S; // a betöltés a fájl végén történik (a validáló függvények után)
 function load(){try{const raw=localStorage.getItem(KEY);if(raw){const s=sanitizeState(JSON.parse(raw));if(s.v<2){addDefaults(s);s.v=2}return s}}catch(e){console.warn('Betöltési hiba',e)}return defaults()}
@@ -95,7 +95,7 @@ document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#dlg').
 /* ===== Eseménykezelés (CSP: nincs inline handler, nincs eval) =====
    A sablonokban data-click/input/change/submit="fn(arg,...)" áll; az argumentum csak
    literál lehet (szám, 'szöveg', null, true/false), illetve this / this.value. */
-const ACT=new Set(["addSet", "adjRest", "bodyFromCal", "calNav", "chooseEx", "closeModal", "delBody", "delEx", "delTemplate", "delWorkout", "demoData", "discardWorkout", "dlgBackdrop", "dlgClose", "editBodyRow", "editEx", "editTemplate", "exportCSV", "exportData", "finishWorkout", "formSubmit", "go", "goToday", "importData", "modalBg", "moveEx", "newExFromList", "newExercise", "openImport", "pickForActive", "pickForTpl", "renderPick", "repeatWorkout", "resetAll", "rmEx", "rmSet", "saveAsTemplate", "saveAsTplFromSummary", "saveBody", "saveTpl", "selDay", "setBodyDate", "setDefRest", "setExRest", "setRange", "setStrEx", "setStrMetric", "setTheme", "setTplName", "setTplSets", "setVal", "setWName", "showStr", "startWorkout", "stopRest", "toggleSet", "toggleTheme", "tplMove", "tplRemove", "updateTplFrom"]);
+const ACT=new Set(["addSet", "adjRest", "bodyFromCal", "calNav", "chooseEx", "closeModal", "delBody", "delEx", "delTemplate", "delWorkout", "demoData", "discardWorkout", "dlgBackdrop", "dlgClose", "editBodyRow", "editEx", "editTemplate", "exportCSV", "exportData", "finishWorkout", "formSubmit", "go", "goToday", "importData", "modalBg", "moveEx", "newExFromList", "newExercise", "openImport", "pickForActive", "pickForTpl", "renderPick", "repeatWorkout", "resetAll", "rmEx", "rmSet", "saveAsTemplate", "saveAsTplFromSummary", "saveBody", "saveTpl", "selDay", "setBodyDate", "setDefRest", "setExRest", "setRange", "setSound", "setStrEx", "setStrMetric", "setTheme", "setTplName", "setTplSets", "setVal", "setWName", "setWake", "showStr", "startWorkout", "stopRest", "testSound", "toggleSet", "toggleTheme", "tplMove", "tplRemove", "updateTplFrom"]);
 function splitArgs(s){const out=[];let cur='',q=false;for(const ch of s){if(ch==="'")q=!q;if(ch===','&&!q){out.push(cur.trim());cur=''}else cur+=ch}if(cur.trim())out.push(cur.trim());return out}
 function parseArg(a,el){if(a==='this')return el;if(a==='this.value')return el.value;if(/^'[^'"\\]*'$/.test(a))return a.slice(1,-1);if(/^-?\d+(\.\d+)?$/.test(a))return +a;if(a==='null')return null;if(a==='true')return true;if(a==='false')return false;throw new Error('arg')}
 function runAct(src,el){const m=/^([A-Za-z_]\w*)\((.*)\)$/.exec((src||'').trim());if(!m||!ACT.has(m[1])||typeof window[m[1]]!=='function'){console.warn('Ismeretlen művelet:',src);return}
@@ -135,7 +135,7 @@ const str=(v,n=120)=>String(v??'').slice(0,n);
 function sanitizeState(d){
   if(!d||typeof d!=='object'||!Array.isArray(d.exercises)||!Array.isArray(d.workouts))throw new Error('format');
   const map={},fix=id=>{const k=String(id);if(!map[k])map[k]=ID_RE.test(k)?k:uid();return map[k]};
-  const o={v:num(d.v,1,99)||2,settings:{rest:num(d.settings?.rest,0,1800)??90,theme:['light','dark'].includes(d.settings?.theme)?d.settings.theme:null,lastBackup:num(d.settings?.lastBackup,0,9e15)||undefined}};
+  const o={v:num(d.v,1,99)||2,settings:{rest:num(d.settings?.rest,0,1800)??90,sound:num(d.settings?.sound,0,3)??3,wakeLock:d.settings?.wakeLock!==false,theme:['light','dark'].includes(d.settings?.theme)?d.settings.theme:null,lastBackup:num(d.settings?.lastBackup,0,9e15)||undefined}};
   o.exercises=d.exercises.filter(e=>e&&e.name).map(e=>{const x={id:fix(e.id),name:str(e.name,100),cat:str(e.cat||'Egyéb',40)};const r=num(e.rest,0,1800);if(r!=null&&e.rest!==''&&e.rest!=null)x.rest=r;return x});
   const sets=a=>(Array.isArray(a)?a:[]).map(s=>({w:num(s?.w,0,2000)??0,r:num(s?.r,0,10000)??0}));
   o.templates=(Array.isArray(d.templates)?d.templates:[]).filter(t=>t&&t.name).map(t=>({id:fix(t.id),name:str(t.name,100),items:(Array.isArray(t.items)?t.items:[]).map(i=>({exId:fix(i?.exId),sets:num(i?.sets,1,30)||3}))}));
@@ -156,7 +156,7 @@ function render(){
   $('#hdr').innerHTML=S.active&&tab!=='workout'?`<button class="pill" data-click="go('workout')" aria-label="Edzés folytatása">${I('biceps-flexed','sm')}<span id="elapsed2"></span></button>`:'';
   for(const k in CH)delete CH[k];
   $('main').innerHTML=({workout:S.active?vActive:vWorkout,history:vHistory,body:vBody,stats:vStats,more:vMore})[tab]();
-  attachCharts();tick();updAvol();
+  attachCharts();tick();updAvol();syncWake();updWakeUI();
 }
 function openModal(h){$('#sheet').innerHTML=h;$('#modal').classList.add('on')}
 function closeModal(){$('#modal').classList.remove('on')}
@@ -205,7 +205,7 @@ async function startWorkout(t){
 function vActive(){
   const a=S.active;
   let h=`<div class="card"><input value="${esc(a.name)}" data-input="setWName(this.value)" style="font:800 17px var(--display)" aria-label="Edzés neve">
-  <div class="row" style="margin-top:10px"><span class="mut">${I('timer','sm')} <b id="elapsed" class="mono" style="color:var(--kj-text)">0:00</b></span><span class="sp"></span><span class="mut small mono" id="avol"></span></div></div>`;
+  <div class="row" style="margin-top:10px"><span class="mut">${I('timer','sm')} <b id="elapsed" class="mono" style="color:var(--kj-text)">0:00</b></span><span class="mut small" id="wakeInd" hidden title="A képernyő nem kapcsol ki edzés közben">${I('smartphone','sm')} ébren</span><span class="sp"></span><span class="mut small mono" id="avol"></span></div></div>`;
   a.exercises.forEach((e,i)=>{
     const prev=prevSets(e.exId),pb=bestsBefore(e.exId,Infinity),ex=exById(e.exId),custom=ex?.rest!=null;
     h+=`<div class="card"><div class="row" style="flex-wrap:nowrap;align-items:flex-start"><div style="flex:1;min-width:0"><div class="ex-title">${esc(exName(e.exId))}</div>
@@ -270,12 +270,45 @@ async function setExRest(exId){
   const r=await form('Pihenőidő',[{id:'rest',label:'Pihenő sorozatok között (mp)',type:'number',min:0,step:5,value:ex.rest??'',placeholder:`alapértelmezett: ${S.settings.rest} mp`,hint:'Üresen hagyva a Beállításokban megadott alapértelmezést használja. 0 = nincs pihenőszámláló.'}],{intro:esc(ex.name)});
   if(!r)return;if(r.rest==='')delete ex.rest;else ex.rest=Math.max(0,Math.min(1800,parseInt(r.rest)||0));save();render();
 }
-function beep(){try{const ac=new(window.AudioContext||window.webkitAudioContext)(),o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(.2,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.6);o.start();o.stop(ac.currentTime+.6)}catch(e){}}
+/* Hang: iOS-en az AudioContext csak felhasználói érintésre indulhat el, ezért egyetlen
+   kontextust használunk, amit minden érintéskor feloldunk (resume + néma puffer). */
+let AC=null;
+function audioCtx(){if(!AC){const K=window.AudioContext||window.webkitAudioContext;if(!K)return null;try{AC=new K()}catch(e){return null}}return AC}
+function unlockAudio(){const ac=audioCtx();if(!ac||ac.state==='running')return;ac.resume().catch(()=>{});try{const b=ac.createBuffer(1,1,22050),src=ac.createBufferSource();src.buffer=b;src.connect(ac.destination);src.start(0)}catch(e){}}
+['pointerdown','touchend','keydown'].forEach(t=>document.addEventListener(t,unlockAudio,{passive:true,capture:true}));
+const VOL=[0,.35,.7,1];
+function chime(level){
+  const v=VOL[level??S.settings.sound??3];if(!v)return;const ac=audioCtx();if(!ac)return;if(ac.state!=='running')ac.resume().catch(()=>{});
+  const t0=ac.currentTime+.03,master=ac.createGain(),comp=ac.createDynamicsCompressor();master.gain.value=v;master.connect(comp);comp.connect(ac.destination);
+  [[880,0],[1174.66,.17],[1760,.34]].forEach(([f,dt])=>{for(const[type,amp]of[['sine',.9],['triangle',.15]]){
+    const o=ac.createOscillator(),g=ac.createGain(),t=t0+dt;o.type=type;o.frequency.value=f;o.connect(g);g.connect(master);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(amp,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+1.1);o.start(t);o.stop(t+1.15)}});
+}
+/* Képernyő ébren tartása edzés közben (Screen Wake Lock API, iOS 16.4+).
+   A rendszer elengedi a zárat, ha az app háttérbe kerül – visszatéréskor újrakérjük. */
+let WL=null,wlPending=false;
+const wakeSupported=()=>'wakeLock' in navigator;
+async function wakeOn(){
+  if(WL||wlPending||!wakeSupported()||document.visibilityState!=='visible')return;
+  wlPending=true;
+  try{WL=await navigator.wakeLock.request('screen');WL.addEventListener('release',()=>{WL=null;updWakeUI()})}catch(e){WL=null}
+  wlPending=false;
+  if(WL&&!(S.active&&S.settings.wakeLock!==false))wakeOff(); // közben véget ért az edzés
+  updWakeUI();
+}
+function wakeOff(){if(WL){const w=WL;WL=null;w.release().catch(()=>{})}updWakeUI()}
+function syncWake(){if(S.active&&S.settings.wakeLock!==false)wakeOn();else if(WL)wakeOff()}
+function updWakeUI(){const el=$('#wakeInd');if(el)el.hidden=!WL}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncWake()});
+document.addEventListener('pointerdown',()=>{if(S.active&&!WL)syncWake()},{passive:true});
+function setWake(v){S.settings.wakeLock=v;save();render()}
+function setSound(v){S.settings.sound=v;save();render();if(v)chime(v)}
+function testSound(){unlockAudio();chime()}
 function tick(){
   if(S.active){const t=dur(Date.now()-S.active.start);const a=$('#elapsed'),b=$('#elapsed2');if(a)a.textContent=t;if(b)b.textContent=t}
   const rb=$('#rest');document.body.classList.toggle('resting',!!rest);
   if(rest){const left=Math.ceil((rest.end-Date.now())/1000);
-    if(left<=0){rest=null;rb.classList.remove('on');try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}beep();toast('Pihenő vége – következő sorozat!')}
+    if(left<=0){rest=null;rb.classList.remove('on');try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}chime();toast('Pihenő vége – következő sorozat!')}
     else{rb.classList.add('on');$('#restt').textContent=dur(left*1000);$('#restex').textContent=rest.ex||'';$('#restbar').style.width=Math.min(100,left/rest.total*100)+'%'}}
   else rb.classList.remove('on');
 }
@@ -491,6 +524,13 @@ function vMore(){
   <label for="defrest">Alapértelmezett pihenőidő (mp)</label>
   <input id="defrest" type="number" min="0" max="1800" step="15" value="${S.settings.rest??90}" data-change="setDefRest(this.value)">
   <div class="hint">Pipálás után indul. Gyakorlatonként felülírható (edzés közben a gyakorlat neve alatti időre koppintva, vagy lent a listában). 0 = kikapcsolva.</div>
+  <label>Hangjelzés a pihenő végén</label>
+  <div class="row" style="gap:6px">${[[0,'Ki'],[1,'Halk'],[2,'Közepes'],[3,'Hangos']].map(([v,l])=>`<button class="chip ${(S.settings.sound??3)===v?'on':''}" data-click="setSound(${v})">${l}</button>`).join('')}<button class="btn sm" data-click="testSound()">Teszt</button></div>
+  <div class="hint">iPhone-on a némító kapcsoló (csengő ki) a hangot is elnémítja. Lezárt képernyőnél vagy háttérben a böngésző szünetelteti az időzítőt – ezt a lenti ébren tartás megelőzi.</div>
+  <label>Képernyő ébren tartása edzés közben</label>
+  ${wakeSupported()?`<div class="chips" style="margin:0">${[[true,'Be'],[false,'Ki']].map(([v,l])=>`<button class="chip ${(S.settings.wakeLock!==false)===v?'on':''}" data-click="setWake(${v})">${l}</button>`).join('')}</div>
+  <div class="hint">Futó edzés alatt a képernyő nem sötétül el és nem zár le, így a pihenő-visszaszámlálás és a hangjelzés is működik. Az edzés befejezésekor automatikusan kikapcsol. Több akkumulátort fogyaszt.</div>`
+  :`<div class="hint">Ez a böngésző nem támogatja (iPhone-on iOS 16.4 vagy újabb kell).</div>`}
   <label>Megjelenés</label>
   <div class="chips" style="margin:0">${[[null,'Rendszer szerint'],['light','Világos'],['dark','Sötét']].map(([v,l])=>`<button class="chip ${S.settings.theme===v?'on':''}" data-click="setTheme(${v?`'${v}'`:'null'})">${l}</button>`).join('')}</div></div>
   <div class="card"><h2>Mentés</h2><div class="hint" style="margin:0 0 12px">Minden adat csak ezen az eszközön, a böngésző helyi tárhelyén van – semmi nem kerül szerverre. A <b>Mentés / megosztás</b> a telefon megosztás menüjét nyitja meg: innen menthetsz Google Drive-ra, a Fájlok appba vagy iCloud Drive-ra. Visszatöltés: <b>Import</b>, majd a fájl kiválasztása (a Drive is megjelenik a fájlválasztóban, ha telepítve van).</div>

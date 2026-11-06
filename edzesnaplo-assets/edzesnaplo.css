@@ -138,6 +138,8 @@ tr.done .chk{background:var(--kj-green-fill);color:var(--kj-green-ink);border-co
 .dot{width:6px;height:6px;border-radius:50%;display:block}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--kj-muted);margin:2px 0 6px;flex-wrap:wrap;align-items:center}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+/* dupla koppintásos nagyítás kikapcsolása, a kétujjas nagyítás megmarad */
+html,body,*{touch-action:manipulation}
 svg.chart{width:100%;height:auto;display:block;touch-action:pan-y}
 svg .gl{stroke:var(--kj-border);stroke-width:1}
 svg .ax{fill:var(--kj-muted);font:500 15px var(--mono)}
