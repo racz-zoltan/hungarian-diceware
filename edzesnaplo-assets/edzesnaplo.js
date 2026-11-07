@@ -62,11 +62,13 @@ const DATA_V=5;
 const BW_NAMES=['Húzódzkodás (fordított fogás)','Húzódzkodás','Tolódzkodás','Hasprés','Lábemelés függésben','Hasgörgő','Lábemelés fekve','Dead bug'];
 function exEq(e){if(!e)return null;const n=e.name;if(e.kind==='cardio')return'KA';if(e.cat==='Kettlebell'||/^KB /.test(n))return'KB';if(/\((rúd|gép|kábel)\)/.test(n))return'ET';
   if(e.cat==='Saját testsúly'||BW_NAMES.includes(n))return'ST';if(/kézisúlyzó|Kalapács/i.test(n))return'KS';return null}
-const TAGS={KA:['ka','Kardió'],KB:['kb','Kettlebell'],ST:['st','Saját testsúly'],ET:['et','Edzőterem'],KS:['ks','Kézisúlyzó (otthon)']};
-function tplTag(t){let eq=t.items.map(i=>exEq(exById(i.exId))).filter(Boolean);if(!eq.length)return '';
-  if(eq.every(x=>x==='KA'))return `<span class="tag ka" title="Kardió">KA</span>`;eq=eq.filter(x=>x!=='KA');
-  const k=eq.includes('ET')?'ET':eq.every(x=>x==='KB'||x==='ST')&&eq.includes('KB')?'KB':eq.every(x=>x==='ST')?'ST':eq.every(x=>x==='KS'||x==='ST')?'KS':'ET';
-  return `<span class="tag ${TAGS[k][0]}" title="${TAGS[k][1]}">${k}</span>`}
+const TAGS={ET:['et','Edzőterem'],KS:['ks','Kézisúlyzó (otthon)'],ST:['st','Saját testsúly'],KB:['kb','Kettlebell'],KA:['ka','Kardió']}; // ez a sorrend a sablonlistában is
+const TAG_ORDER=Object.keys(TAGS);
+function tplKey(t){let eq=t.items.map(i=>exEq(exById(i.exId))).filter(Boolean);if(!eq.length)return null;
+  if(eq.every(x=>x==='KA'))return'KA';eq=eq.filter(x=>x!=='KA');
+  return eq.includes('ET')?'ET':eq.every(x=>x==='KB'||x==='ST')&&eq.includes('KB')?'KB':eq.every(x=>x==='ST')?'ST':eq.every(x=>x==='KS'||x==='ST')?'KS':'ET'}
+function tplTag(t){const k=tplKey(t);return k?`<span class="tag ${TAGS[k][0]}" title="${TAGS[k][1]}">${k}</span>`:''}
+const tplRank=t=>{const k=tplKey(t);return k?TAG_ORDER.indexOf(k):TAG_ORDER.length};
 const DEF_REST={'KB swing (egykezes)':45,'KB swing (kétkezes)':60,'KB snatch':60,'KB török felállás (get-up)':60};
 function addDefaults(st){
   for(const[name,cat,kind]of DEF_EX){let e=st.exercises.find(x=>x.name===name);if(!e){e={id:uid(),name,cat};if(DEF_REST[name])e.rest=DEF_REST[name];st.exercises.push(e)}if(kind&&!e.kind)e.kind=kind}
@@ -129,7 +131,7 @@ document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#dlg').
 /* ===== Eseménykezelés (CSP: nincs inline handler, nincs eval) =====
    A sablonokban data-click/input/change/submit="fn(arg,...)" áll; az argumentum csak
    literál lehet (szám, 'szöveg', null, true/false), illetve this / this.value. */
-const ACT=new Set(["addMeal", "addSet", "adjRest", "bodyFromCal", "calNav", "chooseEx", "closeModal", "copyInstr", "copyMealToday", "delBody", "delEx", "delMeal", "delTemplate", "delWorkout", "demoData", "discardWorkout", "dlgBackdrop", "dlgClose", "editBodyRow", "editEx", "editMeal", "editTemplate", "exportCSV", "exportData", "finishWorkout", "foodFromCal", "foodHelp", "foodNav", "foodToday", "formSubmit", "go", "goToday", "importData", "importHealthFile", "importStrong", "modalBg", "moveEx", "newExFromList", "newExercise", "openHealthFile", "openImport", "openStrong", "pasteMeals", "pasteSteps", "pickForActive", "pickForTpl", "renderPick", "repeatWorkout", "resetAll", "rmEx", "rmSet", "saveAsTemplate", "saveBody", "saveTpl", "selDay", "setBodyDate", "setClaudeUrl", "setDefRest", "setExRest", "setFoodDate", "setFoodRng", "setProf", "setRange", "setSound", "setStepGoal", "setStrEx", "setStrMetric", "setTheme", "setTplName", "setTplSets", "setTrendRng", "setVal", "setWName", "setWake", "showStr", "startWorkout", "stepsHelp", "stopRest", "testSound", "toggleSet", "toggleTheme", "toggleTrend", "toggleWaist", "tplMove", "tplRemove", "updateTplFrom"]);
+const ACT=new Set(["addMeal", "addSet", "adjRest", "bodyFromCal", "calNav", "chooseEx", "closeModal", "copyInstr", "copyMealToday", "delBody", "delEx", "delMeal", "delTemplate", "delWorkout", "demoData", "discardWorkout", "dlgBackdrop", "dlgClose", "editBodyRow", "editEx", "editMeal", "editTemplate", "exportCsv", "exportData", "finishWorkout", "foodFromCal", "foodHelp", "foodNav", "foodToday", "formSubmit", "go", "goProfile", "goToday", "importData", "importHealthFile", "importStrong", "modalBg", "moveEx", "newExFromList", "newExercise", "openHealthFile", "openImport", "openStrong", "pasteMeals", "pasteSteps", "pickForActive", "pickForTpl", "renderPick", "repeatWorkout", "resetAll", "rmEx", "rmSet", "saveAsTemplate", "saveBody", "saveTpl", "selDay", "setBodyDate", "setClaudeUrl", "setDefRest", "setExRest", "setFoodDate", "setFoodRng", "setProf", "setRange", "setSound", "setStepGoal", "setStrEx", "setStrMetric", "setTheme", "setTplName", "setTplSets", "setTrendRng", "setVal", "setWName", "setWake", "showStr", "startWorkout", "stepsHelp", "stopRest", "testSound", "toggleSet", "toggleTheme", "toggleTrend", "toggleWaist", "tplMove", "tplRemove", "updateTplFrom"]);
 function splitArgs(s){const out=[];let cur='',q=false;for(const ch of s){if(ch==="'")q=!q;if(ch===','&&!q){out.push(cur.trim());cur=''}else cur+=ch}if(cur.trim())out.push(cur.trim());return out}
 function parseArg(a,el){if(a==='this')return el;if(a==='this.value')return el.value;if(/^'[^'"\\]*'$/.test(a))return a.slice(1,-1);if(/^-?\d+(\.\d+)?$/.test(a))return +a;if(a==='null')return null;if(a==='true')return true;if(a==='false')return false;throw new Error('arg')}
 function runAct(src,el){const m=/^([A-Za-z_]\w*)\((.*)\)$/.exec((src||'').trim());if(!m||!ACT.has(m[1])||typeof window[m[1]]!=='function'){console.warn('Ismeretlen művelet:',src);return}
@@ -209,6 +211,12 @@ function backupNag(){
   if(lb&&days<14)return '';
   return `<div class="card" style="border-color:var(--kj-gold-line);background:var(--kj-gold-soft)"><div class="row" style="flex-wrap:nowrap"><span style="color:var(--kj-gold)">${I('info')}</span><span style="flex:1" class="small">${lb?`${days} napja nem mentettél.`:'Még nem készült mentés.'} Az adatok csak ezen az eszközön vannak.</span><button class="btn sm p" data-click="exportData()">Mentés</button></div></div>`;
 }
+function profileMissing(){const p=S.profile;return[[!p.sex,'nem'],[!p.birthYear,'születési év'],[!p.height,'magasság'],[!p.activity,'aktivitás']].filter(x=>x[0]).map(x=>x[1])}
+function profileNag(){
+  if(!profileMissing().length)return '';
+  return `<div class="card" style="border-color:var(--kj-gold-line);background:var(--kj-gold-soft)"><div class="row" style="flex-wrap:nowrap"><span style="color:var(--kj-gold)">${I('target')}</span><span style="flex:1" class="small">A személyes egészségcélok elérése érdekében töltsd ki a profiladatokat.</span><button class="btn sm p" data-click="goProfile()">${I('settings','sm')} Beállítások</button></div></div>`;
+}
+function goProfile(){go('more');const el=$('#profile');if(el){el.scrollIntoView({block:"start"});}}
 function relDay(ts){const a=new Date(ts);a.setHours(0,0,0,0);const b=new Date();b.setHours(0,0,0,0);const n=Math.round((b-a)/DAY);
   return n<=0?'ma':n===1?'tegnap':n<7?n+' napja':n<30?Math.floor(n/7)+' hete':n<365?Math.floor(n/30)+' hónapja':Math.floor(n/365)+' éve'}
 function tplCard(t,last,uses){
@@ -219,11 +227,11 @@ function tplCard(t,last,uses){
 }
 function vWorkout(){
   const lastOf={},uses={};for(const w of S.workouts)if(w.tplId){lastOf[w.tplId]=Math.max(lastOf[w.tplId]||0,w.start);uses[w.tplId]=(uses[w.tplId]||0)+1}
-  const used=S.templates.filter(t=>lastOf[t.id]).sort((a,b)=>lastOf[b.id]-lastOf[a.id]),fresh=S.templates.filter(t=>!lastOf[t.id]);
-  let h=backupNag()+`<div class="card"><button class="btn p block" data-click="startWorkout()">${I('plus')} Üres edzés indítása</button><div class="hint" style="text-align:center">Befejezés után a dátummal és időponttal elmentődik az Edzéseim közé – onnan átnevezhető, módosítható, törölhető.</div></div>`;
+  const used=S.templates.filter(t=>lastOf[t.id]).sort((a,b)=>lastOf[b.id]-lastOf[a.id]),fresh=S.templates.filter(t=>!lastOf[t.id]).map((t,i)=>[t,i]).sort((a,b)=>tplRank(a[0])-tplRank(b[0])||a[1]-b[1]).map(x=>x[0]);
+  let h=profileNag()+backupNag()+`<div class="card"><button class="btn p block" data-click="startWorkout()">${I('plus')} Üres edzés indítása</button><div class="hint" style="text-align:center">Befejezés után a dátummal és időponttal elmentődik az Edzéseim közé – onnan átnevezhető, módosítható, törölhető.</div></div>`;
   if(used.length){h+=`<h3 style="margin:8px 2px 10px">Edzéseim</h3>`;used.forEach(t=>h+=tplCard(t,lastOf[t.id],uses[t.id]))}
   h+=`<div class="row" style="margin:${used.length?18:6}px 2px 10px"><h3 style="margin:0">Sablonok</h3><span class="sp"></span><button class="btn sm gold" data-click="editTemplate()">${I('plus','sm')} Új sablon</button></div>`;
-  h+=`<div class="legend" style="margin:-4px 2px 10px">${Object.entries(TAGS).map(([k,[c,l]])=>`<span><span class="tag ${c}">${k}</span> ${l}</span>`).join('')}</div>`;
+  h+=`<div class="taglegend">${Object.entries(TAGS).map(([k,[c,l]])=>`<span><span class="tag ${c}">${k}</span> ${l}</span>`).join('')}</div>`;
   if(!fresh.length)h+=`<div class="card mut small">${S.templates.length?'Minden sablon használatban van – fent, az Edzéseim között találod őket.':'Még nincs sablon.'}</div>`;
   fresh.forEach(t=>h+=tplCard(t,0,0));
   const rec=wSorted().reverse().slice(0,3);
@@ -499,7 +507,7 @@ function vProfile(){
     <div class="hint">${t.tdee?`Energiaigény: Mifflin–St Jeor × aktivitás. Korrekció a célhoz: ${t.adj>0?'+':''}${t.adj} kcal (${t.adj<0?'kb. '+fmt(-t.adj*7/7700,2)+' kg/hét fogyás':t.adj>0?'kb. '+fmt(t.adj*7/7700,2)+' kg/hét gyarapodás':'súlytartás'}).`:''}
     ${t.floored?` A javaslat elérte az alsó határt (${t.floor} kcal), ennél kevesebbet nem javaslok.`:''}
     Fehérje: ${PPK[t.goal]} g/ttkg${p.height&&t.w&&t.w>27.5*(p.height/100)**2?' (referencia-testsúlyra)':''}, zsír: az energia ${Math.round(FATPCT[t.goal]*100)}%-a, szénhidrát: a maradék, rost: 14 g / 1000 kcal, de legalább 25 g (ebből a több is jó). Tájékoztató becslés, nem orvosi tanács – egészségügyi állapot esetén egyeztesd szakemberrel.</div>`;
-  return `<div class="card"><h2>${I('target','sm')} Profil és célok</h2>
+  return `<div class="card" id="profile" style="scroll-margin-top:72px"><h2>${I('target','sm')} Profil és célok</h2>
   <label>Nem</label><div class="chips" style="margin:0">${chip('sex','m','Férfi',p.sex==='m')}${chip('sex','f','Nő',p.sex==='f')}</div>
   <div class="grid3" style="align-items:end"><div><label for="pby">Születési év${p.birthYear?` · ${y-p.birthYear} év`:''}</label><input id="pby" type="number" inputmode="numeric" min="1900" max="${y}" value="${p.birthYear??''}" placeholder="pl. 1980" data-change="setProf('birthYear',this.value)"></div>
   <div><label for="pht">Magasság (cm)</label><input id="pht" type="number" inputmode="decimal" value="${p.height??''}" placeholder="pl. 178" data-change="setProf('height',this.value)"></div>
@@ -772,6 +780,7 @@ function stepsHelp(){
   <li><b>Fontos:</b> a <b>Szöveg egyesítése</b>, a <b>Név beállítása</b> és a <b>Fájl mentése</b> a legutolsó <i>Ismétlés vége</i> <b>után</b> álljon, ne a cikluson belül – különben a teljes tartalom minden körben újra kiíródik (az app az azonos sorokat egyszer veszi figyelembe, de a fájl feleslegesen nagy lesz).</li>
   <li><b>Fájl mentése</b> (Save File) → pl. iCloud Drive / Shortcuts mappa; „Felülírás, ha létezik”: be. Ha a „Kérdezze meg, hová mentse” be van kapcsolva, minden futtatáskor választhatsz helyet.</li></ol>
   <p class="small">Futtatás után: Edzésnapló → Test → <b>Fájl</b> → válaszd ki az <code class="mono">egeszseg.txt</code>-t. Mentés előtt megmutatja, hány új és hány eltérő érték van; eltérésnél választhatsz, melyik maradjon. Egy napon több mérésnél az elsőt (reggelit) veszi.</p>
+  <p class="small"><b>Csak az utolsó ~30 nap jön át?</b> Az iOS adattípusonként korlátozhatja, mennyi régi adatot láthat a Parancsok app. Nézd meg: <b>Beállítások → Adatvédelem és biztonság → Egészség → Parancsok</b>, és minden használt típusnál (Lépések, Testtömeg, Testzsír) legyen engedélyezve a <b>teljes</b> előzmény. Ha a Lépések 30 napra van állítva, a Parancsok a régebbi napokat egyszerűen nem kapja meg, hiba nélkül.</p>
   <p class="hint">Napi frissítéshez elég a dátumszűrőt „előző 30 nap”-ra állítani – az újraolvasás nem duplikál. A korábbi, csak lépésszámos (vágólapos) parancsod is működik tovább a Beillesztés gombbal. A testzsírt az app akkor is helyesen kezeli, ha a parancs törtként (0,215) adja ki. A műveletnevek iOS-verziónként kicsit eltérhetnek – ha valamit nem találsz, küldj képernyőképet.</p>
   <div class="row end"><button class="btn p" data-click="closeModal()">Rendben</button></div>`);
 }
@@ -909,11 +918,11 @@ function vStats(){
 /* ===== Összesítő trend: minden adatsor a saját átlagához mért eltérésként (z-pontszám), simítva ===== */
 let trendRng=90;const trendHide=new Set();
 const TRENDS=[
-  {k:'weight',name:'Testsúly',color:C.weight,win:7,unit:' kg',dec:1},
-  {k:'fat',name:'Testzsír',color:C.fat,win:21,unit:' %',dec:1},
-  {k:'kcal',name:'Étkezési energia',color:C.kcal,win:7,unit:' kcal',dec:0},
-  {k:'steps',name:'Lépések',color:C.steps,win:7,unit:'',dec:0},
-  {k:'wk',name:'Edzések / hét',color:C.workout,win:7,unit:'',dec:0}];
+  {k:'weight',dash:'',name:'Testsúly',color:C.weight,win:7,unit:' kg',dec:1},
+  {k:'fat',dash:'10 6',name:'Testzsír',color:C.fat,win:21,unit:' %',dec:1},
+  {k:'kcal',dash:'1 6',name:'Étkezési energia',color:C.kcal,win:7,unit:' kcal',dec:0},
+  {k:'steps',dash:'16 5 3 5',name:'Lépések',color:C.steps,win:7,unit:'',dec:0},
+  {k:'wk',dash:'5 5',name:'Edzések / hét',color:C.workout,win:7,unit:'',dec:0}];
 function trendData(n){
   const raw={weight:{},fat:{},kcal:{},steps:{},wk:{}},td=today();
   for(const b of S.body){if(b.weight!=null)raw.weight[b.date]=b.weight;if(b.fat!=null)raw.fat[b.date]=b.fat;if(b.steps!=null)raw.steps[b.date]=b.steps}
@@ -948,10 +957,10 @@ function vTrend(){
   const n=trendRng,D=trendData(n),xs=D.days.map(d=>pYmd(d).getTime());
   const series=[],chips=[];
   for(const T of TRENDS){const z=zNorm(D.sm[T.k]),off=trendHide.has(T.k);
-    chips.push(`<button class="chip ${off||!z?'':'on'}" style="${off||!z?'':`background:${T.color};border-color:${T.color};color:var(--kj-bg)`}" data-click="toggleTrend('${T.k}')" ${z?'':'disabled'} title="${z?'':'Kevés adat'}">${T.name}</button>`);
+    chips.push(`<button class="chip ${off||!z?'':'on'}" style="${off||!z?'':`background:${T.color};border-color:${T.color};color:var(--kj-bg)`}" data-click="toggleTrend('${T.k}')" ${z?'':'disabled'} title="${z?'':'Kevés adat'}"><svg width="22" height="8" aria-hidden="true" style="vertical-align:1px;margin-right:5px"><line x1="2" y1="4" x2="20" y2="4" style="stroke:currentColor;stroke-width:2.6;stroke-linecap:round${T.dash?';stroke-dasharray:'+T.dash.split(' ').map(x=>x/2).join(' '):''}"/></svg>${T.name}</button>`);
     if(!z||off)continue;
     const pts=[];let prev=false;z.forEach((v,i)=>{if(v==null){prev=false;return}pts.push({x:xs[i],y:v,gap:false,t:fmt(D.sm[T.k][i],T.dec)+T.unit});prev=true});
-    series.push({name:T.name,color:T.color,points:pts,w:2.6});}
+    series.push({name:T.name,color:T.color,points:pts,w:T.k==='kcal'?3.6:T.k==='weight'?3:2.6,dash:T.dash});}
   let h=`<div class="card"><h2>Összesítő trend</h2>
   <div class="chips" style="margin-bottom:8px">${[30,90,120].map(v=>`<button class="chip ${n===v?'on':''}" data-click="setTrendRng(${v})">${v} nap</button>`).join('')}</div>
   <div class="chips" style="margin-bottom:6px">${chips.join('')}</div>
@@ -996,7 +1005,7 @@ function lineChart(series,o={}){
   tk.forEach(t=>g+=`<line x1="${pl}" x2="${W-pr}" y1="${sy(t)}" y2="${sy(t)}" class="gl"/><text x="${pl-8}" y="${sy(t)+5}" text-anchor="end" class="ax">${o.yFmt?o.yFmt(t):Math.abs(t)>=1000?fmtShort(t):fmt(t,1)}</text>`);
   for(let i=0;i<=4;i++){const x=x0+(x1-x0)*i/4;g+=`<text x="${sx(x)}" y="${H-8}" text-anchor="${i===0?'start':i===4?'end':'middle'}" class="ax">${xLbl(x,x1-x0)}</text>`}
   series.forEach(s=>{const d=s.points.map((p,i)=>(i&&!p.gap?'L':'M')+sx(p.x).toFixed(1)+' '+sy(p.y).toFixed(1)).join('');
-    g+=`<path d="${d}" style="fill:none;stroke:${s.color};stroke-width:${s.w||2.5};stroke-linejoin:round;stroke-linecap:round"/>`;
+    g+=`<path d="${d}" style="fill:none;stroke:${s.color};stroke-width:${s.w||2.5};stroke-linejoin:round;stroke-linecap:round${s.dash?';stroke-dasharray:'+s.dash:''}"/>`;
     if(s.dots&&s.points.length<=120)s.points.forEach(p=>g+=`<circle cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="${s.points.length>50?2.2:3.4}" style="fill:${s.color}"/>`)});
   const id='c'+(chN++);CH[id]={series,sx,sy,x0,x1,W,H,pl,pr,pt,pb,unit:o.unit||''};
   const legend=series.length>1&&!o.noLegend?`<div class="legend">${series.map(s=>`<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join('')}</div>`:'';
@@ -1121,10 +1130,25 @@ async function importStrong(inp){
 }
 
 /* ===== Beállítások: gyakorlatok, adatok ===== */
+function vPrivacy(){
+  const inst=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+  const off=!!(navigator.serviceWorker&&navigator.serviceWorker.controller);
+  const li=(ic,t)=>`<li class="privli"><span class="privic">${I(ic,'sm')}</span><span>${t}</span></li>`;
+  return `<div class="card"><h2>${I('shield-check','sm')} Adatvédelem és offline működés</h2>
+  <div class="row" style="gap:6px;margin-bottom:10px"><span class="chip ${inst?'on':''}" style="cursor:default">${I(inst?'check':'smartphone','sm')} ${inst?'Főképernyős appként fut':'Böngészőben fut'}</span><span class="chip ${off?'on':''}" style="cursor:default">${I(off?'check':'wifi-off','sm')} ${off?'Offline is elérhető':'Offline mód még nem aktív'}</span></div>
+  <ul class="privlist small">
+  ${li('hard-drive','<b>Minden adat csak ezen az eszközön van.</b> Nincs regisztráció, fiók, szerver, analitika, süti vagy követés. Az edzések, testadatok, étkezések és a profil a böngésző helyi tárhelyén maradnak; az app semmit nem küld el sehova.')}
+  ${li('wifi-off','<b>Internet nélkül is működik.</b> Az első megnyitás után a teljes app a telefonon tárolódik, edzőteremben, térerő nélkül is használható. Ha van net, a frissítés automatikusan letöltődik.')}
+  ${li('square-plus','<b>Natív appként is használható.</b> iPhone-on Safariban: <b>Megosztás</b> '+I('share','sm')+' → <b>Főképernyőhöz adás</b>. Androidon Chrome-ban: menü → <b>Alkalmazás telepítése</b>. Utána saját ikonról, teljes képernyőn, címsor nélkül indul, mint egy letöltött app.')}
+  ${li('smartphone','<b>iPhone-on érdemes telepíteni.</b> A Safari a sokáig nem látogatott oldalak helyi adatait törölheti, a főképernyős appokra ez nem vonatkozik. A főképernyős app és a Safari <b>külön tárhelyet</b> használ: ami az egyikben van, az a másikban nem látszik – áthozni Mentés + Import segítségével lehet.')}
+  ${li('save','<b>A mentés a te kezedben van.</b> Mivel nincs szerver, eszközcsere vagy az app törlése esetén csak a saját mentésedből állítható vissza minden. A <b>Mentés / megosztás</b> fájlt a Drive-ra, iCloudba vagy a Fájlokba teheted.')}
+  ${li('external-link','<b>Étkezésnaplózás Claude-dal:</b> a gomb a Claude appot nyitja meg; amit ott leírsz vagy lefényképezel, az Anthropic szolgáltatásához kerül. Az Edzésnaplóba csak az kerül, amit vágólapról beillesztesz.')}
+  </ul></div>`;
+}
 function vMore(){
   const cats=[...new Set(S.exercises.map(e=>e.cat))].sort(catSort);
   const usage={};for(const w of S.workouts)for(const e of w.exercises)usage[e.exId]=(usage[e.exId]||0)+1;
-  return vProfile()+`<div class="card"><h2>Beállítások</h2>
+  return vProfile()+vPrivacy()+`<div class="card"><h2>Beállítások</h2>
   <label for="defrest">Alapértelmezett pihenőidő (mp)</label>
   <input id="defrest" type="number" min="0" max="1800" step="15" value="${S.settings.rest??90}" data-change="setDefRest(this.value)">
   <div class="hint">Pipálás után indul. Gyakorlatonként felülírható (edzés közben a gyakorlat neve alatti időre koppintva, vagy lent a listában). 0 = kikapcsolva.</div>
@@ -1146,9 +1170,13 @@ function vMore(){
   <div class="card"><h2>Mentés</h2><div class="hint" style="margin:0 0 12px">Minden adat csak ezen az eszközön, a böngésző helyi tárhelyén van – semmi nem kerül szerverre. A <b>Mentés / megosztás</b> a telefon megosztás menüjét nyitja meg: innen menthetsz Google Drive-ra, a Fájlok appba vagy iCloud Drive-ra. Visszatöltés: <b>Import</b>, majd a fájl kiválasztása (a Drive is megjelenik a fájlválasztóban, ha telepítve van).</div>
   <div class="stat" style="margin-bottom:12px"><b style="font-size:16px">${S.settings.lastBackup?fmtDate(S.settings.lastBackup)+' · '+fmtTime(S.settings.lastBackup):'Még nem volt'}</b><span>Utolsó mentés</span></div>
   <div class="row"><button class="btn p" data-click="exportData()">${I(canShareFiles()?'share':'download','sm')} Mentés / megosztás</button><button class="btn" data-click="openImport()">${I('folder-open','sm')} Import</button><input type="file" id="imp" accept=".json,application/json" style="display:none" data-change="importData(this)"></div>
-  <div class="row" style="margin-top:10px"><button class="btn" data-click="openStrong()">${I('upload','sm')} Import Strong appból (CSV)</button><input type="file" id="impStrong" accept=".csv,text/csv,text/comma-separated-values" style="display:none" data-change="importStrong(this)"></div>
+  <h3 style="margin-top:16px">Export CSV-ben</h3>
+  <div class="csvgrid">${[['workouts','Edzések','Strong-formátum'],['body','Testadatok','napi'],['steps','Lépések','napi'],['meals','Étkezés – tételek','makrók, rost'],['mealdays','Étkezés – napi','összesítő']].map(([k,l,h])=>`<button class="btn sm" data-click="exportCsv('${k}')">${I('download','sm')} <span style="text-align:left">${l}<br><small class="mut">${h}</small></span></button>`).join('')}</div>
+  <div class="hint">A magyar táblázatok pontosvesszővel és tizedesvesszővel készülnek (Excel, Numbers közvetlenül megnyitja). Az edzések a Strong app CSV-formátumában, így ide vagy más appba vissza is importálhatók.</div>
+  <h3 style="margin-top:16px">Import</h3>
+  <div class="row" style="margin-top:6px"><button class="btn" data-click="openStrong()">${I('upload','sm')} Import Strong appból (CSV)</button><input type="file" id="impStrong" accept=".csv,text/csv,text/comma-separated-values" style="display:none" data-change="importStrong(this)"></div>
   <div class="hint">Strong app → Profil → Beállítások → Adatok exportálása. Az edzéseket hozzáadja a meglévőkhöz; az újraimportált (azonos kezdési idejű) edzéseket kihagyja.</div>
-  <div class="row" style="margin-top:10px"><button class="btn" data-click="exportCSV()">${I('download','sm')} Testadatok (CSV)</button><button class="btn gold" data-click="demoData()">Mintaadatok</button><span class="sp"></span><button class="btn d" data-click="resetAll()">${I('trash-2','sm')} Minden törlése</button></div></div>
+  <div class="row" style="margin-top:10px"><button class="btn gold" data-click="demoData()">Mintaadatok</button><span class="sp"></span><button class="btn d" data-click="resetAll()">${I('trash-2','sm')} Minden törlése</button></div></div>
   <div class="card"><div class="row" style="margin-bottom:4px"><h2 style="margin:0;flex:1">Gyakorlatok <span class="mut mono" style="font-size:14px">${S.exercises.length}</span></h2><button class="btn sm gold" data-click="newExFromList()">${I('plus','sm')} Új</button></div>
   ${cats.map(c=>`<h3 style="margin-top:16px">${esc(c)}</h3>`+S.exercises.filter(e=>e.cat===c).sort(byName).map(e=>`<div class="row li"><span style="flex:1;min-width:0">${esc(e.name)}<br><span class="mut small mono">${e.rest!=null?`<span style="color:var(--kj-violet)">${I('timer','sm')} ${fmtSec(e.rest)}</span>`:`${I('timer','sm')} alap`}${usage[e.id]?` · ${usage[e.id]} edzés`:''}</span></span><button class="btn sm ico" data-click="editEx('${e.id}')" aria-label="Szerkesztés">${I('pencil','sm')}</button><button class="btn sm ico d" data-click="delEx('${e.id}')" aria-label="Törlés">${I('trash-2','sm')}</button></div>`).join('')).join('')}</div>
   <div class="hint" style="text-align:center;margin:10px 0 4px">Ikonok: Lucide (ISC) · Betűk: Instrument Sans, Bricolage Grotesque, JetBrains Mono (OFL)</div>`;
@@ -1172,7 +1200,34 @@ async function exportData(){
   const now=Date.now(),snap=JSON.stringify(Object.assign({},S,{settings:Object.assign({},S.settings,{lastBackup:now})}));
   if(await shareOrDownload('edzesnaplo-'+today()+'.json',snap,'application/json','Edzésnapló mentés')){S.settings.lastBackup=now;save();if(tab==='more'||tab==='workout')render();toast('Mentés kész')}
 }
-function exportCSV(){const c=v=>v==null?'':String(v).replace('.',',');shareOrDownload('testadatok-'+today()+'.csv','﻿datum;suly_kg;testzsir_szazalek;derek_cm;lepes\n'+bodySorted().map(b=>[b.date,c(b.weight),c(b.fat),c(b.waist),b.steps??''].join(';')).join('\n'),'text/csv','Testadatok')}
+/* ===== CSV-export =====
+   Magyar táblázatok: pontosvessző, tizedesvessző, UTF-8 BOM (Excel/Numbers helyesen nyitja).
+   Edzések: a Strong app formátumában (vessző, tizedespont, angol fejléc) – ugyanígy vissza is importálható. */
+function csvCell(v,sep){if(v==null)return'';let s=String(v);if(/^[=+\-@\t\r]/.test(s)&&isNaN(+s))s="'"+s; // képletbefecskendezés ellen
+  return /["\n\r]/.test(s)||s.includes(sep)?'"'+s.replace(/"/g,'""')+'"':s}
+function csvBuild(head,rows,sep=';'){return'﻿'+[head,...rows].map(r=>r.map(c=>csvCell(c,sep)).join(sep)).join('\r\n')}
+const hu=(v,d=1)=>v==null||v===''||isNaN(v)?'':String(Math.round(v*10**d)/10**d).replace('.',',');
+const csvName=n=>`edzesnaplo-${n}-${today()}.csv`;
+function csvWorkouts(){
+  const z=n=>String(n).padStart(2,'0'),dt=ts=>{const d=new Date(ts);return`${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`};
+  const durS=w=>{const m=Math.max(1,Math.round((w.end-w.start)/60000)),h=Math.floor(m/60);return(h?h+'h ':'')+(m%60)+'m'};
+  const rows=[];for(const w of wSorted())for(const e of w.exercises){const cd=isCardio(e.exId);e.sets.forEach((s,i)=>rows.push([dt(w.start),w.name,durS(w),exName(e.exId),i+1,cd?0:s.w,cd?0:s.r,cd?s.w||0:0,cd?(s.r||0)*60:0,'','','']))}
+  return csvBuild(['Date','Workout Name','Duration','Exercise Name','Set Order','Weight','Reps','Distance','Seconds','Notes','Workout Notes','RPE'],rows,',');
+}
+function csvBody(){const rows=bodySorted().filter(hasMeas).map(b=>{const fm=b.weight!=null&&b.fat!=null?b.weight*b.fat/100:null;return[b.date,hu(b.weight),hu(b.fat),hu(fm),fm==null?'':hu(b.weight-fm),hu(b.waist)]});
+  return csvBuild(['datum','testsuly_kg','testzsir_szazalek','zsirtomeg_kg','zsirmentes_tomeg_kg','derekboseg_cm'],rows)}
+function csvSteps(){return csvBuild(['datum','lepes'],bodySorted().filter(b=>b.steps!=null).map(b=>[b.date,b.steps]))}
+function csvMealItems(){const ord=k=>MEALS.findIndex(m=>m[0]===k);
+  const rows=[...S.meals].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:ord(a.meal)-ord(b.meal)).map(m=>[m.date,mealLbl(m.meal),m.name,m.kcal,hu(m.p),hu(m.c),hu(m.f),hu(m.fib)]);
+  return csvBuild(['datum','etkezes','megnevezes','energia_kcal','feherje_g','szenhidrat_g','zsir_g','rost_g'],rows)}
+function csvMealDays(){const by={};for(const m of S.meals)(by[m.date]=by[m.date]||[]).push(m);const t=targets();
+  const rows=Object.keys(by).sort().map(d=>{const s=sumMeals(by[d]);return[d,by[d].length,Math.round(s.kcal),hu(s.p),hu(s.c),hu(s.f),hu(s.fib),t.kcal||'',t.kcal?Math.round(s.kcal-t.kcal):'']});
+  return csvBuild(['datum','tetelek','energia_kcal','feherje_g','szenhidrat_g','zsir_g','rost_g','javasolt_kcal','elteres_kcal'],rows)}
+const CSV_EXP={workouts:['edzesek',csvWorkouts,()=>S.workouts.length],body:['testadatok',csvBody,()=>S.body.filter(hasMeas).length],steps:['lepesek',csvSteps,()=>S.body.filter(b=>b.steps!=null).length],
+  meals:['etkezes-tetelek',csvMealItems,()=>S.meals.length],mealdays:['etkezes-napi',csvMealDays,()=>new Set(S.meals.map(m=>m.date)).size]};
+async function exportCsv(k){const x=CSV_EXP[k];if(!x)return;if(!x[2]()){toast('Ehhez még nincs adat');return}
+  if(await shareOrDownload(csvName(x[0]),x[1](),'text/csv','Edzésnapló – '+x[0]))toast('CSV elkészült')}
+
 async function importData(inp){const f=inp.files[0];inp.value='';if(!f)return;
   let d;try{if(f.size>20e6)throw 0;d=sanitizeState(JSON.parse(await f.text()))}catch(e){toast('Hibás vagy nem támogatott fájl');return}
   if(!await ask(`A fájlban ${d.workouts.length} edzés és ${d.body.length} mérés van. Felülírja a jelenlegi adatokat?`,{title:'Importálás',ok:'Felülírás',danger:true}))return;
