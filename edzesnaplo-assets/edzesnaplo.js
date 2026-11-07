@@ -51,7 +51,7 @@ const DEF_TPL=[
 const TPL_VER=n=>n.startsWith('Kézisúlyzó')?4:n.startsWith('Saját testsúly')?3:n.startsWith('Kettlebell')?2:0; // melyik adatverzióban jelent meg
 const DATA_V=4;
 /* Eszköz szerinti címke: KB = kettlebell, ST = saját testsúly, ET = edzőterem (rúd, gép, kábel), KS = kézisúlyzó (otthon) */
-const BW_NAMES=['Húzódzkodás','Tolódzkodás','Hasprés','Lábemelés függésben','Hasgörgő','Lábemelés fekve','Dead bug'];
+const BW_NAMES=['Húzódzkodás (fordított fogás)','Húzódzkodás','Tolódzkodás','Hasprés','Lábemelés függésben','Hasgörgő','Lábemelés fekve','Dead bug'];
 function exEq(e){if(!e)return null;const n=e.name;if(e.cat==='Kettlebell'||/^KB /.test(n))return'KB';if(/\((rúd|gép|kábel)\)/.test(n))return'ET';
   if(e.cat==='Saját testsúly'||BW_NAMES.includes(n))return'ST';if(/kézisúlyzó|Kalapács/i.test(n))return'KS';return null}
 const TAGS={KB:['kb','Kettlebell'],ST:['st','Saját testsúly'],ET:['et','Edzőterem'],KS:['ks','Kézisúlyzó (otthon)']};
@@ -117,7 +117,7 @@ document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#dlg').
 /* ===== Eseménykezelés (CSP: nincs inline handler, nincs eval) =====
    A sablonokban data-click/input/change/submit="fn(arg,...)" áll; az argumentum csak
    literál lehet (szám, 'szöveg', null, true/false), illetve this / this.value. */
-const ACT=new Set(["addMeal", "addSet", "adjRest", "bodyFromCal", "calNav", "chooseEx", "closeModal", "copyInstr", "copyMealToday", "delBody", "delEx", "delMeal", "delTemplate", "delWorkout", "demoData", "discardWorkout", "dlgBackdrop", "dlgClose", "editBodyRow", "editEx", "editMeal", "editTemplate", "exportCSV", "exportData", "finishWorkout", "foodFromCal", "foodHelp", "foodNav", "foodToday", "formSubmit", "go", "goToday", "importData", "modalBg", "moveEx", "newExFromList", "newExercise", "openImport", "pasteMeals", "pasteSteps", "pickForActive", "pickForTpl", "renderPick", "repeatWorkout", "resetAll", "rmEx", "rmSet", "saveAsTemplate", "saveBody", "saveTpl", "selDay", "setBodyDate", "setDefRest", "setExRest", "setFoodDate", "setFoodRng", "setProf", "setRange", "setSound", "setStepGoal", "setStrEx", "setStrMetric", "setTheme", "setTplName", "setTplSets", "setTrendRng", "setVal", "setWName", "setWake", "showStr", "startWorkout", "stepsHelp", "stopRest", "testSound", "toggleSet", "toggleTheme", "toggleTrend", "toggleWaist", "tplMove", "tplRemove", "updateTplFrom"]);
+const ACT=new Set(["addMeal", "addSet", "adjRest", "bodyFromCal", "calNav", "chooseEx", "closeModal", "copyInstr", "copyMealToday", "delBody", "delEx", "delMeal", "delTemplate", "delWorkout", "demoData", "discardWorkout", "dlgBackdrop", "dlgClose", "editBodyRow", "editEx", "editMeal", "editTemplate", "exportCSV", "exportData", "finishWorkout", "foodFromCal", "foodHelp", "foodNav", "foodToday", "formSubmit", "go", "goToday", "importData", "importHealthFile", "importStrong", "modalBg", "moveEx", "newExFromList", "newExercise", "openHealthFile", "openImport", "openStrong", "pasteMeals", "pasteSteps", "pickForActive", "pickForTpl", "renderPick", "repeatWorkout", "resetAll", "rmEx", "rmSet", "saveAsTemplate", "saveBody", "saveTpl", "selDay", "setBodyDate", "setDefRest", "setExRest", "setFoodDate", "setFoodRng", "setProf", "setRange", "setSound", "setStepGoal", "setStrEx", "setStrMetric", "setTheme", "setTplName", "setTplSets", "setTrendRng", "setVal", "setWName", "setWake", "showStr", "startWorkout", "stepsHelp", "stopRest", "testSound", "toggleSet", "toggleTheme", "toggleTrend", "toggleWaist", "tplMove", "tplRemove", "updateTplFrom"]);
 function splitArgs(s){const out=[];let cur='',q=false;for(const ch of s){if(ch==="'")q=!q;if(ch===','&&!q){out.push(cur.trim());cur=''}else cur+=ch}if(cur.trim())out.push(cur.trim());return out}
 function parseArg(a,el){if(a==='this')return el;if(a==='this.value')return el.value;if(/^'[^'"\\]*'$/.test(a))return a.slice(1,-1);if(/^-?\d+(\.\d+)?$/.test(a))return +a;if(a==='null')return null;if(a==='true')return true;if(a==='false')return false;throw new Error('arg')}
 function runAct(src,el){const m=/^([A-Za-z_]\w*)\((.*)\)$/.exec((src||'').trim());if(!m||!ACT.has(m[1])||typeof window[m[1]]!=='function'){console.warn('Ismeretlen művelet:',src);return}
@@ -146,6 +146,7 @@ function bodyFromCal(d){bodyDate=d;go('body')}
 function setBodyDate(v){bodyDate=/^\d{4}-\d\d-\d\d$/.test(v)?v:today();render()}
 function setTheme(v){S.settings.theme=v;save();applyTheme();render()}
 function openImport(){$('#imp').click()}
+function openStrong(){$('#impStrong').click()}
 function setDefRest(v){S.settings.rest=Math.max(0,Math.min(1800,parseInt(v)||0));save();toast('Mentve')}
 function formSubmit(){dlgClose(readForm())}
 
@@ -692,47 +693,68 @@ function parseSteps(text){
   }
   return out;
 }
-async function pasteSteps(){
-  let text=null;
-  try{if(navigator.clipboard&&navigator.clipboard.readText)text=await navigator.clipboard.readText()}catch(e){text=null}
-  let data=parseSteps(text);
-  if(!Object.keys(data).length){ // nincs vágólap-hozzáférés vagy nem felismerhető: kézi beillesztés
-    const r=await form('Lépések beillesztése',[{id:'t',label:'Parancs kimenete',type:'textarea',placeholder:'2026-11-05;9120\n2026-11-06;4312',hint:'Nyomd hosszan a mezőt, majd Beillesztés. Soronként egy nap: dátum;lépésszám.'}],{ok:'Feldolgozás',intro:text?'A vágólap tartalmában nem találtam lépésadatot.':''});
-    if(!r)return;data=parseSteps(r.t);
-    if(!Object.keys(data).length){toast('Nem találtam felismerhető sort (dátum;lépésszám)');return}
+/* ===== Egészség app adatai: lépés, testsúly, testzsír – vágólapról vagy fájlból =====
+   Soronként: típus;dátum;érték   (típus: lepes | suly | zsir – ékezettel, angolul is)
+   A típus nélküli „dátum;érték” sor lépésszámnak számít (a korábbi, 30 napos parancs kimenete). */
+const parseDec=t=>{t=String(t??'').replace(/[\s  ]/g,'').replace(/[^\d.,]+$/,'').replace(/^[^\d]+/,'');if(!t)return null;const v=parseFloat(t.replace(',','.'));return isFinite(v)?v:null};
+function healthKind(t){t=deacc(t).trim();if(/^(lep|step)/.test(t))return'steps';if(/^(suly|testsuly|testtom|weight|body ?mass)/.test(t))return'weight';if(/^(zsir|testzsir|fat|body ?fat)/.test(t))return'fat';return null}
+function parseHealth(text){
+  const out={steps:{},weight:{},fat:{}};let lines=0;
+  for(const raw of String(text||'').split(/\r?\n/)){
+    const parts=raw.trim().split(/[;\t|]/).map(x=>x.trim());while(parts.length&&parts[parts.length-1]==='')parts.pop();if(!parts.length)continue;
+    let kind=healthKind(parts[0]),rest=kind?parts.slice(1):parts;if(!kind){if(!/^\d{4}/.test(parts[0]))continue;kind='steps'}
+    if(rest.length<2){const m=/^(.+?)[,]\s*(\S+)$/.exec(rest[0]||'');if(!m)continue;rest=[m[1],m[2]]} // „dátum,érték”
+    const d=parseDateStr(rest[0]);if(!d)continue;const valTxt=rest.slice(1).join(' ');
+    if(kind==='steps'){const v=parseStepNum(valTxt);if(v==null||v<=0||v>200000)continue;out.steps[d]=(out.steps[d]||0)+v}
+    else if(kind==='weight'){let v=parseDec(valTxt);if(v==null)continue;if(/lb/i.test(valTxt))v*=0.45359237;v=Math.round(v*10)/10;if(v<20||v>400)continue;if(out.weight[d]==null)out.weight[d]=v} // napon belül az első (reggeli) mérés
+    else{let v=parseDec(valTxt);if(v==null)continue;if(v>0&&v<=1)v*=100;/* törtként (0,215) érkezett */v=Math.round(v*10)/10;if(v<2||v>70)continue;if(out.fat[d]==null)out.fat[d]=v}
+    lines++;
   }
-  const days=Object.keys(data).sort(),chg=days.filter(d=>S.body.find(b=>b.date===d)?.steps!==data[d]);
-  const isNew=days.filter(d=>S.body.find(b=>b.date===d)?.steps==null).length;
-  if(!chg.length){toast(`${days.length} nap – nincs változás`);return}
-  if(!await ask(`<b>${days.length}</b> nap lépésszáma (${fmtDate(days[0])} – ${fmtDate(days[days.length-1])}).<br>${isNew} új, ${chg.length-isNew} frissített nap. A súly- és egyéb mérések nem változnak.`,{title:'Lépések átvétele',ok:'Mentés'}))return;
-  for(const d of chg){let b=S.body.find(x=>x.date===d);if(!b){b={date:d};S.body.push(b)}b.steps=data[d]}
-  save();render();toast(`${chg.length} nap mentve`);
+  return out;
 }
+async function applyHealth(text,source){
+  const H=parseHealth(text),n=k=>Object.keys(H[k]).length;
+  if(!n('steps')&&!n('weight')&&!n('fat'))return false;
+  const cur=d=>S.body.find(b=>b.date===d);
+  let add=0,same=0,diff=0;const tally=(k,key)=>{for(const[d,v]of Object.entries(H[k])){const c=cur(d)?.[key];if(c==null)add++;else if(Math.abs(c-v)<1e-9)same++;else diff++}};
+  tally('steps','steps');tally('weight','weight');tally('fat','fat');
+  if(!add&&!diff){toast('Nincs új adat – minden érték szerepel már');return true}
+  const all=[...new Set([...Object.keys(H.steps),...Object.keys(H.weight),...Object.keys(H.fat)])].sort();
+  const intro=`${source}: <b>${n('steps')}</b> nap lépésszám, <b>${n('weight')}</b> testsúly- és <b>${n('fat')}</b> testzsírmérés (${pYmd(all[0]).toLocaleDateString('hu-HU',{year:'numeric',month:'short',day:'numeric'})} – ${pYmd(all[all.length-1]).toLocaleDateString('hu-HU',{year:'numeric',month:'short',day:'numeric'})}).<br>${add} új érték${diff?`, ${diff} eltér a már rögzítettől`:''}${same?`, ${same} már szerepel`:''}.`;
+  let over=true;
+  if(diff){const r=await form('Egészség adatok átvétele',[{id:'mode',label:'Eltérő meglévő értékeknél',type:'select',value:'over',options:[['over','az Egészség app értéke legyen (felülírás)'],['keep','a már rögzített érték maradjon']]}],{ok:'Mentés',intro});if(!r)return true;over=r.mode==='over'}
+  else if(!await ask(intro,{title:'Egészség adatok átvétele',ok:'Mentés'}))return true;
+  let saved=0;
+  const put=(k,key)=>{for(const[d,v]of Object.entries(H[k])){let b=cur(d);if(b&&b[key]!=null&&!over)continue;if(b&&b[key]===v)continue;if(!b){b={date:d};S.body.push(b)}b[key]=v;saved++}};
+  put('steps','steps');put('weight','weight');put('fat','fat');
+  save();render();toast(`${saved} érték mentve`);return true;
+}
+async function pasteSteps(){
+  let text=null;try{if(navigator.clipboard&&navigator.clipboard.readText)text=await navigator.clipboard.readText()}catch(e){text=null}
+  if(await applyHealth(text,'Vágólap'))return;
+  const r=await form('Egészség adatok beillesztése',[{id:'t',label:'Parancs kimenete',type:'textarea',placeholder:'lepes;2026-11-05;9120\nsuly;2026-11-05 07:10;84,2\nzsir;2026-11-05 07:10;21,4',hint:'Nyomd hosszan a mezőt, majd Beillesztés. Hosszabb időszakhoz használd a Fájl gombot.'}],{ok:'Feldolgozás',intro:text?'A vágólap tartalmában nem találtam felismerhető sort.':''});
+  if(!r)return;if(!await applyHealth(r.t,'Beillesztett szöveg'))toast('Nem találtam felismerhető sort');
+}
+function openHealthFile(){$('#impHealth').click()}
+async function importHealthFile(inp){const f=inp.files[0];inp.value='';if(!f)return;let t;try{if(f.size>20e6)throw 0;t=await f.text()}catch(e){toast('A fájl nem olvasható');return}
+  if(!await applyHealth(t,esc(f.name).slice(0,60)))toast('A fájlban nem találtam lépés-, súly- vagy testzsír-sort')}
 function stepsHelp(){
-  openModal(`<h2>${I('footprints','sm')} Lépések átvétele iPhone-ról</h2>
-  <p class="small">Egyszer kell összerakni a <b>Parancsok</b> appban. A kész parancs így néz ki:</p>
-  <div class="stat small mono" style="line-height:1.7;margin-bottom:12px">Egészségügyi minták keresése<br>Megismétlés a(z) Egészségügyi minták minden elemével<br>&nbsp;&nbsp;&nbsp;↳ Szöveg: Kezdési dátum ; Elem ismétlése<br>Ismétlés vége<br>A(z) Ismétlési eredmények egyesítése<br>A(z) Egyesített szöveg másolása a vágólapra</div>
-  <p class="small"><b>Új művelet hozzáadása:</b> a szerkesztő alján lévő <b>Keresés</b> mezőbe írd be a művelet nevét, majd koppints rá. A parancs <b>végére</b> kerül. Áthelyezni úgy lehet, hogy a művelet <b>nevét</b> nyomva tartod, és a helyére húzod.</p>
+  openModal(`<h2>${I('footprints','sm')} Egészség app adatai iPhone-ról</h2>
+  <p class="small">Egy <b>Parancsok</b>-parancs kiírja a lépésszámot, a testsúlyt és a testzsír-százalékot egy szövegfájlba; itt a <b>Fájl</b> gombbal beolvasod. A fájlnak nincs méretkorlátja, így akár több év is átjön (a vágólap kb. 200 napnál elakad). Az adat nem hagyja el a telefont.</p>
+  <div class="stat small mono" style="line-height:1.7;margin-bottom:12px">Egészségügyi minták keresése (Steps)<br>Megismétlés … minden elemével<br>&nbsp;&nbsp;↳ Szöveg: lepes;Kezdési dátum;Elem ismétlése<br>&nbsp;&nbsp;↳ Hozzáadás változóhoz: Egeszseg<br>Ismétlés vége<br>… ugyanez Testtömeg (suly) és Testzsír (zsir) …<br>A(z) Egeszseg egyesítése Új sorok elválasztóval<br>Név beállítása: egeszseg.txt<br>Fájl mentése</div>
+  <p class="small"><b>Új művelet:</b> a szerkesztő alján lévő <b>Keresés</b> mezőbe írd a nevét, koppints rá – a parancs <b>végére</b> kerül; a <b>nevénél</b> fogva húzható a helyére.</p>
   <ol class="small" style="padding-left:20px;line-height:1.6">
-  <li><b>Parancsok</b> app → <b>+</b> (új parancs). Keresés: <i>egészségügyi minták</i> → <b>Egészségügyi minták keresése</b>. Beállítások:
-    <br>– Típus a következő: <b>Steps</b> (Lépések)
-    <br>– Kezdési dátum <b>benne van ebben: előző 30 nap</b>
-    <br>– Mértékegység: <b>darabszám</b>
-    <br>– Csoportosítás szempontja: <b>Nap</b>
-    <br>– Rendezés módja: <b>Kezdési dátum</b>, Rendezés: <b>Legrégebbi elöl</b>
-    <br>– Korlát: <b>ki</b></li>
-  <li>Keresés: <i>ismétlés</i> → <b>Ismétlés mindegyikkel</b>. Így jelenik meg: <i>Megismétlés a(z) Egészségügyi minták minden elemével</i>, alatta pedig az <i>Ismétlés vége</i> blokk.</li>
-  <li>Keresés: <i>szöveg</i> → <b>Szöveg</b>. Húzd a <i>Megismétlés…</i> és az <i>Ismétlés vége</i> <b>közé</b> (beljebb kerül). A szövegmezőben:
-    <ol type="a" style="padding-left:18px">
-    <li>Koppints a mezőbe. A billentyűzet fölötti sávban válaszd az <b>Elem ismétlése</b> változót.</li>
-    <li>Koppints a beszúrt címkére, és válaszd a <b>Kezdési dátum</b> tulajdonságot.</li>
-    <li>Írj utána egy pontosvesszőt: <code class="mono">;</code></li>
-    <li>Szúrd be újra az <b>Elem ismétlése</b> változót. Ez maga a lépésszám, nem kell tulajdonságot választani.</li></ol>
-    Eredmény: <code class="mono">Kezdési dátum ; Elem ismétlése</code></li>
-  <li>Keresés: <i>egyesít</i> → <b>Szöveg egyesítése</b>. Az <i>Ismétlés vége</i> alá kerüljön: <i>A(z) <b>Ismétlési eredmények</b> egyesítése <b>Új sorok</b> elválasztóval</i>.</li>
-  <li>Keresés: <i>vágólap</i> → <b>Másolás a vágólapra</b>: <i>A(z) Egyesített szöveg másolása a vágólapra</i>.</li></ol>
-  <p class="small">Futtasd a jobb alsó ▶ gombbal. Első alkalommal engedélyt kér az Egészség adatokhoz. Alul ilyen sorok jelennek meg: <code class="mono">2026. okt. 7. 16:53;10999</code>. Ezután nyisd meg az Edzésnaplót → Test → <b>Beillesztés</b>. A parancsot widgetként vagy ikonként is kiteheted a főképernyőre.</p>
-  <p class="hint">A dátum és az időpont formátuma mindegy, az app a dátumot veszi ki belőle. A 0 lépéses napokat (pl. bekapcsolt „Hiányzó kitöltése” esetén) kihagyja. Ha a vágólapról nem sikerül a beolvasás, a Beillesztés ablakba kézzel is bemásolhatod.</p>
+  <li><b>Lépések.</b> <i>Egészségügyi minták keresése</i>: Típus <b>Steps</b>, Kezdési dátum <b>benne van ebben: előző 365 nap</b> (első alkalommal akár több év), Csoportosítás szempontja: <b>Nap</b>, Rendezés: <b>Kezdési dátum, legrégebbi elöl</b>, Korlát: ki.</li>
+  <li><i>Ismétlés mindegyikkel</i>, a ciklusba (a <i>Megismétlés…</i> és az <i>Ismétlés vége</i> közé) két művelet:
+    <ol type="a" style="padding-left:18px"><li><b>Szöveg</b>: írd be: <code class="mono">lepes;</code> → <b>Elem ismétlése</b> változó → koppints rá → <b>Kezdési dátum</b> → <code class="mono">;</code> → <b>Elem ismétlése</b> (tulajdonság nélkül).</li>
+    <li><b>Hozzáadás változóhoz</b> (Add to Variable): a Szöveget add hozzá egy új változóhoz, neve: <code class="mono">Egeszseg</code>.</li></ol></li>
+  <li><b>Testsúly.</b> Újra <i>Egészségügyi minták keresése</i>: Típus <b>Testtömeg</b> (Body Mass), ugyanaz a dátumszűrő, Mértékegység: <b>kg</b>, Csoportosítás: <b>nincs</b>, Rendezés: legrégebbi elöl. Utána ugyanaz a ciklus, csak a szöveg eleje <code class="mono">suly;</code>, és ugyanahhoz az <code class="mono">Egeszseg</code> változóhoz add hozzá.</li>
+  <li><b>Testzsír.</b> Ugyanígy, Típus <b>Testzsír-százalék</b> (Body Fat Percentage), a szöveg eleje <code class="mono">zsir;</code>.</li>
+  <li>A ciklusok után: <b>Szöveg egyesítése</b> → bemenet: <b>Egeszseg</b> változó, elválasztó: <b>Új sorok</b>.</li>
+  <li><b>Név beállítása</b> (Set Name) → az Egyesített szöveg neve: <code class="mono">egeszseg.txt</code></li>
+  <li><b>Fájl mentése</b> (Save File) → pl. iCloud Drive / Shortcuts mappa; „Felülírás, ha létezik”: be. Ha a „Kérdezze meg, hová mentse” be van kapcsolva, minden futtatáskor választhatsz helyet.</li></ol>
+  <p class="small">Futtatás után: Edzésnapló → Test → <b>Fájl</b> → válaszd ki az <code class="mono">egeszseg.txt</code>-t. Mentés előtt megmutatja, hány új és hány eltérő érték van; eltérésnél választhatsz, melyik maradjon. Egy napon több mérésnél az elsőt (reggelit) veszi.</p>
+  <p class="hint">Napi frissítéshez elég a dátumszűrőt „előző 30 nap”-ra állítani – az újraolvasás nem duplikál. A korábbi, csak lépésszámos (vágólapos) parancsod is működik tovább a Beillesztés gombbal. A testzsírt az app akkor is helyesen kezeli, ha a parancs törtként (0,215) adja ki. A műveletnevek iOS-verziónként kicsit eltérhetnek – ha valamit nem találsz, küldj képernyőképet.</p>
   <div class="row end"><button class="btn p" data-click="closeModal()">Rendben</button></div>`);
 }
 
@@ -755,8 +777,9 @@ function vBody(){
   <div><label for="bwa">Derék (cm)</label><input id="bwa" type="number" step="0.5" inputmode="decimal" value="${e.waist??''}"></div></div>
   <label for="bst">Lépésszám</label><input id="bst" type="number" step="1" min="0" inputmode="numeric" value="${e.steps??''}" placeholder="pl. 8500">
   <div class="row" style="margin-top:14px">${e.date?`<button class="btn d" data-click="delBody('${e.date}')">${I('trash-2','sm')} Törlés</button>`:''}<span class="sp"></span><button class="btn p" data-click="saveBody()">${I('save','sm')} ${e.date?'Frissítés':'Mentés'}</button></div></div>
-  <div class="card"><div class="row" style="flex-wrap:nowrap"><h2 style="flex:1;margin:0">${I('footprints','sm')} Lépések</h2><button class="btn sm ico" data-click="stepsHelp()" aria-label="Súgó: lépések átvétele">${I('circle-help','sm')}</button><button class="btn sm p" data-click="pasteSteps()">${I('clipboard-paste','sm')} Beillesztés</button></div>
-  <div class="hint" style="margin:6px 0 10px">Az iPhone Egészség appjából a Parancsok appal másolhatod át (leírás a ? gomb alatt), vagy írd be kézzel fent.</div>
+  <div class="card"><div class="row" style="flex-wrap:nowrap"><h2 style="flex:1;margin:0">${I('footprints','sm')} Egészség app</h2><button class="btn sm ico" data-click="stepsHelp()" aria-label="Súgó: lépések átvétele">${I('circle-help','sm')}</button></div>
+  <div class="row" style="margin-top:10px;flex-wrap:nowrap"><button class="btn sm p" style="flex:1" data-click="openHealthFile()">${I('folder-open','sm')} Fájl</button><button class="btn sm" style="flex:1" data-click="pasteSteps()">${I('clipboard-paste','sm')} Beillesztés</button><input type="file" id="impHealth" accept=".txt,.csv,text/plain,text/csv" style="display:none" data-change="importHealthFile(this)"></div>
+  <div class="hint" style="margin:6px 0 10px">Lépésszám, testsúly és testzsír az iPhone Egészség appjából, Parancsok segítségével (leírás a ? gomb alatt) – vagy rögzítsd kézzel fent.</div>
   <div class="grid3">${(()=>{const ss=series('steps'),t=S.body.find(b=>b.date===today())?.steps;return stat('Ma',t!=null?fmt(t,0):null)+stat('7 napos átlag',ss.length?fmt(avgLast(ss,7),0):null)+stat('30 napos átlag',ss.length?fmt(avgLast(ss,30),0):null)})()}</div></div>
   <h3 style="margin:16px 2px 10px">Testsúly</h3>
   <div class="grid3" style="margin-bottom:8px">${stat('Utolsó súly',lastW?fmt(lastW.weight)+' kg':null)}${stat('7 napos átlag',ws.length?fmt(avgLast(ws,7))+' kg':null)}${stat('Δ 30 nap',d30==null?null:sgn(d30)+' kg',dcls(d30))}</div>
@@ -978,6 +1001,96 @@ function barChart(labels,vals,o={}){
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
 }
 
+/* ===== Import a Strong appból (CSV export) =====
+   Oszlopok név szerint: Date, Workout Name, Duration, Exercise Name, Set Order, Weight, Reps, Distance, Seconds, (Weight Unit), RPE.
+   Elválasztó: vessző vagy pontosvessző. A gyakorlatneveket a meglévő magyar gyakorlatokhoz rendeli, ismeretlennél újat hoz létre. */
+const STRONG_MAP={
+'Pull Up':'Húzódzkodás','Pull Up (Assisted)':'Húzódzkodás','Chin Up':['Húzódzkodás (fordított fogás)','Hát'],'Push Up':'Fekvőtámasz',
+'Lateral Raise (Dumbbell)':'Oldalemelés (kézisúlyzó)','Hammer Curl (Dumbbell)':'Kalapács hajlítás','Bent Over Row (Dumbbell)':'Evezés (kézisúlyzó)',
+'Bent Over Row (Barbell)':'Evezés (rúd)','Floor Press (Barbell)':['Padlón nyomás (rúd)','Mell'],'Floor Press (Dumbbell)':'Padlón nyomás (kézisúlyzó)',
+'Concentration Curl (Dumbbell)':'Koncentrált bicepszhajlítás (kézisúlyzó)','Squat (Dumbbell)':['Guggolás (kézisúlyzó)','Láb'],'Squat (Barbell)':'Guggolás (rúd)',
+'Squat (Bodyweight)':'Guggolás (saját testsúly)','Bulgarian Split Squat':'Bolgár guggolás (kézisúlyzó)','Goblet Squat (Kettlebell)':'KB goblet guggolás',
+'Goblet Squat (Dumbbell)':'Goblet guggolás (kézisúlyzó)','Romanian Deadlift (Dumbbell)':'Román felhúzás (kézisúlyzó)','Romanian Deadlift (Barbell)':'Román felhúzás (rúd)',
+'Deadlift (Barbell)':'Felhúzás (rúd)','Lunge (Dumbbell)':'Kitörés (kézisúlyzó)','Lunge (Bodyweight)':'Kitörés (saját testsúly)',
+'Upright Row (Barbell)':['Állig húzás (rúd)','Váll'],'Upright Row (Dumbbell)':['Állig húzás (kézisúlyzó)','Váll'],
+'Bicep Curl (Dumbbell)':'Bicepsz hajlítás (kézisúlyzó)','Bicep Curl (Barbell)':'Bicepsz hajlítás (rúd)','Incline Bench Press (Dumbbell)':'Ferde fekvenyomás (kézisúlyzó)',
+'Bench Press (Barbell)':'Fekvenyomás (rúd)','Bench Press (Dumbbell)':'Fekvenyomás (kézisúlyzó)','Overhead Press (Barbell)':'Katonai nyomás (rúd)',
+'Shoulder Press (Dumbbell)':'Vállból nyomás (kézisúlyzó)','Arnold Press (Dumbbell)':['Arnold-nyomás (kézisúlyzó)','Váll'],'Front Raise (Dumbbell)':['Előreemelés (kézisúlyzó)','Váll'],
+'Incline Curl (Dumbbell)':['Ferde pados bicepszhajlítás (kézisúlyzó)','Kar'],'Triceps Extension (Barbell)':['Tricepsz nyújtás (rúd)','Kar'],
+'Triceps Extension (Dumbbell)':['Tricepsz nyújtás (kézisúlyzó)','Kar'],'Triceps Pushdown (Cable - Straight Bar)':'Tricepsz letolás (kábel)',
+'Standing Calf Raise (Dumbbell)':['Vádliemelés állva (kézisúlyzó)','Láb'],'Calf Press on Leg Press':'Vádliemelés (gép)','Leg Press':'Lábtolás (gép)',
+'Lat Pulldown (Cable)':'Mellhez húzás (kábel)','Seated Row (Cable)':'Evezés ülve (kábel)','Face Pull (Cable)':'Face pull (kábel)','Chest Fly (Cable)':'Tárogatás (kábel)',
+'Hip Thrust (Barbell)':'Csípőemelés (rúd)','Glute Bridge':'Csípőemelés (saját testsúly)','Leg Extension (Machine)':'Lábnyújtás (gép)','Lying Leg Curl (Machine)':'Lábhajlítás (gép)',
+'Plank':'Plank (mp)','Crunch':'Hasprés','Hanging Leg Raise':'Lábemelés függésben','Ab Wheel':'Hasgörgő','Burpee':'Burpee','Mountain Climber':'Hegymászó',
+'Kettlebell Swing':'KB swing (kétkezes)','Kettlebell Turkish Get Up':'KB török felállás (get-up)','Dips':'Tolódzkodás','Inverted Row':'Ausztrál húzódzkodás'};
+const STRONG_GENERIC=['Workout','Morning Workout','Afternoon Workout','Evening Workout','Night Workout','Extra Workout','Quick Workout','New Workout'];
+function csvParse(text){
+  text=text.replace(/^﻿/,'');const first=text.slice(0,text.indexOf('\n')),sep=(first.match(/;/g)||[]).length>(first.match(/,/g)||[]).length?';':',';
+  const rows=[];let row=[],cur='',q=false;
+  for(let i=0;i<text.length;i++){const ch=text[i];
+    if(q){if(ch==='"'){if(text[i+1]==='"'){cur+='"';i++}else q=false}else cur+=ch}
+    else if(ch==='"')q=true;else if(ch===sep){row.push(cur);cur=''}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&text[i+1]==='\n')i++;row.push(cur);rows.push(row);row=[];cur=''}else cur+=ch}
+  if(cur||row.length){row.push(cur);rows.push(row)}
+  return rows.filter(r=>r.some(c=>c.trim()!==''));
+}
+const strongDur=t=>{const h=/(\d+)\s*h/.exec(t||''),m=/(\d+)\s*m/.exec(t||'');return((h?+h[1]*60:0)+(m?+m[1]:0))*60000};
+function parseStrong(text,lbs){
+  const rows=csvParse(text);if(rows.length<2)throw new Error('üres');
+  const hd=rows[0].map(h=>h.trim().toLowerCase()),col=n=>hd.indexOf(n);
+  const C={date:col('date'),name:col('workout name'),dur:col('duration'),ex:col('exercise name'),ord:col('set order'),w:col('weight'),r:col('reps'),sec:col('seconds'),unit:col('weight unit')};
+  if(C.date<0||C.ex<0||C.w<0||C.r<0)throw new Error('nem Strong-formátum');
+  const num=v=>{const x=parseFloat(String(v??'').replace(',','.'));return isFinite(x)?x:0};
+  const wk=new Map();let sets=0,skipped=0;
+  for(const r of rows.slice(1)){
+    const m=/^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?/.exec((r[C.date]||'').trim());if(!m){skipped++;continue}
+    const ord=(r[C.ord]||'').trim();if(/rest/i.test(ord)){continue} // „Rest Timer” sorok
+    const exName=(r[C.ex]||'').trim().slice(0,100);if(!exName){skipped++;continue}
+    let w=num(r[C.w]),reps=Math.round(num(r[C.r]));const sec=Math.round(num(r[C.sec]));
+    if(!reps&&sec)reps=sec; // időre végzett gyakorlat: a másodperc kerül az ismétlés helyére
+    if(!reps){skipped++;continue}
+    const unitLbs=C.unit>=0?/lb/i.test(r[C.unit]||''):lbs;if(unitLbs)w=Math.round(w*0.45359237*2)/2;
+    const key=r[C.date].trim()+'|'+(r[C.name]||'');
+    if(!wk.has(key)){const start=new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+(m[6]||0)).getTime();
+      wk.set(key,{name:((r[C.name]||'').trim()||'Edzés').slice(0,100),start,end:start+(strongDur(r[C.dur])||3600000),ex:new Map()})}
+    const W=wk.get(key);if(!W.ex.has(exName))W.ex.set(exName,[]);W.ex.get(exName).push({w:Math.max(0,Math.min(2000,w)),r:Math.min(10000,reps)});sets++;
+  }
+  return{workouts:[...wk.values()].sort((a,b)=>a.start-b.start),sets,skipped};
+}
+function strongExId(name,created){
+  const target=STRONG_MAP[name],hu=Array.isArray(target)?target[0]:target,cat=Array.isArray(target)?target[1]:null;
+  const find=n=>S.exercises.find(e=>e.name.toLowerCase()===n.toLowerCase());
+  let e=hu?find(hu):find(name);
+  if(!e){const nm=hu||name,eq=/\((Barbell|Machine|Cable)/i.test(name)?'Egyéb':'Egyéb';e={id:uid(),name:nm,cat:cat||(hu?'Egyéb':eq)};S.exercises.push(e);created.add(nm)}
+  return e.id;
+}
+async function importStrong(inp){
+  const f=inp.files[0];inp.value='';if(!f)return;
+  let text;try{if(f.size>20e6)throw 0;text=await f.text()}catch(e){toast('A fájl nem olvasható');return}
+  let P;try{P=parseStrong(text,false)}catch(e){toast('Ez nem Strong CSV-exportnak tűnik');return}
+  if(!P.workouts.length){toast('Nem találtam edzést a fájlban');return}
+  const have=new Set(S.workouts.map(w=>Math.floor(w.start/60000))),fresh=P.workouts.filter(w=>!have.has(Math.floor(w.start/60000)));
+  const exNames=[...new Set(P.workouts.flatMap(w=>[...w.ex.keys()]))],known=exNames.filter(n=>{const t=STRONG_MAP[n],hu=(Array.isArray(t)?t[0]:t)||n;return S.exercises.some(e=>e.name.toLowerCase()===hu.toLowerCase())}).length;
+  if(!fresh.length){toast(`Mind a(z) ${P.workouts.length} edzés szerepel már – nincs mit importálni`);return}
+  const fd=ts=>new Date(ts).toLocaleDateString('hu-HU',{year:'numeric',month:'short',day:'numeric'});
+  const hasUnitCol=/weight unit/i.test(text.slice(0,300));
+  const r=await form('Import a Strong appból',hasUnitCol?[]:[{id:'unit',label:'A súlyok mértékegysége az exportban',type:'select',value:'kg',options:[['kg','kg'],['lbs','font (lbs) – átváltom kg-ra']]}],
+    {ok:'Importálás',intro:`<b>${P.workouts.length}</b> edzés (${fd(P.workouts[0].start)} – ${fd(P.workouts[P.workouts.length-1].start)}), <b>${P.sets}</b> sorozat, <b>${exNames.length}</b> gyakorlat – ebből ${known} a meglévőkhöz rendelve, ${exNames.length-known} új lesz.${fresh.length<P.workouts.length?`<br>${P.workouts.length-fresh.length} edzés már szerepel (azonos kezdési idő), ezeket kihagyom.`:''}${P.skipped?`<br>${P.skipped} üres sort (0 ismétlés) kihagyok.`:''}`});
+  if(!r)return;
+  if(r.unit==='lbs')P=parseStrong(text,true);
+  const keep=new Set(fresh.map(w=>w.start)),created=new Set(),cnt={};
+  const list=P.workouts.filter(w=>keep.has(w.start));list.forEach(w=>{if(!STRONG_GENERIC.includes(w.name))cnt[w.name]=(cnt[w.name]||0)+1});
+  const out=list.map(w=>({id:uid(),name:w.name,start:w.start,end:w.end,tplId:null,exercises:[...w.ex.entries()].map(([n,sets])=>({exId:strongExId(n,created),sets}))}));
+  // sablon a legalább 3-szor használt, nem általános nevű edzésekből (a legutóbbi felépítéssel); azonos nevű meglévő sablonhoz kapcsol
+  let tplNew=0;
+  for(const[name,c]of Object.entries(cnt)){if(c<3)continue;const last=out.filter(w=>w.name===name).at(-1);
+    let t=S.templates.find(x=>x.name===name);if(!t){t={id:uid(),name,items:last.exercises.map(e=>({exId:e.exId,sets:e.sets.length}))};S.templates.push(t);tplNew++}
+    out.forEach(w=>{if(w.name===name)w.tplId=t.id})}
+  S.workouts.push(...out);
+  for(const w of wSorted())w.prs=detectPRs(w); // rekordok újraszámolása időrendben
+  save();go('workout');
+  dlg(`<h2>${I('check','sm')} Import kész</h2><p><b>${out.length}</b> edzés és <b>${out.reduce((a,w)=>a+w.exercises.reduce((b,e)=>b+e.sets.length,0),0)}</b> sorozat importálva.${tplNew?`<br>${tplNew} sablon jött létre a gyakran használt edzésnevekből (az Edzéseim között).`:''}${created.size?`<br>Új gyakorlatok: ${[...created].map(esc).join(', ')}.`:''}</p><p class="hint">Az új gyakorlatokat a Beállítások → Gyakorlatok listában átnevezheted, kategorizálhatod.</p><div class="row end"><button class="btn p" data-click="dlgBackdrop()">Rendben</button></div>`,null);
+}
+
 /* ===== Beállítások: gyakorlatok, adatok ===== */
 function vMore(){
   const cats=[...new Set(S.exercises.map(e=>e.cat))].sort(catSort);
@@ -1001,6 +1114,8 @@ function vMore(){
   <div class="card"><h2>Mentés</h2><div class="hint" style="margin:0 0 12px">Minden adat csak ezen az eszközön, a böngésző helyi tárhelyén van – semmi nem kerül szerverre. A <b>Mentés / megosztás</b> a telefon megosztás menüjét nyitja meg: innen menthetsz Google Drive-ra, a Fájlok appba vagy iCloud Drive-ra. Visszatöltés: <b>Import</b>, majd a fájl kiválasztása (a Drive is megjelenik a fájlválasztóban, ha telepítve van).</div>
   <div class="stat" style="margin-bottom:12px"><b style="font-size:16px">${S.settings.lastBackup?fmtDate(S.settings.lastBackup)+' · '+fmtTime(S.settings.lastBackup):'Még nem volt'}</b><span>Utolsó mentés</span></div>
   <div class="row"><button class="btn p" data-click="exportData()">${I(canShareFiles()?'share':'download','sm')} Mentés / megosztás</button><button class="btn" data-click="openImport()">${I('folder-open','sm')} Import</button><input type="file" id="imp" accept=".json,application/json" style="display:none" data-change="importData(this)"></div>
+  <div class="row" style="margin-top:10px"><button class="btn" data-click="openStrong()">${I('upload','sm')} Import Strong appból (CSV)</button><input type="file" id="impStrong" accept=".csv,text/csv,text/comma-separated-values" style="display:none" data-change="importStrong(this)"></div>
+  <div class="hint">Strong app → Profil → Beállítások → Adatok exportálása. Az edzéseket hozzáadja a meglévőkhöz; az újraimportált (azonos kezdési idejű) edzéseket kihagyja.</div>
   <div class="row" style="margin-top:10px"><button class="btn" data-click="exportCSV()">${I('download','sm')} Testadatok (CSV)</button><button class="btn gold" data-click="demoData()">Mintaadatok</button><span class="sp"></span><button class="btn d" data-click="resetAll()">${I('trash-2','sm')} Minden törlése</button></div></div>
   <div class="card"><div class="row" style="margin-bottom:4px"><h2 style="margin:0;flex:1">Gyakorlatok <span class="mut mono" style="font-size:14px">${S.exercises.length}</span></h2><button class="btn sm gold" data-click="newExFromList()">${I('plus','sm')} Új</button></div>
   ${cats.map(c=>`<h3 style="margin-top:16px">${esc(c)}</h3>`+S.exercises.filter(e=>e.cat===c).sort(byName).map(e=>`<div class="row li"><span style="flex:1;min-width:0">${esc(e.name)}<br><span class="mut small mono">${e.rest!=null?`<span style="color:var(--kj-violet)">${I('timer','sm')} ${fmtSec(e.rest)}</span>`:`${I('timer','sm')} alap`}${usage[e.id]?` · ${usage[e.id]} edzés`:''}</span></span><button class="btn sm ico" data-click="editEx('${e.id}')" aria-label="Szerkesztés">${I('pencil','sm')}</button><button class="btn sm ico d" data-click="delEx('${e.id}')" aria-label="Törlés">${I('trash-2','sm')}</button></div>`).join('')).join('')}</div>
