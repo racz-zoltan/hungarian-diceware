@@ -1019,15 +1019,15 @@ function vTrend(){
   const n=trendRng,D=trendData(n),xs=D.days.map(d=>pYmd(d).getTime());
   const series=[],chips=[];
   for(const T of TRENDS){const z=zNorm(D.sm[T.k]),off=trendHide.has(T.k);
-    chips.push(`<button class="chip ${off||!z?'':'on'}" style="${off||!z?'':`background:${T.color};border-color:${T.color};color:var(--kj-bg)`}" data-click="toggleTrend('${T.k}')" ${z?'':'disabled'} title="${z?'':'Kevés adat'}"><svg width="22" height="8" aria-hidden="true" style="vertical-align:1px;margin-right:5px"><line x1="2" y1="4" x2="20" y2="4" style="stroke:currentColor;stroke-width:2.6;stroke-linecap:round${T.dash?';stroke-dasharray:'+T.dash.split(' ').map(x=>x/2).join(' '):''}"/></svg>${T.name}</button>`);
+    chips.push(`<button class="chip tchip ${off||!z?'off':''}" style="${off||!z?'':`color:${T.color};border-color:${T.color}`}" aria-pressed="${!(off||!z)}" data-click="toggleTrend('${T.k}')" ${z?'':'disabled'} title="${z?'':'Kevés adat'}"><svg width="22" height="8" aria-hidden="true" style="vertical-align:1px;margin-right:5px"><line x1="2" y1="4" x2="20" y2="4" style="stroke:currentColor;stroke-width:2.6;stroke-linecap:round${T.dash?';stroke-dasharray:'+T.dash.split(' ').map(x=>x/2).join(' '):''}"/></svg>${T.name}</button>`);
     if(!z||off)continue;
     const pts=[];let prev=false;z.forEach((v,i)=>{if(v==null){prev=false;return}pts.push({x:xs[i],y:v,gap:false,t:fmt(D.sm[T.k][i],T.dec)+T.unit});prev=true});
     series.push({name:T.name,color:T.color,points:pts,w:T.k==='kcal'?3.6:T.k==='weight'?3:2.6,dash:T.dash});}
   let h=`<div class="card"><h2>Összesítő trend</h2>
   <div class="chips" style="margin-bottom:8px">${[30,90,120].map(v=>`<button class="chip ${n===v?'on':''}" data-click="setTrendRng(${v})">${v} nap</button>`).join('')}</div>
-  <div class="chips" style="margin-bottom:6px">${chips.join('')}</div>
   ${lineChart(series,{h:250,yMin:-2.5,yMax:2.5,ticks:[-2,-1,0,1,2],yFmt:t=>t===0?'átl.':(t>0?'+':'−')+Math.abs(t),noLegend:true})}
-  <div class="hint">Minden vonal a saját átlagához képest mutatja a le-fel mozgást (0 = az időszak átlaga, ±1 = egy szórásnyi eltérés), simítva: testsúly, étkezés, lépés 7 napos, testzsír 21 napos átlag, edzés és volumen: az előző 7 nap edzésszáma, illetve megmozgatott összsúlya. Mérés nélküli napokon a vonal a következő értékig összeköt. Így a különböző mértékegységű adatok egy grafikonon összevethetők; a pontos értéket koppintásra mutatja. A gombokkal ki-be kapcsolhatod az adatsorokat.</div>`;
+  <div class="hint">Minden vonal a saját átlagához képest mutatja a le-fel mozgást (0 = az időszak átlaga, ±1 = egy szórásnyi eltérés), simítva: testsúly, étkezés, lépés 7 napos, testzsír 21 napos átlag, edzés és volumen: az előző 7 nap edzésszáma, illetve megmozgatott összsúlya. Mérés nélküli napokon a vonal a következő értékig összeköt. Így a különböző mértékegységű adatok egy grafikonon összevethetők; a pontos értéket koppintásra mutatja. Az alábbi gombokkal ki-be kapcsolhatod az adatsorokat.</div>
+  <div class="chips" style="margin-top:10px">${chips.join('')}</div>`;
   // összefüggések
   const drv=[['kcal','Étkezési energia (7 napos átlag)'],['steps','Lépések (7 napos átlag)'],['wk','Edzések az előző 7 napban'],['vol','Edzésvolumen az előző 7 napban']];
   const rows=drv.map(([k,l])=>({k,l,w:pearson(D.sm[k],D.wch),f:pearson(D.sm[k],D.fch)}));
