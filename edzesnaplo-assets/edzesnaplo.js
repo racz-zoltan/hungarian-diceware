@@ -377,8 +377,13 @@ let AC=null;
 function audioCtx(){if(!AC){const K=window.AudioContext||window.webkitAudioContext;if(!K)return null;try{AC=new K()}catch(e){return null}}return AC}
 /* Csak érintésre (felhasználói gesztusban) fut: ha iOS-en a hang „megszakított” állapotban ragadt, új hangkörnyezetet nyit.
    A háttérbe tételt és a visszatérést szándékosan nem befolyásolja. */
-function unlockAudio(){let ac=audioCtx();if(!ac||ac.state==='running')return;
-  if(ac.state==='interrupted'||ac.state==='closed'){try{ac.close()}catch(e){}AC=null;ac=audioCtx();if(!ac)return}
+/* iOS: háttérbe tétel után a hangkörnyezet „running”-nak mutathatja magát, mégis néma marad (és ilyenkor a következő
+   háttérbe tételnél az időzítő sem fut). Ezért visszatérés után az első érintés mindig friss hangkörnyezetet nyit. */
+let acStale=false;
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&AC)acStale=true});
+function unlockAudio(){let ac=audioCtx();if(!ac)return;
+  if(acStale||ac.state==='interrupted'||ac.state==='closed'){acStale=false;try{ac.close()}catch(e){}AC=null;ac=audioCtx();if(!ac)return}
+  if(ac.state==='running')return;
   ac.resume().catch(()=>{try{AC.close()}catch(e){}AC=null});try{const b=ac.createBuffer(1,1,22050),src=ac.createBufferSource();src.buffer=b;src.connect(ac.destination);src.start(0)}catch(e){}}
 ['pointerdown','touchend','keydown'].forEach(t=>document.addEventListener(t,unlockAudio,{passive:true,capture:true}));
 const VOL=[0,.35,.7,1];
@@ -392,7 +397,7 @@ function chime(level){
 /* Visszajelző hangok (koppintás, gépelés, kész sorozat) és rezgés – a pihenő-hangjelzéstől függetlenül kapcsolhatók. */
 function sfx(kind){
   const st=S.settings,on={tap:st.uiSound,type:st.typeSound,done:st.doneSound}[kind];if(on===false)return;
-  const ac=audioCtx();if(!ac)return;if(ac.state!=='running'){ac.resume().catch(()=>{});return}
+  const ac=audioCtx();if(!ac)return;if(ac.state!=='running')ac.resume().catch(()=>{});
   const t0=ac.currentTime+.005,out=ac.createGain();out.connect(ac.destination);
   const tone=(f,dt,len,amp,type='sine')=>{const o=ac.createOscillator(),g=ac.createGain(),t=t0+dt;o.type=type;o.frequency.value=f;o.connect(g);g.connect(out);
     g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(amp,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+len);o.start(t);o.stop(t+len+.02)};
