@@ -7,8 +7,8 @@
   "start_url": "/edzesnaplo.html",
   "scope": "/edzesnaplo.html",
   "display": "standalone",
-  "background_color": "#060a17",
-  "theme_color": "#060a17",
+  "background_color": "#0a0f1e",
+  "theme_color": "#0a0f1e",
   "categories": [
     "health",
     "fitness"
