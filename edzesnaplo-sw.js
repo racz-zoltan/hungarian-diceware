@@ -1,5 +1,5 @@
 /* Edzésnapló service worker – csak az edzesnaplo.html-t és saját fájljait kezeli (scope: /edzesnaplo.html). */
-const CACHE='edzesnaplo-4852d9f629d3';
+const CACHE='edzesnaplo-2316e78a0493';
 const CORE=["edzesnaplo.html", "edzesnaplo.webmanifest", "edzesnaplo-assets/apple-touch-icon.png", "edzesnaplo-assets/edzesnaplo.css", "edzesnaplo-assets/edzesnaplo.js", "edzesnaplo-assets/favicon.svg", "edzesnaplo-assets/icon-192.png", "edzesnaplo-assets/icon-32.png", "edzesnaplo-assets/icon-512.png", "edzesnaplo-assets/icon-maskable-512.png"];
 const FONTS=["fonts/instrument-sans-400.woff2", "fonts/instrument-sans-400-hu.woff2", "fonts/instrument-sans-500.woff2", "fonts/instrument-sans-500-hu.woff2", "fonts/instrument-sans-600.woff2", "fonts/instrument-sans-600-hu.woff2", "fonts/instrument-sans-700.woff2", "fonts/instrument-sans-700-hu.woff2", "fonts/bricolage-grotesque-800.woff2", "fonts/bricolage-grotesque-800-hu.woff2", "fonts/jetbrains-mono-500.woff2", "fonts/jetbrains-mono-500-hu.woff2", "fonts/jetbrains-mono-700.woff2", "fonts/jetbrains-mono-700-hu.woff2"];
 self.addEventListener('install',e=>e.waitUntil((async()=>{
