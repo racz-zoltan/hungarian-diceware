@@ -31,7 +31,7 @@
   --kj-violet:#7c3aed;--kj-violet-soft:rgba(124,58,237,.12);
   --kj-green:#047857;--kj-green-line:#059669;--kj-green-soft:rgba(16,185,129,.14);--kj-green-fill:#34d399;--kj-green-ink:#022c22;
   --kj-track:rgba(15,23,42,.10);--kj-focus:rgba(34,211,238,.35);--kj-scrim:rgba(15,23,42,.45);
-  --c-weight:#65a30d;--c-fat:#ea580c;--c-waist:#0d9488;--c-steps:#2e6b45;--c-workout:#e11d48;--c-kcal:#2563eb;--c-protein:#7c3aed;--c-carb:#d97706;--c-fatm:#0891b2;--c-fiber:#4f46e5;--c-cardio:#db2777;
+  --c-weight:#65a30d;--c-fat:#ea580c;--c-waist:#0d9488;--c-steps:#2e6b45;--c-workout:#e11d48;--c-kcal:#2563eb;--c-protein:#7c3aed;--c-carb:#d97706;--c-fatm:#0891b2;--c-fiber:#4f46e5;--c-cardio:#db2777;--c-volume:#8b5a2b;
 }
 [data-theme="dark"]{
   --kj-bg:#060a17;
@@ -48,7 +48,7 @@
   --kj-violet:#a78bfa;--kj-violet-soft:rgba(167,139,250,.14);
   --kj-green:#6ee7b7;--kj-green-line:#34d399;--kj-green-soft:rgba(16,185,129,.16);
   --kj-track:rgba(148,163,184,.18);--kj-focus:rgba(34,211,238,.30);--kj-scrim:rgba(2,6,23,.7);
-  --c-weight:#a3e635;--c-fat:#fb923c;--c-waist:#2dd4bf;--c-steps:#5a9f72;--c-workout:#fb7185;--c-kcal:#60a5fa;--c-protein:#a78bfa;--c-carb:#fbbf24;--c-fatm:#22d3ee;--c-fiber:#818cf8;--c-cardio:#f472b6;
+  --c-weight:#a3e635;--c-fat:#fb923c;--c-waist:#2dd4bf;--c-steps:#5a9f72;--c-workout:#fb7185;--c-kcal:#60a5fa;--c-protein:#a78bfa;--c-carb:#fbbf24;--c-fatm:#22d3ee;--c-fiber:#818cf8;--c-cardio:#f472b6;--c-volume:#c49a6c;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{background:var(--kj-bg);color-scheme:light}

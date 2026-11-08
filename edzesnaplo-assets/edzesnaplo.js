@@ -5,7 +5,7 @@ const DAY=864e5;
 const C={blue:'var(--kj-blue-line)',gold:'var(--kj-gold-line)',violet:'var(--kj-violet)',green:'var(--kj-green-line)',red:'var(--kj-red-line)',
   // adattípusok színei – mindenhol ugyanazt jelentik (naptár, statisztika, étkezés)
   weight:'var(--c-weight)',fat:'var(--c-fat)',waist:'var(--c-waist)',steps:'var(--c-steps)',workout:'var(--c-workout)',kcal:'var(--c-kcal)',
-  protein:'var(--c-protein)',carb:'var(--c-carb)',fatm:'var(--c-fatm)',fiber:'var(--c-fiber)',cardio:'var(--c-cardio)',text:'var(--kj-text)'};
+  protein:'var(--c-protein)',carb:'var(--c-carb)',fatm:'var(--c-fatm)',fiber:'var(--c-fiber)',cardio:'var(--c-cardio)',volume:'var(--c-volume)',text:'var(--kj-text)'};
 const I=(n,c='')=>`<svg class="ic ${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const z2=n=>String(n).padStart(2,'0');
@@ -76,7 +76,7 @@ function addDefaults(st){
   for(const[name,items]of DEF_TPL)if(!st.templates.some(t=>t.name===name)&&(st.v===0||TPL_VER(name)>st.v))
     st.templates.push({id:uid(),name,items:items.filter(([n])=>f(n)).map(([n,s])=>({exId:f(n),sets:s}))});
 }
-function defaults(){const st={v:0,exercises:[],templates:[],workouts:[],body:[],meals:[],profile:{pace:1},active:null,settings:{rest:90,theme:null,sound:3,wakeLock:true,stepGoal:0}};addDefaults(st);st.v=DATA_V;return st}
+function defaults(){const st={v:0,exercises:[],templates:[],workouts:[],body:[],meals:[],profile:{pace:1},active:null,settings:{rest:90,theme:null,sound:3,wakeLock:true,stepGoal:0,uiSound:true,typeSound:true,doneSound:true,haptic:true,restNotify:false}};addDefaults(st);st.v=DATA_V;return st}
 const KEY='edzesnaplo.v1';
 let S; // a betöltés a fájl végén történik (a validáló függvények után)
 function load(){try{const raw=localStorage.getItem(KEY);if(raw){const s=sanitizeState(JSON.parse(raw));if(s.v<DATA_V){addDefaults(s);s.v=DATA_V}return s}}catch(e){console.warn('Betöltési hiba',e)}return defaults()}
@@ -131,7 +131,7 @@ document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#dlg').
 /* ===== Eseménykezelés (CSP: nincs inline handler, nincs eval) =====
    A sablonokban data-click/input/change/submit="fn(arg,...)" áll; az argumentum csak
    literál lehet (szám, 'szöveg', null, true/false), illetve this / this.value. */
-const ACT=new Set(["addMeal", "addSet", "adjRest", "bodyFromCal", "calNav", "chooseEx", "closeModal", "copyInstr", "copyMealToday", "delBody", "delEx", "delMeal", "delTemplate", "delWorkout", "demoData", "discardWorkout", "dlgBackdrop", "dlgClose", "editBodyRow", "editEx", "editMeal", "editTemplate", "exportCsv", "exportData", "finishWorkout", "foodFromCal", "foodHelp", "foodNav", "foodToday", "formSubmit", "go", "goProfile", "goToday", "importData", "importHealthFile", "importStrong", "modalBg", "moveEx", "newExFromList", "newExercise", "openHealthFile", "openImport", "openStrong", "pasteMeals", "pasteSteps", "pickForActive", "pickForTpl", "renderPick", "repeatWorkout", "resetAll", "rmEx", "rmSet", "saveAsTemplate", "saveBody", "saveTpl", "selDay", "setBodyDate", "setClaudeUrl", "setDefRest", "setExRest", "setFoodDate", "setFoodRng", "setProf", "setRange", "setSound", "setStepGoal", "setStrEx", "setStrMetric", "setTheme", "setTplName", "setTplSets", "setTrendRng", "setVal", "setWName", "setWake", "showStr", "startWorkout", "stepsHelp", "stopRest", "testSound", "toggleSet", "toggleTheme", "toggleTrend", "toggleWaist", "tplMove", "tplRemove", "updateTplFrom"]);
+const ACT=new Set(["addMeal", "addSet", "adjRest", "bodyFromCal", "calNav", "chooseEx", "closeModal", "copyInstr", "copyMealToday", "delBody", "delEx", "delMeal", "delTemplate", "delWorkout", "demoData", "discardWorkout", "dlgBackdrop", "dlgClose", "editBodyRow", "editEx", "editMeal", "editTemplate", "exportCsv", "exportData", "finishWorkout", "foodFromCal", "foodHelp", "foodNav", "foodToday", "formSubmit", "go", "goProfile", "goToday", "importData", "importHealthFile", "importStrong", "modalBg", "moveEx", "newExFromList", "newExercise", "openHealthFile", "openImport", "openStrong", "pasteMeals", "pasteSteps", "pickForActive", "pickForTpl", "renderPick", "repeatWorkout", "resetAll", "rmEx", "rmSet", "saveAsTemplate", "saveBody", "saveTpl", "selDay", "setBodyDate", "setClaudeUrl", "setDefRest", "setExRest", "setFoodDate", "setFoodRng", "setFx", "setProf", "setRange", "setRestNotify", "setSound", "setStepGoal", "setStrEx", "setStrMetric", "setTheme", "setTplName", "setTplSets", "setTrendRng", "setVal", "setWName", "setWake", "showStr", "startWorkout", "stepsHelp", "stopRest", "testSound", "toggleSet", "toggleTheme", "toggleTrend", "toggleWaist", "tplMove", "tplRemove", "updateTplFrom"]);
 function splitArgs(s){const out=[];let cur='',q=false;for(const ch of s){if(ch==="'")q=!q;if(ch===','&&!q){out.push(cur.trim());cur=''}else cur+=ch}if(cur.trim())out.push(cur.trim());return out}
 function parseArg(a,el){if(a==='this')return el;if(a==='this.value')return el.value;if(/^'[^'"\\]*'$/.test(a))return a.slice(1,-1);if(/^-?\d+(\.\d+)?$/.test(a))return +a;if(a==='null')return null;if(a==='true')return true;if(a==='false')return false;throw new Error('arg')}
 function runAct(src,el){const m=/^([A-Za-z_]\w*)\((.*)\)$/.exec((src||'').trim());if(!m||!ACT.has(m[1])||typeof window[m[1]]!=='function'){console.warn('Ismeretlen művelet:',src);return}
@@ -172,7 +172,7 @@ const str=(v,n=120)=>String(v??'').slice(0,n);
 function sanitizeState(d){
   if(!d||typeof d!=='object'||!Array.isArray(d.exercises)||!Array.isArray(d.workouts))throw new Error('format');
   const map={},fix=id=>{const k=String(id);if(!map[k])map[k]=ID_RE.test(k)?k:uid();return map[k]};
-  const o={v:num(d.v,1,99)||2,settings:{rest:num(d.settings?.rest,0,1800)??90,sound:num(d.settings?.sound,0,3)??3,claudeUrl:typeof d.settings?.claudeUrl==='string'&&/^https:\/\/claude\.ai\/[\w\-./?=&#%~]*$/.test(d.settings.claudeUrl)?d.settings.claudeUrl.slice(0,300):null,stepGoal:num(d.settings?.stepGoal,0,100000)??0,wakeLock:d.settings?.wakeLock!==false,theme:['light','dark'].includes(d.settings?.theme)?d.settings.theme:null,lastBackup:num(d.settings?.lastBackup,0,9e15)||undefined}};
+  const o={v:num(d.v,1,99)||2,settings:{rest:num(d.settings?.rest,0,1800)??90,sound:num(d.settings?.sound,0,3)??3,claudeUrl:typeof d.settings?.claudeUrl==='string'&&/^https:\/\/claude\.ai\/[\w\-./?=&#%~]*$/.test(d.settings.claudeUrl)?d.settings.claudeUrl.slice(0,300):null,stepGoal:num(d.settings?.stepGoal,0,100000)??0,wakeLock:d.settings?.wakeLock!==false,uiSound:d.settings?.uiSound!==false,typeSound:d.settings?.typeSound!==false,doneSound:d.settings?.doneSound!==false,haptic:d.settings?.haptic!==false,restNotify:d.settings?.restNotify===true,theme:['light','dark'].includes(d.settings?.theme)?d.settings.theme:null,lastBackup:num(d.settings?.lastBackup,0,9e15)||undefined}};
   o.exercises=d.exercises.filter(e=>e&&e.name).map(e=>{const x={id:fix(e.id),name:str(e.name,100),cat:str(e.cat||'Egyéb',40)};if(e.kind==='cardio')x.kind='cardio';const r=num(e.rest,0,1800);if(r!=null&&e.rest!==''&&e.rest!=null)x.rest=r;return x});
   const sets=a=>(Array.isArray(a)?a:[]).map(s=>({w:num(s?.w,0,2000)??0,r:num(s?.r,0,10000)??0}));
   o.templates=(Array.isArray(d.templates)?d.templates:[]).filter(t=>t&&t.name).map(t=>({id:fix(t.id),name:str(t.name,100),items:(Array.isArray(t.items)?t.items:[]).map(i=>({exId:fix(i?.exId),sets:num(i?.sets,1,30)||3}))}));
@@ -194,7 +194,7 @@ function go(t){document.activeElement&&document.activeElement.blur&&document.act
 function render(){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
   $('#title').textContent={workout:S.active?'Edzés folyamatban':'Edzés',food:'Étkezés',history:'Naptár',body:'Testadatok',stats:'Statisztika',more:'Beállítások'}[tab];
-  $('#hdr').innerHTML=S.active&&tab!=='workout'?`<button class="pill" data-click="go('workout')" aria-label="Edzés folytatása">${I('biceps-flexed','sm')}<span id="elapsed2"></span></button>`:'';
+  $('#hdr').innerHTML=S.active&&tab!=='workout'?`<button class="pill" data-click="go('workout')" aria-label="Edzés folytatása">${I('flame','sm')}<span id="elapsed2"></span></button>`:'';
   for(const k in CH)delete CH[k];
   $('main').innerHTML=({workout:S.active?vActive:vWorkout,food:vFood,history:vHistory,body:vBody,stats:vStats,more:vMore})[tab]();
   attachCharts();tick();updAvol();syncWake();updWakeUI();
@@ -285,8 +285,8 @@ function toggleSet(i,j){
     if(s.w===''&&p)s.w=p.w; if(s.r===''&&p)s.r=p.r;
     if(s.r===''||!(+s.r>0)){toast(isCardio(e.exId)?'Add meg az időt (perc)':'Add meg az ismétlésszámot');return}
     if(s.w==='')s.w=0;
-    s.done=true;startRest(e.exId);
-  }else s.done=false;
+    s.done=true;startRest(e.exId);sfx('done');haptic();
+  }else{s.done=false;sfx('tap')}
   save();
   const row=$('#r'+i+'_'+j);row.classList.toggle('done',s.done);const ins=row.querySelectorAll('input');ins[0].value=s.w;ins[1].value=s.r;updAvol();
 }
@@ -342,6 +342,57 @@ function chime(level){
     const o=ac.createOscillator(),g=ac.createGain(),t=t0+dt;o.type=type;o.frequency.value=f;o.connect(g);g.connect(master);
     g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(amp,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+1.1);o.start(t);o.stop(t+1.15)}});
 }
+/* Visszajelző hangok (koppintás, gépelés, kész sorozat) és rezgés – a pihenő-hangjelzéstől függetlenül kapcsolhatók. */
+function sfx(kind){
+  const st=S.settings,on={tap:st.uiSound,type:st.typeSound,done:st.doneSound}[kind];if(on===false)return;
+  const ac=audioCtx();if(!ac)return;if(ac.state!=='running'){ac.resume().catch(()=>{});return}
+  const t0=ac.currentTime+.005,out=ac.createGain();out.connect(ac.destination);
+  const tone=(f,dt,len,amp,type='sine')=>{const o=ac.createOscillator(),g=ac.createGain(),t=t0+dt;o.type=type;o.frequency.value=f;o.connect(g);g.connect(out);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(amp,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+len);o.start(t);o.stop(t+len+.02)};
+  if(kind==='tap'){tone(1250,0,.045,.16);tone(2500,0,.02,.04,'triangle')}
+  else if(kind==='type'){tone(1900*(.94+Math.random()*.12),0,.028,.07,'triangle')}
+  else{tone(784,0,.32,.28);tone(1174.66,.085,.42,.26);tone(1568,.17,.5,.16);tone(2349,.17,.25,.04,'triangle')}
+}
+/* Rezgés: Androidon a Vibration API; iPhone-on (iOS 18+) egy rejtett „switch” jelölőnégyzet
+   átbillentése ad rövid haptikus visszajelzést – csak érintésre indított műveletben működik. */
+let HB=null;
+function haptic(){
+  if(S.settings.haptic===false)return;
+  if(navigator.vibrate){try{navigator.vibrate(35)}catch(e){}return}
+  if(!HB){HB=document.createElement('label');HB.setAttribute('aria-hidden','true');HB.style.cssText='position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;opacity:0';
+    const i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');i.tabIndex=-1;HB.appendChild(i);document.body.appendChild(HB)}
+  try{HB.click()}catch(e){}
+}
+document.addEventListener('click',e=>{
+  const el=e.target.closest&&e.target.closest('button,.chip,a.btn,[data-click]');if(!el||el===HB||el.disabled)return;
+  if((el.getAttribute('data-click')||'').startsWith('toggleSet('))return; // a pipálás saját hangot ad
+  sfx('tap');
+},true);
+document.addEventListener('input',e=>{const t=e.target;if(t&&(t.tagName==='TEXTAREA'||t.tagName==='INPUT'&&/^(text|number|search|url|email|tel|password)$/.test(t.type)))sfx('type')},true);
+/* Értesítés a pihenő végén, ha az app háttérben van (Android / asztali böngésző; iPhone-on a háttérbe
+   tett webapp futását a rendszer felfüggeszti, ott visszatéréskor szól). */
+let notifT=null;
+const notifSupported=()=>'Notification' in window&&'serviceWorker' in navigator;
+async function restNotif(){
+  if(!S.settings.restNotify||!notifSupported()||Notification.permission!=='granted'||document.visibilityState==='visible')return;
+  try{const reg=await navigator.serviceWorker.getRegistration();const body=(rest?.ex||lastRestEx)?'Következő sorozat: '+(rest?.ex||lastRestEx):'Következő sorozat!';
+    const o={body,tag:'edzesnaplo-rest',renotify:true,vibrate:[200,100,200],icon:'edzesnaplo-assets/icon-192.png',badge:'edzesnaplo-assets/icon-192.png'};
+    if(reg)await reg.showNotification('Pihenő vége',o);else new Notification('Pihenő vége',o)}catch(e){}
+}
+let lastRestEx='';
+document.addEventListener('visibilitychange',()=>{
+  clearTimeout(notifT);notifT=null;
+  if(document.visibilityState==='hidden'){if(rest&&S.settings.restNotify)notifT=setTimeout(tick,Math.max(0,rest.end-Date.now())+50)}
+  else tick();
+});
+async function setRestNotify(v){
+  if(v){if(!notifSupported()){toast('Ez a böngésző nem támogatja az értesítéseket');return}
+    let p=Notification.permission;if(p==='default')p=await Notification.requestPermission().catch(()=>'denied');
+    if(p!=='granted'){toast('Az értesítés nincs engedélyezve a böngésző/telefon beállításaiban');S.settings.restNotify=false;save();render();return}}
+  S.settings.restNotify=v;save();render();
+}
+function setFx(k){if(!['uiSound','typeSound','doneSound','haptic'].includes(k))return;S.settings[k]=S.settings[k]===false;save();render();
+  if(S.settings[k]!==false){if(k==='haptic')haptic();else sfx({uiSound:'tap',typeSound:'type',doneSound:'done'}[k])}}
 /* Képernyő ébren tartása edzés közben (Screen Wake Lock API, iOS 16.4+).
    A rendszer elengedi a zárat, ha az app háttérbe kerül – visszatéréskor újrakérjük. */
 let WL=null,wlPending=false;
@@ -368,7 +419,7 @@ function tick(){
   if(S.active){const t=dur(Date.now()-S.active.start);const a=$('#elapsed'),b=$('#elapsed2');if(a)a.textContent=t;if(b)b.textContent=t}
   const rb=$('#rest');document.body.classList.toggle('resting',!!rest);
   if(rest){const left=Math.ceil((rest.end-Date.now())/1000);
-    if(left<=0){rest=null;rb.classList.remove('on');try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}chime();toast('Pihenő vége – következő sorozat!')}
+    if(left<=0){const late=-left;lastRestEx=rest.ex||'';rest=null;rb.classList.remove('on');try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}chime();restNotif();toast(late>5?`Pihenő vége (${late<90?late+' mp':Math.round(late/60)+' perc'}e lejárt)`:'Pihenő vége – következő sorozat!')}
     else{rb.classList.add('on');$('#restt').textContent=dur(left*1000);$('#restex').textContent=rest.ex||'';$('#restbar').style.width=Math.min(100,left/rest.total*100)+'%'}}
   else rb.classList.remove('on');
 }
@@ -438,7 +489,7 @@ function vHistory(){
   <div class="grid3" style="margin-bottom:12px">${stat('Edzés a hónapban',mW.length)}${stat('Volumen',mW.length?fmtShort(mW.reduce((a,w)=>a+wVolume(w),0))+' kg':null)}${stat('Súlyváltozás',mDelta==null?null:sgn(mDelta)+' kg')}</div>`;
   const dw=(wDay[calSel]||[]).sort((a,b)=>a.start-b.start),db=bMap[calSel];
   h+=`<h3 style="margin:8px 2px 10px">${pYmd(calSel).toLocaleDateString('hu-HU',{year:'numeric',month:'long',day:'numeric',weekday:'long'})}</h3>`;
-  h+=`<div class="card"><div class="row"><h2 style="flex:1;margin:0;font-size:16.5px">${I('scale','sm')} Testadatok</h2><button class="btn sm" data-click="bodyFromCal('${calSel}')">${db?I('pencil','sm')+' Szerkesztés':I('plus','sm')+' Rögzítés'}</button></div>
+  h+=`<div class="card"><div class="row"><h2 style="flex:1;margin:0;font-size:16.5px">${I('person-standing','sm')} Testadatok</h2><button class="btn sm" data-click="bodyFromCal('${calSel}')">${db?I('pencil','sm')+' Szerkesztés':I('plus','sm')+' Rögzítés'}</button></div>
   ${db?`<div class="grid3" style="margin-top:12px">${stat('Súly',db.weight!=null?fmt(db.weight)+' kg':null)}${stat('Testzsír',db.fat!=null?fmt(db.fat)+' %':null)}${stat('Derék',db.waist!=null?fmt(db.waist)+' cm':null)}</div>
   ${db.steps!=null?`<div class="stat" style="margin-top:8px"><b>${I('footprints','sm')} ${fmt(db.steps,0)}</b><span>Lépés${S.settings.stepGoal?` · cél: ${fmt(S.settings.stepGoal,0)} (${Math.round(db.steps/S.settings.stepGoal*100)}%)`:''}</span></div>`:''}`:'<div class="mut small" style="margin-top:6px">Nincs mérés erre a napra.</div>'}</div>`;
   {const dm=dayMeals(calSel),s=sumMeals(dm),t=targets();
@@ -885,7 +936,17 @@ function vStats(){
   const lbl=weeks.map(t=>{const d=new Date(t);return z2(d.getMonth()+1)+'.'+z2(d.getDate())});
   const nm=new Date(),thisM=S.workouts.filter(x=>{const d=new Date(x.start);return d.getMonth()===nm.getMonth()&&d.getFullYear()===nm.getFullYear()}).length;
   h+=`<div class="card"><h2>Edzések</h2><div class="grid3" style="margin-bottom:12px">${stat('Összes edzés',S.workouts.length)}${stat('Ebben a hónapban',thisM)}${stat('Átlag / hét (12 hét)',fmt(cnt.reduce((a,b)=>a+b,0)/12,1))}</div>
-  <h3>Edzésszám hetente</h3>${barChart(lbl,cnt,{color:C.workout})}<h3 style="margin-top:14px">Heti volumen (kg, erőedzés)</h3>${barChart(lbl,vol,{color:C.workout,opFn:()=>.7})}</div>`;
+  <h3>Edzésszám hetente</h3>${barChart(lbl,cnt,{color:C.workout})}</div>`;
+  {const wv=S.workouts.map(x=>({x:x.start,y:wVolume(x)})).filter(p=>p.y>0).sort((a,b)=>a.x-b.x),wr=wv.filter(inR);
+   const avgW=vol.reduce((a,b)=>a+b,0)/12,avgS=wr.length?wr.reduce((a,p)=>a+p.y,0)/wr.length:null,best=wr.reduce((m,p)=>!m||p.y>m.y?p:m,null);
+   const l4=vol.slice(8).reduce((a,b)=>a+b,0),p4=vol.slice(4,8).reduce((a,b)=>a+b,0),ch4=p4?(l4-p4)/p4*100:null;
+   const ma=wr.map((p,i)=>{const a=wr.slice(Math.max(0,i-4),i+1);return{x:p.x,y:a.reduce((s,q)=>s+q.y,0)/a.length}});
+   h+=`<div class="card"><h2 style="display:flex;gap:8px;align-items:center"><span style="color:var(--c-volume)">${I('dumbbell')}</span> Volumen</h2>
+   <div class="grid3" style="margin-bottom:12px">${stat('Átlag / hét (12 hét)',avgW?fmtShort(avgW)+' kg':null)}${stat('Átlag / edzés (időszak)',avgS==null?null:fmtShort(avgS)+' kg')}${stat('Utolsó 4 hét vs. előző 4',ch4==null?null:sgn(ch4,0)+' %')}</div>
+   <h3>Heti volumen (kg)</h3>${barChart(lbl,vol,{color:C.volume,empty:'Az elmúlt 12 hétben nincs erőedzés-volumen'})}
+   ${wr.length>1?`<h3 style="margin-top:14px">Edzésenként (időszak)</h3>${lineChart([{name:'Edzés',color:C.volume,points:wr,dots:true,w:1.2},{name:'5 edzéses átlag',color:C.volume,points:ma,w:3.2}],{unit:' kg',h:190})}`:''}
+   ${best?`<div class="hint">Legnagyobb volumenű edzés az időszakban: <b>${fmt(best.y,0)} kg</b> (${fmtDate(ymd(new Date(best.x)))}).</div>`:''}
+   <div class="hint">Volumen = súly × ismétlés, a pipált erősorozatokra összeadva. A saját testsúlyos (0 kg) és a kardió sorozatok nem számítanak bele.</div></div>`;}
   const used=[...new Set(S.workouts.flatMap(x=>x.exercises.map(e=>e.exId)))].filter(exById);
   if(!used.includes(strEx))strEx=[...used].sort((a,b)=>strSeries(b,'e').length-strSeries(a,'e').length)[0]||null;
   used.sort((a,b)=>exName(a).localeCompare(exName(b),'hu'));
@@ -922,17 +983,18 @@ const TRENDS=[
   {k:'fat',dash:'10 6',name:'Testzsír',color:C.fat,win:21,unit:' %',dec:1},
   {k:'kcal',dash:'1 6',name:'Étkezési energia',color:C.kcal,win:7,unit:' kcal',dec:0},
   {k:'steps',dash:'16 5 3 5',name:'Lépések',color:C.steps,win:7,unit:'',dec:0},
-  {k:'wk',dash:'5 5',name:'Edzések / hét',color:C.workout,win:7,unit:'',dec:0}];
+  {k:'wk',dash:'5 5',name:'Edzések / hét',color:C.workout,win:7,unit:'',dec:0},
+  {k:'vol',dash:'9 3 2 3 2 3',name:'Volumen / hét',color:C.volume,win:7,unit:' kg',dec:0}];
 function trendData(n){
-  const raw={weight:{},fat:{},kcal:{},steps:{},wk:{}},td=today();
+  const raw={weight:{},fat:{},kcal:{},steps:{},wk:{},vol:{}},td=today();
   for(const b of S.body){if(b.weight!=null)raw.weight[b.date]=b.weight;if(b.fat!=null)raw.fat[b.date]=b.fat;if(b.steps!=null)raw.steps[b.date]=b.steps}
   for(const m of S.meals)if(m.date!==td)raw.kcal[m.date]=(raw.kcal[m.date]||0)+m.kcal; // a mai, még tartó nap kimarad
-  for(const w of S.workouts){const d=ymd(new Date(w.start));raw.wk[d]=(raw.wk[d]||0)+1}
+  for(const w of S.workouts){const d=ymd(new Date(w.start));raw.wk[d]=(raw.wk[d]||0)+1;raw.vol[d]=(raw.vol[d]||0)+wVolume(w)}
   const pre=35,N=n+pre,days=[...Array(N)].map((_,i)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-(N-1)+i);return ymd(d)});
   const sm={};
   for(const T of TRENDS){const m=raw[T.k];
     sm[T.k]=days.map((d,i)=>{
-      if(T.k==='wk'){if(i<6||!S.workouts.length)return null;let c=0;for(let j=i-6;j<=i;j++)c+=m[days[j]]||0;return c} // gördülő 7 napos edzésszám
+      if(T.k==='wk'||T.k==='vol'){if(i<6||!S.workouts.length)return null;let c=0;for(let j=i-6;j<=i;j++)c+=m[days[j]]||0;return c} // gördülő 7 napos edzésszám
       let s=0,c=0;for(let j=Math.max(0,i-T.win+1);j<=i;j++)if(m[days[j]]!=null){s+=m[days[j]];c++}return c?s/c:null})}
   const chg=(a,lag)=>a.map((v,i)=>i>=lag&&v!=null&&a[i-lag]!=null?v-a[i-lag]:null);
   const wch=chg(sm.weight,7),fch=chg(sm.fat,14),cut=a=>a.slice(pre);
@@ -965,9 +1027,9 @@ function vTrend(){
   <div class="chips" style="margin-bottom:8px">${[30,90,120].map(v=>`<button class="chip ${n===v?'on':''}" data-click="setTrendRng(${v})">${v} nap</button>`).join('')}</div>
   <div class="chips" style="margin-bottom:6px">${chips.join('')}</div>
   ${lineChart(series,{h:250,yMin:-2.5,yMax:2.5,ticks:[-2,-1,0,1,2],yFmt:t=>t===0?'átl.':(t>0?'+':'−')+Math.abs(t),noLegend:true})}
-  <div class="hint">Minden vonal a saját átlagához képest mutatja a le-fel mozgást (0 = az időszak átlaga, ±1 = egy szórásnyi eltérés), simítva: testsúly, étkezés, lépés 7 napos, testzsír 21 napos átlag, edzés: az előző 7 nap edzésszáma. Mérés nélküli napokon a vonal a következő értékig összeköt. Így a különböző mértékegységű adatok egy grafikonon összevethetők; a pontos értéket koppintásra mutatja. A gombokkal ki-be kapcsolhatod az adatsorokat.</div>`;
+  <div class="hint">Minden vonal a saját átlagához képest mutatja a le-fel mozgást (0 = az időszak átlaga, ±1 = egy szórásnyi eltérés), simítva: testsúly, étkezés, lépés 7 napos, testzsír 21 napos átlag, edzés és volumen: az előző 7 nap edzésszáma, illetve megmozgatott összsúlya. Mérés nélküli napokon a vonal a következő értékig összeköt. Így a különböző mértékegységű adatok egy grafikonon összevethetők; a pontos értéket koppintásra mutatja. A gombokkal ki-be kapcsolhatod az adatsorokat.</div>`;
   // összefüggések
-  const drv=[['kcal','Étkezési energia (7 napos átlag)'],['steps','Lépések (7 napos átlag)'],['wk','Edzések az előző 7 napban']];
+  const drv=[['kcal','Étkezési energia (7 napos átlag)'],['steps','Lépések (7 napos átlag)'],['wk','Edzések az előző 7 napban'],['vol','Edzésvolumen az előző 7 napban']];
   const rows=drv.map(([k,l])=>({k,l,w:pearson(D.sm[k],D.wch),f:pearson(D.sm[k],D.fch)}));
   const cell=x=>x.r==null?`<td class="mut">kevés adat</td>`:`<td><b style="color:${Math.abs(x.r)<.2?'var(--kj-muted)':'var(--kj-text)'}">${sgn(x.r,2)}</b><small>${rWord(x.r)}</small></td>`;
   const best=rows.filter(r=>r.w.r!=null).sort((a,b)=>Math.abs(b.w.r)-Math.abs(a.w.r))[0];
@@ -1155,6 +1217,12 @@ function vMore(){
   <label>Hangjelzés a pihenő végén</label>
   <div class="row" style="gap:6px">${[[0,'Ki'],[1,'Halk'],[2,'Közepes'],[3,'Hangos']].map(([v,l])=>`<button class="chip ${(S.settings.sound??3)===v?'on':''}" data-click="setSound(${v})">${l}</button>`).join('')}<button class="btn sm" data-click="testSound()">Teszt</button></div>
   <div class="hint">iPhone-on a némító kapcsoló (csengő ki) a hangot is elnémítja. Lezárt képernyőnél vagy háttérben a böngésző szünetelteti az időzítőt – ezt a lenti ébren tartás megelőzi.</div>
+  <label>Visszajelző hangok és rezgés</label>
+  <div class="chips" style="margin:0">${[['uiSound','Gombok'],['typeSound','Gépelés'],['doneSound','Kész sorozat'],['haptic','Rezgés']].map(([k,l])=>`<button class="chip ${S.settings[k]!==false?'on':''}" data-click="setFx('${k}')" aria-pressed="${S.settings[k]!==false}">${S.settings[k]!==false?I('check','sm')+' ':''}${l}</button>`).join('')}</div>
+  <div class="hint">Koppintásra halk kattanás, gépeléskor finom tikk, sorozat kipipálásakor rövid „siker” dallam és enyhe rezgés. A pihenő-hangjelzéstől függetlenül kapcsolhatók. A rezgés Androidon és iPhone-on iOS 18-tól működik; iPhone-on a némító kapcsoló a hangokat is elnémítja, és ha a billentyűzet kattanása be van kapcsolva az iOS-ben, a gépelés-hangot érdemes kikapcsolni.</div>
+  <label>Értesítés a pihenő végén, ha az app háttérben van</label>
+  ${notifSupported()?`<div class="chips" style="margin:0">${[[true,'Be'],[false,'Ki']].map(([v,l])=>`<button class="chip ${(S.settings.restNotify===true)===v?'on':''}" data-click="setRestNotify(${v})">${l}</button>`).join('')}</div>`:''}
+  <div class="hint">Androidon és számítógépen értesítés jelenik meg, ha pihenő közben másik appra váltasz. iPhone-on a rendszer a háttérbe tett webappot felfüggeszti, és szerver nélkül nem lehet időzített értesítést küldeni – ott visszatéréskor azonnal szól, és jelzi, mennyi ideje járt le. Megbízható megoldás iPhone-on: a képernyő ébren tartása és az app előtérben hagyása.</div>
   <label>Képernyő ébren tartása edzés közben</label>
   ${wakeSupported()?`<div class="chips" style="margin:0">${[[true,'Be'],[false,'Ki']].map(([v,l])=>`<button class="chip ${(S.settings.wakeLock!==false)===v?'on':''}" data-click="setWake(${v})">${l}</button>`).join('')}</div>
   <div class="hint">Futó edzés alatt a képernyő nem sötétül el és nem zár le, így a pihenő-visszaszámlálás és a hangjelzés is működik. Az edzés befejezésekor automatikusan kikapcsol. Több akkumulátort fogyaszt.</div>`

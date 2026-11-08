@@ -1,5 +1,5 @@
 /* Edzésnapló service worker – csak az edzesnaplo.html-t és saját fájljait kezeli (scope: /edzesnaplo.html). */
-const CACHE='edzesnaplo-db562f93810b';
+const CACHE='edzesnaplo-dd17f3181a8e';
 const CORE=["edzesnaplo.html", "edzesnaplo.webmanifest", "edzesnaplo-assets/apple-touch-icon.png", "edzesnaplo-assets/edzesnaplo.css", "edzesnaplo-assets/edzesnaplo.js", "edzesnaplo-assets/favicon.svg", "edzesnaplo-assets/icon-192.png", "edzesnaplo-assets/icon-32.png", "edzesnaplo-assets/icon-512.png", "edzesnaplo-assets/icon-maskable-512.png"];
 const FONTS=["fonts/instrument-sans-400.woff2", "fonts/instrument-sans-400-hu.woff2", "fonts/instrument-sans-500.woff2", "fonts/instrument-sans-500-hu.woff2", "fonts/instrument-sans-600.woff2", "fonts/instrument-sans-600-hu.woff2", "fonts/instrument-sans-700.woff2", "fonts/instrument-sans-700-hu.woff2", "fonts/bricolage-grotesque-800.woff2", "fonts/bricolage-grotesque-800-hu.woff2", "fonts/jetbrains-mono-500.woff2", "fonts/jetbrains-mono-500-hu.woff2", "fonts/jetbrains-mono-700.woff2", "fonts/jetbrains-mono-700-hu.woff2"];
 self.addEventListener('install',e=>e.waitUntil((async()=>{
@@ -18,5 +18,13 @@ self.addEventListener('fetch',e=>{
     const c=await caches.open(CACHE);
     const hit=await c.match(r,{ignoreSearch:true})||(r.mode==='navigate'?await c.match('edzesnaplo.html'):null);
     return hit||fetch(r);
+  })());
+});
+self.addEventListener('notificationclick',e=>{
+  e.notification.close();
+  e.waitUntil((async()=>{
+    const all=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+    for(const c of all)if(new URL(c.url).pathname.endsWith('/edzesnaplo.html')&&'focus' in c)return c.focus();
+    if(self.clients.openWindow)return self.clients.openWindow('edzesnaplo.html');
   })());
 });
